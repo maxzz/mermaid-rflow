@@ -1,0 +1,88 @@
+/*
+ * View Transition classes used by <ViewTransition> boundaries in 0-app.tsx and 2-main/0-app-logo.tsx.
+ * React sets `view-transition-class` on the element, so pseudo-elements are matched by class.
+ */
+
+@keyframes vt-fade-in {
+    from { opacity: 0; }
+}
+
+@keyframes vt-fade-out {
+    to { opacity: 0; }
+}
+
+@keyframes vt-slide-in-up {
+    from { opacity: 0; transform: translateY(24px); }
+}
+
+@keyframes vt-slide-out-up {
+    to { opacity: 0; transform: translateY(-24px); }
+}
+
+@keyframes vt-scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+}
+
+@keyframes vt-scale-out {
+    to { opacity: 0; transform: scale(0.96); }
+}
+
+/* Plain cross-fade (default) */
+
+::view-transition-old(.vt-page-fade) {
+    animation: 200ms ease-in both vt-fade-out;
+}
+
+::view-transition-new(.vt-page-fade) {
+    animation: 250ms ease-out both vt-fade-in;
+}
+
+/* Welcome -> Main: welcome lifts away, editor rises in */
+
+::view-transition-old(.vt-page-exit-up) {
+    animation: 220ms ease-in both vt-slide-out-up;
+}
+
+::view-transition-new(.vt-page-enter-up) {
+    animation: 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both vt-slide-in-up;
+}
+
+/* Main -> Welcome: editor shrinks away, welcome scales in */
+
+::view-transition-old(.vt-page-exit-scale) {
+    animation: 220ms ease-in both vt-scale-out;
+}
+
+::view-transition-new(.vt-page-enter-scale) {
+    animation: 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both vt-scale-in;
+}
+
+/* Shared-element logo: morph position/size between the pages */
+
+::view-transition-group(.vt-logo-share) {
+    animation-duration: 420ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+::view-transition-old(.vt-logo-share),
+::view-transition-new(.vt-logo-share) {
+    /* the logo is the same artwork on both pages: skip the cross-fade blend */
+    animation: none;
+    mix-blend-mode: normal;
+    height: 100%;
+    overflow: clip;
+}
+
+::view-transition-old(.vt-logo-share) {
+    opacity: 0;
+}
+
+/* Respect user preference */
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}

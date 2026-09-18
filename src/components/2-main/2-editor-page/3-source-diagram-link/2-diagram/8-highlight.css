@@ -1,0 +1,53 @@
+/* Highlight styles for beautiful-mermaid SVG. Scoped to the preview content wrapper. */
+
+[data-preview-content].source-link-interactive .node,
+[data-preview-content].source-link-interactive .subgraph,
+[data-preview-content].source-link-interactive .actor,
+[data-preview-content].source-link-interactive .class-node,
+[data-preview-content].source-link-interactive .entity,
+[data-preview-content].source-link-interactive .edge,
+[data-preview-content].source-link-interactive .edge-label,
+[data-preview-content].source-link-interactive .message,
+[data-preview-content].source-link-interactive .block,
+[data-preview-content].source-link-interactive .note,
+[data-preview-content].source-link-interactive .lifeline,
+[data-preview-content].source-link-interactive .activation,
+[data-preview-content].source-link-interactive .class-relationship,
+[data-preview-content].source-link-interactive .er-relationship {
+    cursor: pointer;
+}
+
+[data-preview-content] [data-source-link-hit] {
+    stroke: transparent !important;
+    filter: none !important;
+    cursor: inherit;
+}
+
+[data-preview-content] g.is-source-link-caret > *:first-child {
+    stroke: var(--primary);
+    stroke-width: 1.75;
+}
+
+[data-preview-content] g.is-source-link-click > *:first-child {
+    stroke: var(--primary);
+    stroke-width: 2.5;
+}
+
+[data-preview-content] g.is-source-link-click {
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--primary) 45%, transparent));
+}
+
+[data-preview-content] polyline.is-source-link-caret,
+[data-preview-content] line.is-source-link-caret,
+[data-preview-content] rect.is-source-link-caret {
+    stroke: var(--primary);
+    stroke-width: 1.75;
+}
+
+[data-preview-content] polyline.is-source-link-click,
+[data-preview-content] line.is-source-link-click,
+[data-preview-content] rect.is-source-link-click {
+    stroke: var(--primary);
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--primary) 45%, transparent));
+}

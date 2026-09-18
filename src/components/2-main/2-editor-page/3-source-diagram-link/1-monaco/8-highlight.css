@@ -1,0 +1,7 @@
+.monaco-editor .source-link-line-caret {
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+}
+
+.monaco-editor .source-link-line-click {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
+}
