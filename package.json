@@ -1,7 +1,7 @@
 {
     "name": "mermaid-rflow",
     "version": "0.26.1",
-    "description": "React template with Shadcn UI, Jotai, and Valtio",
+    "description": "Diagram editor with reactflow and mermaid",
     "private": true,
     "type": "module",
     "devDependencies": {

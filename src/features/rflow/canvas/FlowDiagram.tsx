@@ -19,11 +19,14 @@ import ReactFlow, {
     MiniMap,
     ReactFlowProvider,
     useReactFlow,
+    useStoreApi,
     type Connection,
+    type DefaultEdgeOptions,
     type Edge,
     type EdgeChange,
     type Node,
     type NodeChange,
+    type NodeTypes,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import '@/features/rflow/styles/selected-edge.css';
@@ -63,11 +66,34 @@ import { isThemeDark } from '@/utils/theme-utils';
 import { classNames } from '@/utils';
 import { BarsLoaderIcon } from '@/ui/local-ui';
 
-const nodeTypes = {
+const nodeTypes: NodeTypes = {
     custom: CustomNode,
     diamond: DiamondNode,
     group: SubgraphNode,
 };
+
+const defaultEdgeOptions: DefaultEdgeOptions = {
+    type: 'smoothstep',
+    animated: true,
+    style: { stroke: '#1976D2', strokeWidth: 2.5 },
+    markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#1976D2' },
+};
+
+/** reactflow@11 checks type keys inside useMemo; React Strict Mode runs that callback twice and false-positives error 002. */
+function onReactFlowError(id: string, message: string) {
+    if (id === '002') {
+        return;
+    }
+    console.warn(`[React Flow]: ${message} Help: https://reactflow.dev/error#${id}`);
+}
+
+function ReactFlowErrorGuard({ children }: { children: React.ReactNode; }) {
+    const store = useStoreApi();
+    if (store.getState().onError !== onReactFlowError) {
+        store.getState().onError = onReactFlowError;
+    }
+    return children;
+}
 
 function FlowDiagramInternal() {
     const { nodes, edges } = useSnapshot(rflowDiagram);
@@ -163,11 +189,8 @@ function FlowDiagramInternal() {
             setFlowEdges(
                 addEdge(
                     {
+                        ...defaultEdgeOptions,
                         ...connection,
-                        type: 'smoothstep',
-                        animated: true,
-                        style: { stroke: '#1976D2', strokeWidth: 2.5 },
-                        markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#1976D2' },
                     },
                     rflowDiagram.edges as Edge[],
                 ),
@@ -379,18 +402,14 @@ function FlowDiagramInternal() {
                         onConnect={onConnect}
                         onNodeDoubleClick={onNodeDoubleClick}
                         nodeTypes={nodeTypes}
+                        defaultEdgeOptions={defaultEdgeOptions}
+                        onError={onReactFlowError}
                         fitView
                         deleteKeyCode={['Delete', 'Backspace']}
                         panOnDrag
                         panOnScroll={false}
                         zoomOnScroll
                         zoomOnPinch
-                        defaultEdgeOptions={{
-                            type: 'smoothstep',
-                            animated: true,
-                            style: { stroke: '#1976D2', strokeWidth: 2.5 },
-                            markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#1976D2' },
-                        }}
                         connectionLineType={ConnectionLineType.SmoothStep}
                         onEdgeClick={onEdgeClick}
                         onPaneClick={() => setSelectedEdgeId(null)}
@@ -462,7 +481,9 @@ function FlowDiagramInternal() {
 export function FlowDiagram() {
     return (
         <ReactFlowProvider>
-            <FlowDiagramInternal />
+            <ReactFlowErrorGuard>
+                <FlowDiagramInternal />
+            </ReactFlowErrorGuard>
         </ReactFlowProvider>
     );
 }
