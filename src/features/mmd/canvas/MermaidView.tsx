@@ -1,17 +1,20 @@
 import { type PointerEvent, type RefObject, type WheelEvent, useLayoutEffect, useRef } from 'react';
-import { getDefaultStore, useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { useSnapshot } from 'valtio';
-import { HandIcon, MaximizeIcon, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
 import { classNames } from '@/utils';
 import { isThemeDark } from '@/utils/theme-utils';
 import { appSettings } from '@/store/1-ui-settings';
-import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@/store/2-mermaid-settings';
-import { Button } from '@/ui/shadcn/button';
+import { ZOOM_STEP, mermaidSettings } from '@/store/2-mermaid-settings';
+import { classifyMermaidSource, isFlowchartDiagramType } from '../catalog/1-flowchart-source';
 import { bindLastMermaidFunctions } from '../render/2-render-official';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { mmdSettings } from '../store/2-mmd-settings';
 import { mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
+import { MmdPaletteRail } from '../ui/MmdPaletteRail';
+import { MmdViewControls } from '../ui/MmdViewControls';
+import { fitMmdToView, setMmdZoom } from './mmd-zoom';
 import { MmdEditOverlay } from './MmdEditOverlay';
+import { useMmdLayout } from './useMmdLayout';
 import { useMmdSourceLink } from './useMmdSourceLink';
 import '../styles/8-mmd-view.css';
 
@@ -19,13 +22,15 @@ export function MermaidView() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const hostRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
-    const { svg, error } = useSnapshot(mmdDiagram);
+    const { svg, error, diagramType } = useSnapshot(mmdDiagram);
+    const { source } = useSnapshot(mermaidSettings);
     const { autofit } = useSnapshot(mmdSettings);
     const { theme } = useSnapshot(appSettings);
     const zoom = useAtomValue(mmdZoomAtom);
     const panMode = useAtomValue(mmdPanModeAtom);
     const dark = isThemeDark(theme);
     const enabled = !!svg && !error;
+    const flowchart = classifyMermaidSource(source) === 'flowchart' || isFlowchartDiagramType(diagramType);
 
     useLayoutEffect(
         () => {
@@ -47,6 +52,15 @@ export function MermaidView() {
         panMode,
     });
 
+    useMmdLayout({
+        contentRef,
+        hostRef,
+        enabled,
+        flowchart,
+        panMode,
+        output: svg,
+    });
+
     useLayoutEffect(
         () => {
             if (autofit && enabled) {
@@ -63,6 +77,7 @@ export function MermaidView() {
             return;
         }
         e.preventDefault();
+        mmdSettings.autofit = false;
         setMmdZoom(e.deltaY < 0 ? zoom * ZOOM_STEP : zoom / ZOOM_STEP);
     }
 
@@ -102,59 +117,10 @@ export function MermaidView() {
                     <MmdEditOverlay hostRef={hostRef} contentRef={contentRef} enabled={enabled} />
                 </div>
             </div>
-            <MmdZoomControls scrollRef={scrollRef} contentRef={contentRef} />
+            <MmdPaletteRail />
+            <MmdViewControls scrollRef={scrollRef} contentRef={contentRef} />
         </div>
     );
-}
-
-function MmdZoomControls({ scrollRef, contentRef }: { scrollRef: RefObject<HTMLDivElement | null>; contentRef: RefObject<HTMLDivElement | null>; }) {
-    const [zoom] = useAtom(mmdZoomAtom);
-    const [panMode, setPanMode] = useAtom(mmdPanModeAtom);
-    const { autofit } = useSnapshot(mmdSettings);
-
-    return (
-        <div className="absolute left-4 bottom-4 px-1 py-0.5 text-xs bg-background/90 backdrop-blur-sm border border-border rounded-lg shadow-sm flex items-center gap-0.5">
-            <Button variant="ghost" size="icon-xs" onClick={() => setMmdZoom(zoom / ZOOM_STEP)} disabled={zoom <= ZOOM_MIN} title="Zoom out">
-                <ZoomOutIcon />
-            </Button>
-            <button
-                className="min-w-10 font-mono tabular-nums text-[.7rem] text-muted-foreground hover:text-foreground cursor-pointer"
-                onClick={() => setMmdZoom(1)}
-                title="Reset zoom to 100%"
-                type="button"
-            >
-                {Math.round(zoom * 100)}%
-            </button>
-            <Button variant="ghost" size="icon-xs" onClick={() => setMmdZoom(zoom * ZOOM_STEP)} disabled={zoom >= ZOOM_MAX} title="Zoom in">
-                <ZoomInIcon />
-            </Button>
-            <Button
-                variant="ghost"
-                size="icon-xs"
-                title={autofit ? 'Fit (autofit on)' : 'Fit to view'}
-                onClick={() => {
-                    mmdSettings.autofit = true;
-                    fitMmdToView(scrollRef.current, contentRef.current);
-                }}
-            >
-                <MaximizeIcon />
-            </Button>
-            <Button
-                className={classNames(panMode && 'bg-muted text-foreground')}
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setPanMode((v) => !v)}
-                title={panMode ? 'Pan mode on: drag to scroll' : 'Pan mode: drag to scroll'}
-                aria-pressed={panMode}
-            >
-                <HandIcon />
-            </Button>
-        </div>
-    );
-}
-
-function setMmdZoom(next: number) {
-    getDefaultStore().set(mmdZoomAtom, Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, next)));
 }
 
 function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: boolean) {
@@ -192,25 +158,4 @@ function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: bo
     }
 
     return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp };
-}
-
-function fitMmdToView(container: HTMLElement | null, content: HTMLElement | null) {
-    if (!container || !content) {
-        setMmdZoom(1);
-        return;
-    }
-    const svg = content.querySelector('svg');
-    const naturalW = svg instanceof SVGSVGElement
-        ? (svg.viewBox.baseVal.width || svg.width.baseVal.value || content.offsetWidth)
-        : content.offsetWidth;
-    const naturalH = svg instanceof SVGSVGElement
-        ? (svg.viewBox.baseVal.height || svg.height.baseVal.value || content.offsetHeight)
-        : content.offsetHeight;
-    if (naturalW <= 0 || naturalH <= 0) {
-        setMmdZoom(1);
-        return;
-    }
-    const padding = 56;
-    const fit = Math.min((container.clientWidth - padding) / naturalW, (container.clientHeight - padding) / naturalH);
-    setMmdZoom(fit);
 }

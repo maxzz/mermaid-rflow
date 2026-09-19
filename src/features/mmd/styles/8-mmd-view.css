@@ -44,6 +44,15 @@
     filter: drop-shadow(0 0 4px color-mix(in oklab, var(--primary) 45%, transparent));
 }
 
+.mmd-host.source-link-interactive g.node {
+    cursor: grab;
+}
+
+.is-mmd-dragging,
+.is-mmd-dragging .mmd-host g.node {
+    cursor: grabbing;
+}
+
 .mmd-add-handle {
     box-shadow: 0 0 0 2px var(--background);
 }

@@ -1,8 +1,48 @@
 import { findToken, lineWithoutComment } from '@/store/6-source-render-links';
 
 export type FlowDirection = 'TD' | 'TB' | 'BT' | 'LR' | 'RL';
-export type NodeShape = 'rect' | 'diamond' | 'stadium' | 'circle';
+export const NODE_SHAPES = [
+    'rect',
+    'diamond',
+    'stadium',
+    'circle',
+    'text',
+    'rounded',
+    'hex',
+    'cyl',
+    'cloud',
+    'doc',
+    'fr-rect',
+    'dbl-circ',
+    'lean-r',
+    'trap-b',
+    'image',
+    'icon',
+    'video',
+] as const;
+export type NodeShape = typeof NODE_SHAPES[number];
 export type SourceKind = 'empty' | 'flowchart' | 'other';
+export type WrapShapeExtra = {
+    src?: string;
+    icon?: string;
+};
+
+export const FLOW_SHAPE_ITEMS: { value: NodeShape; label: string; }[] = [
+    { value: 'text', label: 'Text' },
+    { value: 'rect', label: 'Rectangle' },
+    { value: 'rounded', label: 'Rounded' },
+    { value: 'stadium', label: 'Stadium' },
+    { value: 'circle', label: 'Circle' },
+    { value: 'diamond', label: 'Diamond' },
+    { value: 'hex', label: 'Hexagon' },
+    { value: 'cyl', label: 'Cylinder' },
+    { value: 'cloud', label: 'Cloud' },
+    { value: 'doc', label: 'Document' },
+    { value: 'fr-rect', label: 'Subroutine' },
+    { value: 'dbl-circ', label: 'Double circle' },
+    { value: 'lean-r', label: 'Lean right' },
+    { value: 'trap-b', label: 'Trapezoid' },
+];
 
 export type FlowHeader =
     | { kind: 'empty'; }
@@ -111,7 +151,7 @@ export function collectFlowchartIds(source: string): Set<string> {
     }
     const text = `${header.declaration}\n${header.body}`;
     for (const line of text.split('\n')) {
-        const clean = lineWithoutComment(line);
+        const clean = lineWithoutComment(line).replace(/@\{[\s\S]*?\}/g, ' ');
         const re = /[A-Za-z][\w-]*/g;
         let match: RegExpExecArray | null;
         while ((match = re.exec(clean))) {
@@ -146,8 +186,27 @@ export function prefixForShape(shape: NodeShape): 'n' | 'd' | 's' | 'c' {
     }
 }
 
-export function wrapShape(id: string, label: string, shape: NodeShape): string {
+export function wrapShape(id: string, label: string, shape: NodeShape, extra: WrapShapeExtra = {}): string {
     const inner = formatShapeInner(label);
+    if (shape === 'image' || (shape === 'video' && extra.src && mediaAsImage(extra.src))) {
+        const url = shape === 'video' ? (youtubeThumbUrl(extra.src ?? '') ?? extra.src ?? '') : (extra.src ?? '');
+        const width = shape === 'video' ? 160 : 120;
+        if (url) {
+            return `${id}@{ img: "${escapeAttr(url)}", w: ${width}, label: ${quotedLabel(label)} }`;
+        }
+        return `${id}@{ shape: notch-rect, label: ${quotedLabel(label)} }`;
+    }
+    if (shape === 'video') {
+        return `${id}@{ shape: browser, label: ${quotedLabel(label)} }`;
+    }
+    if (shape === 'icon') {
+        const icon = extra.icon?.trim() || 'fa:fa-star';
+        const text = label.trim() ? `${icon} ${label.trim()}` : icon;
+        return `${id}[${quotedLabel(text)}]`;
+    }
+    if (shape === 'text') {
+        return `${id}[${quotedLabel(label)}]\n    ${id}@{ shape: text }`;
+    }
     switch (shape) {
         case 'diamond':
             return `${id}{${inner}}`;
@@ -155,9 +214,43 @@ export function wrapShape(id: string, label: string, shape: NodeShape): string {
             return `${id}((${inner}))`;
         case 'stadium':
             return `${id}([${inner}])`;
-        default:
+        case 'rect':
             return `${id}[${inner}]`;
+        default:
+            return `${id}@{ shape: ${shape}, label: ${quotedLabel(label)} }`;
     }
+}
+
+export function defaultLabelFor(shape: NodeShape): string {
+    switch (shape) {
+        case 'text':
+            return 'Text Block';
+        case 'image':
+            return 'Image';
+        case 'video':
+            return 'Video';
+        case 'icon':
+            return 'Icon';
+        default:
+            return 'New';
+    }
+}
+
+export function youtubeThumbUrl(src: string): string | null {
+    const match = src.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/i);
+    return match?.[1] ? `https://i.ytimg.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
+
+function mediaAsImage(src: string): boolean {
+    return Boolean(youtubeThumbUrl(src) || /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(src) || src.startsWith('data:image/'));
+}
+
+function quotedLabel(label: string): string {
+    return `"${escapeLabel(label)}"`;
+}
+
+function escapeAttr(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '%22');
 }
 
 export function formatShapeInner(label: string): string {
@@ -171,7 +264,7 @@ function needsQuotes(label: string): boolean {
     return label === '' || /[[\](){}|#;"'\n]/.test(label) || label !== label.trim();
 }
 
-function escapeLabel(label: string): string {
+export function escapeLabel(label: string): string {
     return label.replace(/\r\n/g, '\n').replace(/\n/g, '<br/>').replace(/"/g, '#quot;');
 }
 
@@ -184,6 +277,7 @@ export type NodeDefSpan = {
     labelStart: number;
     labelEnd: number;
     shape: NodeShape | 'other';
+    atClose?: number;
 };
 
 export function findNodeDefinition(source: string, id: string): NodeDefSpan | null {
@@ -196,7 +290,7 @@ export function findNodeDefinition(source: string, id: string): NodeDefSpan | nu
             continue;
         }
         const after = clean.slice(token.end);
-        if (!/^\s*[\[\(\{>]/.test(after) && !/^\s*subgraph\s+$/i.test(clean.slice(0, token.start))) {
+        if (!/^\s*(?:[\[\(\{>]|@\{)/.test(after) && !/^\s*subgraph\s+$/i.test(clean.slice(0, token.start))) {
             continue;
         }
         const shape = parseShapeAfterId(clean, token.end);
@@ -212,6 +306,7 @@ export function findNodeDefinition(source: string, id: string): NodeDefSpan | nu
             labelStart: shape.labelStart,
             labelEnd: shape.labelEnd,
             shape: shape.shape,
+            atClose: shape.atClose,
         };
     }
     return null;
@@ -287,8 +382,11 @@ function parseNodeToken(text: string, start: number): NodeToken | null {
     };
 }
 
-function parseShapeAfterId(text: string, idEnd: number): { label: string; labelStart: number; labelEnd: number; shape: NodeShape | 'other'; end: number; } | null {
+function parseShapeAfterId(text: string, idEnd: number): { label: string; labelStart: number; labelEnd: number; shape: NodeShape | 'other'; end: number; atClose?: number; } | null {
     let i = skipWs(text, idEnd);
+    if (text[i] === '@' && text[i + 1] === '{') {
+        return parseAtShape(text, i);
+    }
     const open = text.slice(i, i + 2);
     if (open === '((') {
         return closePair(text, i, '((', '))', 'circle');
@@ -329,6 +427,73 @@ function parseShapeAfterId(text: string, idEnd: number): { label: string; labelS
         };
     }
     return null;
+}
+
+function parseAtShape(text: string, start: number): { label: string; labelStart: number; labelEnd: number; shape: NodeShape | 'other'; end: number; atClose?: number; } | null {
+    const brace = readAtBrace(text, start);
+    if (!brace) {
+        return null;
+    }
+    const bodyStart = start + 2;
+    const shapeMatch = brace.body.match(/\bshape\s*:\s*([A-Za-z][\w-]*)/);
+    const labelMatch = brace.body.match(/\blabel\s*:\s*("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s,}]+)/);
+    const shapeName = shapeMatch?.[1] ?? '';
+    const shape: NodeShape | 'other' = isNodeShape(shapeName) ? shapeName : 'other';
+    if (labelMatch && labelMatch.index != null) {
+        const raw = labelMatch[1]!;
+        const rawStart = bodyStart + labelMatch.index + labelMatch[0]!.length - raw.length;
+        return {
+            label: unquote(raw.replace(/\\"/g, '"')),
+            labelStart: rawStart,
+            labelEnd: rawStart + raw.length,
+            shape,
+            end: brace.end,
+            atClose: brace.end - 1,
+        };
+    }
+    return {
+        label: '',
+        labelStart: brace.end - 1,
+        labelEnd: brace.end - 1,
+        shape,
+        end: brace.end,
+        atClose: brace.end - 1,
+    };
+}
+
+function readAtBrace(text: string, start: number): { body: string; end: number; } | null {
+    if (text[start] !== '@' || text[start + 1] !== '{') {
+        return null;
+    }
+    let depth = 1;
+    let quote: '"' | "'" | null = null;
+    for (let i = start + 2; i < text.length; i++) {
+        const ch = text[i]!;
+        if (quote) {
+            if (ch === quote && text[i - 1] !== '\\') {
+                quote = null;
+            }
+            continue;
+        }
+        if (ch === '"' || ch === "'") {
+            quote = ch;
+            continue;
+        }
+        if (ch === '{') {
+            depth += 1;
+        }
+        else if (ch === '}') {
+            depth -= 1;
+            if (depth === 0) {
+                return { body: text.slice(start + 2, i), end: i + 1 };
+            }
+        }
+    }
+    return null;
+}
+
+function isNodeShape(value: string): value is NodeShape {
+    return (NODE_SHAPES as readonly string[]).includes(value);
 }
 
 function closePair(text: string, start: number, open: string, close: string, shape: NodeShape | 'other') {

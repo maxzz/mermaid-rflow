@@ -2,6 +2,7 @@
     "name": "mermaid-rflow",
     "version": "0.26.1",
     "description": "Diagram editor with reactflow and mermaid",
+    "license": "MIT",
     "private": true,
     "type": "module",
     "devDependencies": {

@@ -1,6 +1,8 @@
 import { findToken, lineWithoutComment } from '@/store/6-source-render-links';
 import {
     classifyMermaidSource,
+    defaultLabelFor,
+    escapeLabel,
     extractHeader,
     findNodeDefinition,
     formatShapeInner,
@@ -10,6 +12,7 @@ import {
     rebuildSource,
     wrapShape,
     type FlowDirection,
+    type NodeDefSpan,
     type NodeShape,
 } from './1-flowchart-source';
 
@@ -52,15 +55,22 @@ export function renameNode(source: string, id: string, label: string): PatchResu
         const body = header.body.endsWith('\n') || header.body === '' ? `${header.body}${line}\n` : `${header.body}\n${line}\n`;
         return { ok: true, source: rebuildSource(header, header.declaration, body), changed: true };
     }
-    const inner = formatShapeInner(label);
-    if (inner === def.lineText.slice(def.labelStart, def.labelEnd)) {
+    const nextLine = rewriteNodeLabel(def, label);
+    if (nextLine === def.lineText) {
         return unchanged(source);
     }
-    const nextLine = def.lineText.slice(0, def.labelStart) + inner + def.lineText.slice(def.labelEnd);
     return replaceLine(source, def.line, nextLine);
 }
 
-export function addNode(source: string, opts: { shape: NodeShape; label?: string; fromId?: string; }): PatchResult {
+export type AddNodeOpts = {
+    shape: NodeShape;
+    label?: string;
+    fromId?: string;
+    src?: string;
+    icon?: string;
+};
+
+export function addNode(source: string, opts: AddNodeOpts): PatchResult {
     const header = extractHeader(source);
     if (header.kind === 'other') {
         return notFlowchart();
@@ -71,8 +81,8 @@ export function addNode(source: string, opts: { shape: NodeShape; label?: string
         return notFlowchart();
     }
     const id = nextMermaidId(working, prefixForShape(opts.shape));
-    const label = opts.label?.trim() || 'New';
-    const lines = [`    ${wrapShape(id, label, opts.shape)}`];
+    const label = opts.label?.trim() || defaultLabelFor(opts.shape);
+    const lines = [`    ${wrapShape(id, label, opts.shape, { src: opts.src, icon: opts.icon })}`];
     if (opts.fromId) {
         lines.push(`    ${opts.fromId} --> ${id}`);
     }
@@ -175,6 +185,17 @@ function keepOtherEndpoint(indent: string, token: { id: string; raw: string; } |
         return `${indent}${token.raw}`;
     }
     return null;
+}
+
+function rewriteNodeLabel(def: NodeDefSpan, label: string): string {
+    if (def.atClose != null && def.labelStart === def.atClose) {
+        return def.lineText.slice(0, def.atClose) + `, label: "${escapeLabel(label)}"` + def.lineText.slice(def.atClose);
+    }
+    const inner = def.atClose != null ? `"${escapeLabel(label)}"` : formatShapeInner(label);
+    if (inner === def.lineText.slice(def.labelStart, def.labelEnd)) {
+        return def.lineText;
+    }
+    return def.lineText.slice(0, def.labelStart) + inner + def.lineText.slice(def.labelEnd);
 }
 
 function replaceLine(source: string, index: number, nextLine: string): PatchOk {

@@ -1,4 +1,4 @@
-import { type MouseEvent, type PointerEvent, type RefObject, useEffect, useLayoutEffect, useState } from 'react';
+import { type PointerEvent, type RefObject, useEffect, useLayoutEffect, useState } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
@@ -8,7 +8,8 @@ import { addNode, connectNodes, deleteNode, renameNode } from '../catalog/2-sour
 import { applyMmdPatchResult } from '../catalog/4-apply-patch';
 import { closestMmdTagged } from '../catalog/3-catalog-mmd';
 import { mmdDiagram } from '../store/1-mmd-diagram';
-import { mmdConnectFromAtom, mmdInlineEditAtom, mmdPaletteShapeAtom } from '../store/3-mmd-ui';
+import { mmdLayout } from '../store/4-mmd-layout';
+import { mmdConnectFromAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom } from '../store/3-mmd-ui';
 
 export type MmdEditOverlayProps = {
     hostRef: RefObject<HTMLElement | null>;
@@ -24,6 +25,8 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled }: MmdEditOverlayP
     const { svg, diagramType } = useSnapshot(mmdDiagram);
     const link = useSnapshot(sourceLink);
     const shape = useAtomValue(mmdPaletteShapeAtom);
+    const dragging = useAtomValue(mmdNodeDraggingAtom);
+    const layout = useSnapshot(mmdLayout);
     const [inline, setInline] = useAtom(mmdInlineEditAtom);
     const [, setConnectFrom] = useAtom(mmdConnectFromAtom);
     const [box, setBox] = useState<Box | null>(null);
@@ -45,9 +48,45 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled }: MmdEditOverlayP
                 setBox(null);
                 return;
             }
-            setBox(boxRelative(el, host));
+            const next = boxRelative(el, host);
+            setBox((prev) => sameBox(prev, next) ? prev : next);
         },
-        [contentRef, hostRef, nodeId, svg, link.keys],
+        [contentRef, hostRef, layout.nodes, nodeId, svg, link.keys],
+    );
+
+    useEffect(
+        () => {
+            const host = hostRef.current;
+            if (!host || !enabled || !flowchart) {
+                return;
+            }
+            function onDblClick(e: MouseEvent) {
+                if (!(e.target instanceof Element) || e.target.closest('[data-mmd-chrome]')) {
+                    return;
+                }
+                const tagged = closestMmdTagged(e.target);
+                const id = nodeIdFromKey(tagged?.getAttribute(SOURCE_LINK_KEY_ATTR) ?? '');
+                if (!id) {
+                    return;
+                }
+                const pane = hostRef.current;
+                if (!pane || !(tagged instanceof Element)) {
+                    return;
+                }
+                e.preventDefault();
+                const b = boxRelative(tagged, pane);
+                setInline({
+                    id,
+                    text: readNodeLabel(mermaidSettings.source, id),
+                    x: b.x,
+                    y: b.y,
+                    w: Math.max(b.w, 72),
+                });
+            }
+            host.addEventListener('dblclick', onDblClick);
+            return () => host.removeEventListener('dblclick', onDblClick);
+        },
+        [enabled, flowchart, hostRef, setInline],
     );
 
     useEffect(
@@ -133,17 +172,6 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled }: MmdEditOverlayP
         handle.addEventListener('pointerup', up);
     }
 
-    function onDoubleClick(e: MouseEvent) {
-        e.stopPropagation();
-        setInline({
-            id: selectedId,
-            text: readNodeLabel(mermaidSettings.source, selectedId),
-            x: selectedBox.x,
-            y: selectedBox.y,
-            w: Math.max(selectedBox.w, 72),
-        });
-    }
-
     const lineLen = drag ? Math.hypot(drag.x2 - drag.x1, drag.y2 - drag.y1) : 0;
     const lineAngle = drag ? Math.atan2(drag.y2 - drag.y1, drag.x2 - drag.x1) : 0;
 
@@ -153,25 +181,18 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled }: MmdEditOverlayP
                 data-mmd-chrome=""
                 className="absolute border-2 border-primary rounded-sm pointer-events-none"
                 style={{ left: selectedBox.x, top: selectedBox.y, width: selectedBox.w, height: selectedBox.h }}
-                onDoubleClick={onDoubleClick}
             />
-            <button
-                type="button"
-                data-mmd-chrome=""
-                className="mmd-add-handle absolute z-10 size-3 rounded-full bg-primary pointer-events-auto"
-                style={{ left: selectedBox.x + selectedBox.w / 2 - 6, top: selectedBox.y + selectedBox.h + 4 }}
-                title="Add a node, or drag to connect"
-                onPointerDown={onHandlePointerDown}
-                onDoubleClick={(e) => e.stopPropagation()}
-            />
-            <button
-                type="button"
-                data-mmd-chrome=""
-                className="absolute pointer-events-auto bg-transparent"
-                style={{ left: selectedBox.x, top: selectedBox.y, width: selectedBox.w, height: selectedBox.h }}
-                aria-label="Edit node label"
-                onDoubleClick={onDoubleClick}
-            />
+            {!dragging && (
+                <button
+                    type="button"
+                    data-mmd-chrome=""
+                    className="mmd-add-handle absolute z-10 size-3 rounded-full bg-primary pointer-events-auto"
+                    style={{ left: selectedBox.x + selectedBox.w / 2 - 6, top: selectedBox.y + selectedBox.h + 4 }}
+                    title="Add a node, or drag to connect"
+                    onPointerDown={onHandlePointerDown}
+                    onDoubleClick={(e) => e.stopPropagation()}
+                />
+            )}
             {drag && (
                 <div
                     data-mmd-chrome=""
@@ -248,6 +269,10 @@ function boxRelative(el: Element, host: HTMLElement): Box {
     const a = el.getBoundingClientRect();
     const b = host.getBoundingClientRect();
     return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height };
+}
+
+function sameBox(a: Box | null, b: Box): boolean {
+    return Boolean(a && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h);
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {

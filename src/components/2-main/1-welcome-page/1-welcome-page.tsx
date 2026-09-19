@@ -30,7 +30,7 @@ export function WelcomePage() {
                 </Button>
 
                 <p className="max-w-md text-sm text-muted-foreground leading-relaxed">
-                    Write Mermaid in a Monaco editor and preview it as an editable React Flow canvas, official mermaid-js SVG, or beautiful-mermaid SVG / Unicode text.
+                    Write Mermaid in a Monaco editor and preview it as an editable React Flow canvas, official mermaid-js SVG with layout editing, or beautiful-mermaid SVG / Unicode text.
                     Switch light and dark mode, then copy or export the result.
                 </p>
 

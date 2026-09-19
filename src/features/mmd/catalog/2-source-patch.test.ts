@@ -63,6 +63,17 @@ describe('renameNode', () => {
         expect(findNodeDefinition(result.source, 'A')?.label).toBe('Begin');
     });
 
+    it('renames a mermaid 11 @{ shape } label', () => {
+        const src = 'graph TD\n    n1@{ shape: hex, label: "Prep" }\n';
+        const result = renameNode(src, 'n1', 'Ready');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).toContain('n1@{ shape: hex, label: "Ready" }');
+        expect(findNodeDefinition(result.source, 'n1')?.label).toBe('Ready');
+    });
+
     it('quotes labels that need it', () => {
         const result = renameNode(FLOW, 'C', 'Ship | now');
         expect(result.ok).toBe(true);
@@ -92,6 +103,35 @@ describe('addNode / connectNodes', () => {
             return;
         }
         expect(diamond.source).toContain('d1{Maybe}');
+    });
+
+    it('emits a mermaid 11 text block', () => {
+        const added = addNode(FLOW, { shape: 'text' });
+        expect(added.ok).toBe(true);
+        if (!added.ok) {
+            return;
+        }
+        expect(added.source).toContain('n1["Text Block"]');
+        expect(added.source).toContain('n1@{ shape: text }');
+        expect(added.source).not.toContain('E --> n1');
+    });
+
+    it('emits @{ shape } nodes and image assets', () => {
+        const hex = addNode(FLOW, { shape: 'hex', label: 'Prep' });
+        expect(hex.ok).toBe(true);
+        if (hex.ok) {
+            expect(hex.source).toContain('n1@{ shape: hex, label: "Prep" }');
+        }
+        const img = addNode(FLOW, { shape: 'image', src: 'https://example.com/a.png', label: 'Shot' });
+        expect(img.ok).toBe(true);
+        if (img.ok) {
+            expect(img.source).toContain('n1@{ img: "https://example.com/a.png", w: 120, label: "Shot" }');
+        }
+        const icon = addNode(FLOW, { shape: 'icon', icon: 'fa:fa-car', label: 'Car' });
+        expect(icon.ok).toBe(true);
+        if (icon.ok) {
+            expect(icon.source).toContain('n1["fa:fa-car Car"]');
+        }
     });
 
     it('does not duplicate an existing edge', () => {
@@ -130,6 +170,17 @@ describe('deleteNode', () => {
         expect(result.source).not.toMatch(/\bA\b/);
         expect(result.source).toContain('B{Is it working?}');
         expect(result.source).toContain('%% keep this comment');
+    });
+
+    it('removes both the label line and @{ shape: text } companion', () => {
+        const src = 'graph TD\n    A[Start] --> B[Next]\n    n1["Text Block"]\n    n1@{ shape: text }\n';
+        const result = deleteNode(src, 'n1');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).not.toMatch(/\bn1\b/);
+        expect(result.source).toContain('A[Start] --> B[Next]');
     });
 
     it('leaves comments and class-like lines alone when the id is absent', () => {

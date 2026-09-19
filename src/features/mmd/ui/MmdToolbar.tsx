@@ -1,20 +1,17 @@
-import { useAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { toast } from 'sonner';
-import { CircleIcon, CopyIcon, DiamondIcon, DownloadIcon, PillIcon, SquareIcon } from 'lucide-react';
+import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { sourceLink } from '@/store/6-source-render-links';
 import { copyText, downloadText } from '@/components/4-dialogs/2-export/8-export-utils';
 import { Button } from '@/ui/shadcn/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Switch } from '@/ui/shadcn/switch';
-import { classifyMermaidSource, readDirection, type FlowDirection, type NodeShape } from '../catalog/1-flowchart-source';
-import { addNode, setDirection } from '../catalog/2-source-patch';
+import { classifyMermaidSource, readDirection, type FlowDirection } from '../catalog/1-flowchart-source';
+import { setDirection } from '../catalog/2-source-patch';
 import { applyMmdPatchResult } from '../catalog/4-apply-patch';
 import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../render/1-themes';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { mmdSettings } from '../store/2-mmd-settings';
-import { mmdPaletteShapeAtom } from '../store/3-mmd-ui';
 
 const DIRECTIONS: { value: FlowDirection; label: string; }[] = [
     { value: 'TD', label: 'Top to bottom' },
@@ -23,19 +20,10 @@ const DIRECTIONS: { value: FlowDirection; label: string; }[] = [
     { value: 'RL', label: 'Right to left' },
 ];
 
-const SHAPES: { value: NodeShape; label: string; icon: typeof SquareIcon; }[] = [
-    { value: 'rect', label: 'Rectangle', icon: SquareIcon },
-    { value: 'diamond', label: 'Diamond', icon: DiamondIcon },
-    { value: 'stadium', label: 'Stadium', icon: PillIcon },
-    { value: 'circle', label: 'Circle', icon: CircleIcon },
-];
-
 export function MmdToolbarActions() {
     const { source } = useSnapshot(mermaidSettings);
     const { theme, adaptive, look, autofit } = useSnapshot(mmdSettings);
     const { svg, error } = useSnapshot(mmdDiagram);
-    const link = useSnapshot(sourceLink);
-    const [shape, setShape] = useAtom(mmdPaletteShapeAtom);
     const flowchart = classifyMermaidSource(source) === 'flowchart';
     const direction = readDirection(source) ?? 'TD';
 
@@ -88,27 +76,6 @@ export function MmdToolbarActions() {
                 <Switch size="sm" checked={autofit} onCheckedChange={(v) => { mmdSettings.autofit = v; }} />
             </label>
 
-            {flowchart && (
-                <div className="flex items-center">
-                    {SHAPES.map((item) => (
-                        <Button
-                            key={item.value}
-                            variant="ghost"
-                            size="icon-xs"
-                            className={shape === item.value ? 'bg-muted text-foreground' : undefined}
-                            title={`Add ${item.label.toLowerCase()}`}
-                            onClick={() => {
-                                setShape(item.value);
-                                const selected = firstSelectedNodeId(link.keys as string[]);
-                                applyMmdPatchResult(addNode(mermaidSettings.source, { shape: item.value, fromId: selected ?? undefined }));
-                            }}
-                        >
-                            <item.icon />
-                        </Button>
-                    ))}
-                </div>
-            )}
-
             <Button variant="ghost" size="xs" onClick={() => void copyOfficialSvg(svg, error)} title="Copy official Mermaid SVG">
                 <CopyIcon />
             </Button>
@@ -117,15 +84,6 @@ export function MmdToolbarActions() {
             </Button>
         </div>
     );
-}
-
-function firstSelectedNodeId(keys: string[]): string | null {
-    for (const key of keys) {
-        if (key.startsWith('node:')) {
-            return key.slice('node:'.length);
-        }
-    }
-    return null;
 }
 
 async function copyOfficialSvg(svg: string, error: string | null) {

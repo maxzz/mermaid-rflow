@@ -11,6 +11,7 @@ export type MmdInlineEdit = {
 
 export const mmdZoomAtom = atom(1);
 export const mmdPanModeAtom = atom(false);
+export const mmdNodeDraggingAtom = atom(false);
 export const mmdInlineEditAtom = atom<MmdInlineEdit | null>(null);
 export const mmdConnectFromAtom = atom<string | null>(null);
 export const mmdPaletteShapeAtom = atom<NodeShape>('rect');

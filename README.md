@@ -16,7 +16,7 @@ A two-panel Mermaid editor: write diagrams in Monaco, then preview them as an ed
 | Preview tab | What you get | Engine |
 | --- | --- | --- |
 | **Flow** (default) | Interactive nodes and edges you can pan, zoom, drag, connect, restyle, save, and export as PNG/JSON | Custom flowchart parser + [Dagre](https://github.com/dagrejs/dagre) + [React Flow](https://reactflow.dev/) |
-| **Mermaid** | Official mermaid-js SVG (Redux / neo themes). Flowcharts can be selected, relabeled, added, deleted, and connected; those gestures patch the source | [mermaid-js/mermaid](https://github.com/mermaid-js/mermaid) |
+| **Mermaid** | Official mermaid-js SVG (Redux / neo themes). Flowcharts can be moved, deleted, and extended with mermaid shapes (`@{ shape }`, images, icons); topology patches go back to the source | [mermaid-js/mermaid](https://github.com/mermaid-js/mermaid) |
 | **SVG** | Themed vector diagram, including sequence / class / ER / XY charts | [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) (ELK layout) |
 | **Text** | Unicode box drawing or plain ASCII | beautiful-mermaid |
 
@@ -35,7 +35,7 @@ graph TD
 
 **Flow is flowchart-oriented.** Sequence, class, ER, and XY samples still render on SVG, Text, and Mermaid. On Flow they convert poorly or show “no flowchart nodes.” Adding, connecting, deleting, duplicating, and relabeling Flow nodes writes that topology back into the left editor (comments, `classDef`, and original wrapping are not preserved). Drag, align, colors, icons, and images stay on the canvas. Editing the source re-converts and replaces the graph (unless you are restoring a saved layout).
 
-**Mermaid is official mermaid-js.** Theme, Adaptive, direction, and Autofit match the mermaid.ai-style preview. For `graph` / `flowchart` sources, selecting a node and renaming, adding, deleting, or connecting it patches only the affected lines. Pixel positions cannot live in Mermaid text, so nodes are not dragged. Other diagram types stay preview-plus-linking.
+**Mermaid is official mermaid-js.** Theme, Adaptive, direction, and Autofit stay in the preview toolbar. The canvas has a left shape palette (shapes, icons, image, video) and a right pan/zoom strip. For `graph` / `flowchart` sources you can drag nodes (positions persist beside the source), delete them, rename them, and add mermaid 11 shapes such as `n1@{ shape: text }`. Topology still patches only the affected lines. Other diagram types stay preview-plus-linking.
 
 The React Flow converter, canvas, and toolbars live under [`src/features/rflow/`](src/features/rflow/) and were adapted from [albingcj/mermaid-reactflow-editor](https://github.com/albingcj/mermaid-reactflow-editor) (MIT). AI generation from that project is not included.
 
