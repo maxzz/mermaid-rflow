@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useSnapshot } from "valtio";
 import Editor, { type EditorProps } from "@monaco-editor/react";
 import { appSettings } from "@/store/1-ui-settings";
@@ -5,6 +6,7 @@ import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { isThemeDark } from "@/utils/theme-utils";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 import { useMonacoSourceLink } from "@/components/2-main/2-editor-page/3-source-diagram-link/1-monaco";
+import { restoreMonacoViewIfNeeded } from "@/components/2-main/2-editor-page/3-source-diagram-link/1-monaco/2-monaco-editor-handle";
 import { MONACO_LANGUAGE_MERMAID, MONACO_THEME_DARK, MONACO_THEME_LIGHT } from "./3-monaco-setup";
 
 /**
@@ -16,6 +18,13 @@ export default function MonacoMermaidEditor() {
     const { theme } = useSnapshot(appSettings);
     const isDark = isThemeDark(theme);
     const onMount = useMonacoSourceLink();
+
+    useEffect(
+        () => {
+            restoreMonacoViewIfNeeded();
+        },
+        [source],
+    );
 
     return (
         <Editor

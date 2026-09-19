@@ -11,6 +11,7 @@ import { Textarea } from '@/ui/shadcn/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 import { COLOR_PRESETS } from '../converter/constants';
 import { rflowDiagram } from '../store/1-flow-diagram';
+import { syncMermaidFromGraph } from '../store/3-sync-source';
 import { rflowIconSearchAtom, defaultIconSearchState, rflowNodeEditorDraftAtom } from '../store/2-flow-ui';
 import { IconSearch } from './IconSearch';
 
@@ -51,6 +52,7 @@ export function NodeEditor() {
                 }
                 : n
         );
+        syncMermaidFromGraph();
         close();
     }
 

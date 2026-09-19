@@ -2,7 +2,7 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  * React Flow canvas bound to Valtio graph state and Jotai chrome.
  */
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type MouseEvent } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { toast } from 'sonner';
@@ -31,8 +31,10 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import '@/features/rflow/styles/selected-edge.css';
 import '@/features/rflow/styles/rflow-nodes.css';
+import '@/features/rflow/styles/source-link.css';
 
 import { rflowDiagram, setFlowEdges, setFlowNodes } from '../store/1-flow-diagram';
+import { syncMermaidFromGraph } from '../store/3-sync-source';
 import {
     draftFromNode,
     rflowCanvasMethodsAtom,
@@ -61,6 +63,8 @@ import { EdgeLabelEditor } from '../ui/EdgeLabelEditor';
 import { NodeEditor } from '../ui/NodeEditor';
 import { NodeSearchDialog } from '../ui/NodeSearchDialog';
 import { type AlignmentType, type DistributionType } from '../converter/constants';
+import { nextRfId } from '../converter/mermaid-ids';
+import { useFlowSourceLink } from './useFlowSourceLink';
 import { appSettings } from '@/store/1-ui-settings';
 import { isThemeDark } from '@/utils/theme-utils';
 import { classNames } from '@/utils';
@@ -77,6 +81,7 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
     animated: true,
     style: { stroke: '#1976D2', strokeWidth: 2.5 },
     markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#1976D2' },
+    data: { mermaidType: '-->' },
 };
 
 /** reactflow@11 checks type keys inside useMemo; React Strict Mode runs that callback twice and false-positives error 002. */
@@ -114,6 +119,7 @@ function FlowDiagramInternal() {
 
     const plainNodes = nodes as Node[];
     const plainEdges = edges as Edge[];
+    const sourceLink = useFlowSourceLink(plainNodes, plainEdges, reactFlowInstance);
 
     const handleDownloadImage = useCallback(
         async () => {
@@ -169,6 +175,16 @@ function FlowDiagramInternal() {
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedNodes(updated.filter((n) => n.selected));
             }
+            if (changes.some((c) => c.type === 'remove' || c.type === 'add')) {
+                if (changes.some((c) => c.type === 'remove')) {
+                    const ids = new Set(updated.map((n) => n.id));
+                    const nextEdges = (rflowDiagram.edges as Edge[]).filter((e) => ids.has(e.source) && ids.has(e.target));
+                    if (nextEdges.length !== rflowDiagram.edges.length) {
+                        setFlowEdges(nextEdges);
+                    }
+                }
+                syncMermaidFromGraph();
+            }
         },
         [setSelectedNodes],
     );
@@ -179,6 +195,9 @@ function FlowDiagramInternal() {
             setFlowEdges(updated);
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedEdges(updated.filter((e) => e.selected));
+            }
+            if (changes.some((c) => c.type === 'remove' || c.type === 'add')) {
+                syncMermaidFromGraph();
             }
         },
         [setSelectedEdges],
@@ -191,22 +210,25 @@ function FlowDiagramInternal() {
                     {
                         ...defaultEdgeOptions,
                         ...connection,
+                        data: { ...defaultEdgeOptions.data, mermaidType: '-->' },
                     },
                     rflowDiagram.edges as Edge[],
                 ),
             );
+            syncMermaidFromGraph();
         },
         [],
     );
 
     const onEdgeClick = useCallback(
-        (_event: React.MouseEvent, edge: Edge) => {
+        (event: MouseEvent, edge: Edge) => {
             setSelectedEdgeId(edge.id);
             const updated = (rflowDiagram.edges as Edge[]).map((e) => ({ ...e, selected: e.id === edge.id }));
             setFlowEdges(updated);
             setSelectedEdges(updated.filter((e) => e.selected));
+            sourceLink.onEdgeClick(event, edge);
         },
-        [setSelectedEdgeId, setSelectedEdges],
+        [setSelectedEdgeId, setSelectedEdges, sourceLink.onEdgeClick],
     );
 
     const handleFocusNode = useCallback(
@@ -231,7 +253,7 @@ function FlowDiagramInternal() {
     );
 
     const onEdgeDoubleClick = useCallback(
-        (event: React.MouseEvent, edge: Edge) => {
+        (event: MouseEvent, edge: Edge) => {
             const rect = reactFlowWrapper.current?.getBoundingClientRect() ?? { left: 0, top: 0 };
             setEdgeLabelEditor({
                 edgeId: edge.id,
@@ -244,7 +266,7 @@ function FlowDiagramInternal() {
     );
 
     const onNodeDoubleClick = useCallback(
-        (_event: React.MouseEvent, node: Node) => {
+        (_event: MouseEvent, node: Node) => {
             setNodeEditorDraft(draftFromNode(node));
         },
         [setNodeEditorDraft],
@@ -267,13 +289,25 @@ function FlowDiagramInternal() {
         [setSearchOpen],
     );
 
+    const nodesWithLink = useMemo(
+        () =>
+            plainNodes.map((n) => ({
+                ...n,
+                className: classNames(n.className, sourceLink.classForNode(n)),
+            })),
+        [plainNodes, sourceLink.classForNode, sourceLink.keys, sourceLink.intensity],
+    );
+
     const edgesWithSelection = useMemo(
         () =>
             plainEdges.map((edge) => ({
                 ...edge,
-                className: edge.id === selectedEdgeId ? 'selected' : undefined,
+                className: classNames(
+                    edge.id === selectedEdgeId && 'selected',
+                    sourceLink.classForEdge(edge),
+                ),
             })),
-        [plainEdges, selectedEdgeId],
+        [plainEdges, selectedEdgeId, sourceLink.classForEdge, sourceLink.keys, sourceLink.intensity],
     );
 
     const commitNodes = useCallback(
@@ -301,6 +335,7 @@ function FlowDiagramInternal() {
     const onDuplicateNodes = useCallback(
         () => {
             commitNodes(duplicateNodes(rflowDiagram.nodes as Node[], selectedNodes));
+            syncMermaidFromGraph();
         },
         [commitNodes, selectedNodes],
     );
@@ -312,6 +347,7 @@ function FlowDiagramInternal() {
             setFlowEdges(newEdges);
             setSelectedNodes([]);
             setSelectedEdges([]);
+            syncMermaidFromGraph();
         },
         [selectedEdges, selectedNodes, setSelectedEdges, setSelectedNodes],
     );
@@ -346,6 +382,7 @@ function FlowDiagramInternal() {
         (edgeId: string, text: string) => {
             setFlowEdges((rflowDiagram.edges as Edge[]).map((e) => (e.id === edgeId ? { ...e, label: text } : e)));
             setEdgeLabelEditor(null);
+            syncMermaidFromGraph();
         },
         [setEdgeLabelEditor],
     );
@@ -392,7 +429,7 @@ function FlowDiagramInternal() {
                 <div className="flex-1 min-h-0">
                     <ReactFlow
                         minZoom={0.05}
-                        nodes={plainNodes}
+                        nodes={nodesWithLink}
                         edges={edgesWithSelection}
                         onlyRenderVisibleElements
                         onNodeDragStart={() => setIsDragging(true)}
@@ -400,6 +437,7 @@ function FlowDiagramInternal() {
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
+                        onNodeClick={sourceLink.onNodeClick}
                         onNodeDoubleClick={onNodeDoubleClick}
                         nodeTypes={nodeTypes}
                         defaultEdgeOptions={defaultEdgeOptions}
@@ -412,7 +450,10 @@ function FlowDiagramInternal() {
                         zoomOnPinch
                         connectionLineType={ConnectionLineType.SmoothStep}
                         onEdgeClick={onEdgeClick}
-                        onPaneClick={() => setSelectedEdgeId(null)}
+                        onPaneClick={() => {
+                            setSelectedEdgeId(null);
+                            sourceLink.onPaneClick();
+                        }}
                         edgesUpdatable
                         connectionMode={ConnectionMode.Loose}
                         onEdgeUpdate={(oldEdge, newConnection) => {
@@ -422,10 +463,17 @@ function FlowDiagramInternal() {
                             setFlowEdges(
                                 (rflowDiagram.edges as Edge[]).map((e) =>
                                     e.id === oldEdge.id
-                                        ? { ...e, ...newConnection, source: newConnection.source!, target: newConnection.target! }
+                                        ? {
+                                            ...e,
+                                            ...newConnection,
+                                            source: newConnection.source!,
+                                            target: newConnection.target!,
+                                            data: { ...e.data, mermaidType: e.data?.mermaidType ?? '-->' },
+                                        }
                                         : e
                                 ),
                             );
+                            syncMermaidFromGraph();
                         }}
                         onEdgeDoubleClick={onEdgeDoubleClick}
                         onDragOver={(event) => {
@@ -440,17 +488,36 @@ function FlowDiagramInternal() {
                             }
                             const bounds = reactFlowWrapper.current!.getBoundingClientRect();
                             const position = reactFlowInstance.project({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
-                            const id = `${type}-${Date.now()}`;
+                            const current = rflowDiagram.nodes as Node[];
                             let newNode: Node | undefined;
                             if (type === 'node') {
-                                newNode = { id, type: 'custom', position, data: { label: 'New Node' }, style: { width: 150, height: 50 } };
+                                newNode = {
+                                    id: nextRfId(current, 'n'),
+                                    type: 'custom',
+                                    position,
+                                    data: { label: 'New Node', shape: 'rect' },
+                                    style: { width: 150, height: 50 },
+                                };
                             } else if (type === 'subgraph') {
-                                newNode = { id, type: 'group', position, data: { label: 'New Subgraph' }, style: { width: 220, height: 120, background: '#e3f2fd', border: '2px dashed #1976D2' } };
+                                newNode = {
+                                    id: nextRfId(current, 'sg'),
+                                    type: 'group',
+                                    position,
+                                    data: { label: 'New Subgraph', isSubgraph: true },
+                                    style: { width: 220, height: 120, background: '#e3f2fd', border: '2px dashed #1976D2' },
+                                };
                             } else if (type === 'diamond') {
-                                newNode = { id, type: 'diamond', position, data: { label: 'Conditional' }, style: { width: 120, height: 120, backgroundColor: '#FFF3E0', borderColor: '#F57C00' } };
+                                newNode = {
+                                    id: nextRfId(current, 'd'),
+                                    type: 'diamond',
+                                    position,
+                                    data: { label: 'Conditional', shape: 'diamond' },
+                                    style: { width: 120, height: 120, backgroundColor: '#FFF3E0', borderColor: '#F57C00' },
+                                };
                             }
                             if (newNode) {
-                                setFlowNodes([...(rflowDiagram.nodes as Node[]), newNode]);
+                                setFlowNodes([...current, newNode]);
+                                syncMermaidFromGraph();
                             }
                         }}
                     >

@@ -1942,6 +1942,9 @@ const reactFlowEdges: Edge[] = edges.map((edge, index) => {
   // Attach to side based on layout direction for better alignment
   sourceHandle: (direction === 'LR' || direction === 'RL') ? 'right-source' : 'bottom-source',
   targetHandle: (direction === 'LR' || direction === 'RL') ? 'left-target' : 'top-target',
+    data: {
+      mermaidType: edge.type || "-->",
+    },
     zIndex: 0,
   };
 });

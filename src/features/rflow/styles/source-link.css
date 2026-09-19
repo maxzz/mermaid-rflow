@@ -1,0 +1,20 @@
+.react-flow__node.is-source-link-caret {
+    outline: 2px solid var(--primary) !important;
+    outline-offset: 2px;
+}
+
+.react-flow__node.is-source-link-click {
+    outline: 3px solid var(--primary) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 40%, transparent) !important;
+}
+
+.react-flow__edge.is-source-link-caret path {
+    stroke: var(--primary) !important;
+}
+
+.react-flow__edge.is-source-link-click path {
+    stroke: var(--primary) !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--primary) 45%, transparent));
+}

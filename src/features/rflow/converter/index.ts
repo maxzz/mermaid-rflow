@@ -1,6 +1,8 @@
 export { convertMermaidToReactFlow } from './mermaidToReactFlow';
 export type { ReactFlowData } from './mermaidToReactFlow';
 export { sanitizeMermaidLabels, extractMermaidFromFences } from './mermaidSanitizer';
+export { reactFlowToMermaid, classifyMermaidSource } from './reactFlowToMermaid';
+export { nextRfId, prefixForNode, mermaidIdOf } from './mermaid-ids';
 export {
     ALIGNMENT_TYPES,
     DISTRIBUTION_TYPES,

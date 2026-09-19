@@ -3,6 +3,7 @@
  */
 import { type Edge, type Node } from 'reactflow';
 import { ALIGNMENT_TYPES, DISTRIBUTION_TYPES, type AlignmentType, type DistributionType } from '../converter/constants';
+import { nextRfId, prefixForNode } from '../converter/mermaid-ids';
 
 export function alignNodes(nodes: Node[], selectedNodes: Node[], alignment: AlignmentType): Node[] {
     if (selectedNodes.length < 2) {
@@ -145,15 +146,12 @@ export function sendToBack(nodes: Node[], selectedNodes: Node[]): Node[] {
     );
 }
 
-let duplicateCounter = 0;
-
 export function duplicateNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
     const newNodes = [...nodes];
-    const timestamp = Date.now();
     selectedNodes.forEach((node) => {
         newNodes.push({
             ...node,
-            id: `${node.id}_copy_${timestamp}_${duplicateCounter++}`,
+            id: nextRfId(newNodes, prefixForNode(node)),
             position: { x: node.position.x + 50, y: node.position.y + 50 },
             selected: false,
         });

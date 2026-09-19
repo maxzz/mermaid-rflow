@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { subscribe } from "valtio";
 import { monaco } from "@/components/2-main/2-editor-page/1-panel-editor/3-monaco-setup";
 import { clearReveal, selectFromEditor, sourceLink } from "@/store/6-source-render-links";
+import { setMonacoEditorInstance } from "./2-monaco-editor-handle";
 import "./8-highlight.css";
 
 type MonacoEditor = monaco.editor.IStandaloneCodeEditor;
@@ -9,6 +10,7 @@ type MonacoEditor = monaco.editor.IStandaloneCodeEditor;
 export function useMonacoSourceLink() {
     return useCallback(
         (editor: MonacoEditor) => {
+            setMonacoEditorInstance(editor);
             const decorations = editor.createDecorationsCollection([]);
 
             const cursorSub = editor.onDidChangeCursorPosition((e) => {
@@ -35,6 +37,7 @@ export function useMonacoSourceLink() {
             editor.onDidDispose(() => {
                 cursorSub.dispose();
                 unsub();
+                setMonacoEditorInstance(null);
             });
         },
         []);
