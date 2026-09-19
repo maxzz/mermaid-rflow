@@ -43,6 +43,11 @@ export default defineConfig({
                             priority: 30,
                         },
                         {
+                            name: 'reactflow',
+                            test: /[\\/]node_modules[\\/](reactflow|@reactflow[\\/][^\\/]+|dagre|mermaid|khroma|dayjs|uuid|stylis|internmap|d3-|@braintree[\\/]sanitize-url|dompurify|marked)[\\/]/,
+                            priority: 25,
+                        },
+                        {
                             name: vendorChunkName,
                             test: /[\\/]node_modules[\\/]/,
                             priority: 10,

@@ -1,0 +1,260 @@
+/**
+ * Adapted from mermaid-reactflow-editor (MIT) — React Flow node/canvas styles.
+ */
+
+.custom-node {
+    background-color: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    color: #1f2937;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.custom-node:hover {
+    border-color: #d1d5db;
+}
+
+.custom-node.selected {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+}
+
+.react-flow__node-custom {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.react-flow__node-diamond,
+.react-flow__node-diamond.react-flow__node-selected {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.custom-node.shape-circle {
+    border-radius: 50%;
+    aspect-ratio: 1;
+}
+
+.custom-node.shape-stadium {
+    border-radius: 30px;
+}
+
+.custom-node.shape-round {
+    border-radius: 15px;
+}
+
+.node-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 14px;
+    box-sizing: border-box;
+}
+
+.custom-node.has-image .node-content {
+    overflow: visible;
+    padding: 0;
+}
+
+.node-label {
+    font-weight: 600;
+    font-size: clamp(10px, 2vw, 13px);
+    margin-bottom: 4px;
+    line-height: 1.4;
+    max-width: 200px;
+    color: #2d3748;
+    text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.custom-node.has-image {
+    padding: 0;
+    background: transparent;
+    border: none;
+    overflow: visible;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.node-image-container {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.node-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: transparent;
+}
+
+.custom-node.has-image.selected .node-image {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+}
+
+.image-caption {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    border-radius: 4px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 1000;
+}
+
+.node-description {
+    font-size: clamp(9px, 1.5vw, 12px);
+    color: #718096;
+    margin-top: 4px;
+    line-height: 1.3;
+    max-width: 200px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.diamond-node {
+    position: relative;
+}
+
+.diamond-node .node-label {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.subgraph-node {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.subgraph-node.selected {
+    outline: 2px solid #2563eb;
+    outline-offset: -1px;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.subgraph-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    max-width: calc(100% - 40px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.subgraph-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 4px 6px;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    color: #2d3748;
+}
+
+.subgraph-drag-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: move;
+    color: #718096;
+    z-index: 50;
+}
+
+.react-flow__handle {
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: scale(0.8);
+}
+
+.react-flow__node:hover .react-flow__handle,
+.react-flow__node.selected .react-flow__handle {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.custom-node .react-flow__handle {
+    position: absolute !important;
+    background-color: #555;
+    border: 2px solid white;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    z-index: 12;
+}
+
+.react-flow__node-group {
+    cursor: move;
+}
+
+.react-flow__node-group.selected {
+    box-shadow: 0 0 0 2px #1976d2 !important;
+}
+
+.react-flow__edge-text {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+.dragging .react-flow__edge.animated path {
+    animation: none !important;
+    stroke-dasharray: none !important;
+}
+
+.dragging .react-flow__node-resizer,
+.dragging .react-flow__handle {
+    visibility: hidden !important;
+}
+
+.react-flow__handle,
+.react-flow__resize-control,
+.subgraph-header,
+.react-flow__panel,
+.react-flow__controls {
+    z-index: 60 !important;
+    pointer-events: all !important;
+}

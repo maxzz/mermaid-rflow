@@ -1,28 +1,38 @@
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
+import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { previewStatus } from "@/store/5-render-diagram/5-render";
+import { rflowDiagram } from "@/features/rflow";
 
 export function StatusBar() {
-    const { error, ms, empty } = useSnapshot(previewStatus);
+    const { outputFormat } = useSnapshot(mermaidSettings);
+    const isFlow = outputFormat === 'flow';
+    const bm = useSnapshot(previewStatus);
+    const flow = useSnapshot(rflowDiagram);
 
-    const state = error ? 'error' : empty ? 'idle' : 'ok';
+    const error = isFlow ? flow.error : bm.error;
+    const empty = isFlow ? flow.nodes.length === 0 && !flow.error : bm.empty;
+    const ms = isFlow ? flow.ms : bm.ms;
+    const converting = isFlow && flow.converting;
+    const state = converting ? 'ok' : error ? 'error' : empty ? 'idle' : 'ok';
+    const label = converting ? 'Converting…' : state === 'error' ? `Error: ${error}` : state === 'idle' ? 'Ready' : 'OK';
 
     return (
         <div className="px-3 h-6 text-[.7rem] text-muted-foreground bg-muted/30 border-t border-border flex items-center justify-between gap-2">
             <div className="min-w-0 flex items-center gap-1.5">
-                <span className={classNames("shrink-0 size-1.5 rounded-full", dotClasses[state])} />
+                <span className={classNames("shrink-0 size-1.5 rounded-full", converting ? "bg-amber-500" : dotClasses[state])} />
                 <span className="truncate" title={error ?? undefined}>
-                    {state === 'error' ? `Error: ${error}` : state === 'idle' ? 'Ready' : 'OK'}
+                    {label}
                 </span>
             </div>
 
             <div className="shrink-0 flex items-center gap-3">
-                {state === 'ok' && (
+                {state === 'ok' && !converting && (
                     <span className="tabular-nums">
-                        Rendered in {ms.toFixed(0)} ms
+                        {isFlow ? 'Converted' : 'Rendered'} in {ms.toFixed(0)} ms
                     </span>
                 )}
-                <span>beautiful-mermaid</span>
+                <span>{isFlow ? 'reactflow' : 'beautiful-mermaid'}</span>
             </div>
         </div>
     );

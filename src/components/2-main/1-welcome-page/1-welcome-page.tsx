@@ -30,8 +30,8 @@ export function WelcomePage() {
                 </Button>
 
                 <p className="max-w-md text-sm text-muted-foreground leading-relaxed">
-                    Write Mermaid diagrams in a Monaco editor and see them rendered live as clean SVG or as Unicode/ASCII text.
-                    Switch light and dark mode, pick a diagram theme, then copy or export the result as SVG, PNG, or plain text.
+                    Write Mermaid flowcharts in a Monaco editor and see them as an editable React Flow canvas, or as SVG / Unicode text via beautiful-mermaid.
+                    Switch light and dark mode, then copy or export the result.
                 </p>
 
                 <DontShowAgainCheckbox />

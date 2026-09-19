@@ -24,9 +24,10 @@ export function RenderView({ scrollRef }: RenderViewProps) {
     const debouncedSource = useDebouncedValue(source, RENDER_DEBOUNCE_MS);
 
     // Synchronous, memoized render: no flash, only recomputed when inputs change
+    const bmFormat = outputFormat === 'text' ? 'text' : 'svg';
     const renderResult = useMemo(
-        () => renderDiagram(bm, debouncedSource, { diagramTheme, ascii, svg }, outputFormat),
-        [bm, debouncedSource, diagramTheme, ascii, svg, outputFormat],
+        () => renderDiagram(bm, debouncedSource, { diagramTheme, ascii, svg }, bmFormat),
+        [bm, debouncedSource, diagramTheme, ascii, svg, bmFormat],
     );
 
     useEffect(() => publishPreviewStatus(renderResult), [renderResult]);

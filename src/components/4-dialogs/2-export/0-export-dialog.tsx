@@ -49,7 +49,7 @@ function Body() {
     const { source, outputFormat, diagramTheme, ascii, svg, pngScale, exportFlattenColors, exportIncludeFontImport } = useSnapshot(mermaidSettings);
 
     // Start from the format currently shown in the preview pane
-    const [format, setFormat] = useState<ExportFormat>(outputFormat);
+    const [format, setFormat] = useState<ExportFormat>(outputFormat === 'text' ? 'text' : 'svg');
 
     const renderResult = useMemo(
         () => renderDiagram(

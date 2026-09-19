@@ -1,7 +1,7 @@
 /**
- * Lazy module loaders. Both `beautiful-mermaid` (bundles the ELK layout engine)
- * and Monaco are large, so they live in their own chunks (see vite.config.ts)
- * and are loaded on demand. Promises are cached so `use()` gets a stable reference.
+ * Lazy module loaders. `beautiful-mermaid` (bundles the ELK layout engine) is
+ * large, so it lives in its own chunk (see vite.config.ts) and is loaded on
+ * demand. The promise is cached so `use()` gets a stable reference.
  */
 
 //---------------------------------------------------------------------------
@@ -16,15 +16,7 @@ export function loadBeautifulMermaid(): Promise<BeautifulMermaidModule> {
     return beautifulMermaidPromise;
 }
 
-//---------------------------------------------------------------------------
-// Monaco Editor
-
-export function loadMonacoEditor() {
-    return import('@/components/2-main/2-editor-page/1-panel-editor/2-monaco-editor');
-}
-
-/** Warm up heavy chunks while the user is still on the welcome page. */
+/** Warm up the SVG/text renderer while the user is still on the welcome page. */
 export function preloadEditorPageModules() {
     loadBeautifulMermaid().catch(() => { /* surfaced later by Suspense error boundary */ });
-    loadMonacoEditor().catch(() => { /* surfaced later by Suspense error boundary */ });
 }

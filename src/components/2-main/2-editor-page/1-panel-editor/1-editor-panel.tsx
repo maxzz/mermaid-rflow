@@ -1,15 +1,10 @@
-import { lazy, Suspense } from "react";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
-import { loadMonacoEditor } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
+import MonacoMermaidEditor from "@/components/2-main/2-editor-page/1-panel-editor/2-monaco-editor";
 import { MERMAID_SAMPLES } from "@/utils/local/mermaid-samples";
-import { BarsLoaderIcon } from "@/ui/local-ui";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { ScrollArea } from "@/ui/shadcn/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
 import { SvgLayoutEnginePopover } from "@/components/2-main/2-editor-page/2-panel-diagrams/8-svg-layout-popover";
-
-// Monaco lives in its own chunk; the promise is shared with preloadEditorPageModules()
-const MonacoMermaidEditor = lazy(loadMonacoEditor);
 
 export function EditorPanel() {
     return (
@@ -20,9 +15,7 @@ export function EditorPanel() {
                 <div className="absolute inset-0 overflow-hidden">
                     <ScrollArea className="h-full" fullHeight fixedWidth viewportClassName="overflow-hidden!">
                         <ErrorBoundary fallback={<PanelMessage>Failed to load the editor.</PanelMessage>}>
-                            <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
-                                <MonacoMermaidEditor />
-                            </Suspense>
+                            <MonacoMermaidEditor />
                         </ErrorBoundary>
                     </ScrollArea>
                 </div>

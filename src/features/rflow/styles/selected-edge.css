@@ -1,0 +1,33 @@
+/* Highlight selected edge */
+.react-flow__edge.selected path {
+  stroke: var(--edge-selected, #ff9800) !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 2px var(--edge-selected-shadow, #ff9800aa));
+}
+
+.react-flow__edge.selected .react-flow__edge-text {
+  fill: var(--edge-selected, #ff9800) !important;
+  font-weight: bold !important;
+}
+
+/* During drag, pause animations and hide heavy UI for smoother performance */
+.dragging .react-flow__edge.animated path {
+  animation: none !important;
+  stroke-dasharray: none !important;
+}
+
+.dragging .react-flow__node-resizer,
+.dragging .react-flow__handle {
+  visibility: hidden !important;
+}
+
+/* During streaming, pause animations and hide heavy UI for smoother performance */
+.streaming-mode .react-flow__edge.animated path {
+  animation: none !important;
+  stroke-dasharray: none !important;
+}
+
+.streaming-mode .react-flow__node-resizer,
+.streaming-mode .react-flow__handle {
+  visibility: hidden !important;
+}

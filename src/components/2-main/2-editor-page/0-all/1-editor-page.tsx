@@ -5,6 +5,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/ui/shadc
 import { Header } from "@/components/1-header";
 import { EditorPanel } from "../1-panel-editor/1-editor-panel";
 import { PreviewPanel } from "../2-panel-diagrams/1-preview-panel";
+import { RflowConverter } from "@/features/rflow";
 
 export function EditorPage() {
     const { panelSizes } = useSnapshot(appSettings);
@@ -16,6 +17,7 @@ export function EditorPage() {
     return (
         <div className="h-dvh text-foreground bg-background overflow-hidden grid grid-rows-[auto_1fr]">
             <Header />
+            <RflowConverter />
 
             <div className="min-h-0">
                 <ResizablePanelGroup orientation="horizontal" defaultLayout={panelSizes.horizontal as Layout} onLayoutChanged={onLayoutChanged}>

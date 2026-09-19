@@ -7,8 +7,9 @@ const STORE_KEY = "tm-mermaid-rflow-settings";
 const STORE_VER = "v1.0";
 const STORAGE_ID = `${STORE_KEY}__${STORE_VER}`;
 
-export type OutputFormat = 'svg' | 'text';
-export type ExportFormat = OutputFormat | 'png';
+export type OutputFormat = 'flow' | 'svg' | 'text';
+export type BmOutputFormat = Exclude<OutputFormat, 'flow'>;
+export type ExportFormat = BmOutputFormat | 'png';
 export type DiagramTheme = 'auto' | ThemeName;
 export type PngScale = 1 | 2 | 4;
 
@@ -79,7 +80,7 @@ export const DIAGRAM_FONTS = [
 const DEFAULT_SETTINGS: MermaidSettings = {
     showWelcome: true,
     source: DEFAULT_MERMAID_SOURCE,
-    outputFormat: 'svg',
+    outputFormat: 'flow',
     zoom: 1,
     diagramTheme: 'auto',
     ascii: {

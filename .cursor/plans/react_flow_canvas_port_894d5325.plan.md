@@ -4,28 +4,28 @@ overview: Keep the existing two-panel layout and beautiful-mermaid SVG/Text path
 todos:
   - id: scaffold
     content: Add reactflow, dagre, mermaid, html-to-image; create src/features/rflow scaffold and Vite chunk group
-    status: pending
+    status: completed
   - id: stores
     content: Add Valtio rflowDiagram / rflowSaved and Jotai canvas-UI atoms; extend outputFormat with flow; wire debounced converter
-    status: pending
+    status: completed
   - id: converter
     content: Port mermaidToReactFlow + sanitizer + layout/shape constants with MIT attribution
-    status: pending
+    status: completed
   - id: canvas
     content: Port FlowDiagram, custom nodes, editing utils, PNG export; bind to Valtio/Jotai instead of useState
-    status: pending
+    status: completed
   - id: chrome
     content: Port and restyle toolbars, NodeEditor, search, edge label editor, LoadDialog onto project shadcn
-    status: pending
+    status: completed
   - id: preview-adapter
     content: "Adapt PreviewPanel/toolbar/status/zoom: Flow default tab; keep SVG/Text beautiful-mermaid path"
-    status: pending
+    status: completed
   - id: editor-direct
     content: Remove Monaco React.lazy; keep monaco-mermaid + Valtio source; slim lazy-modules to beautiful-mermaid only
-    status: pending
+    status: completed
   - id: verify
     content: Exercise Flow/SVG/Text, save/load, and a non-flowchart sample in the running app
-    status: pending
+    status: completed
 isProject: false
 ---
 

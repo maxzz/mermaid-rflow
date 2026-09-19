@@ -9,40 +9,53 @@ import { PreviewToolbar } from "./2-preview-toolbar";
 import { RenderView } from "./3-render-view";
 import { ZoomControls } from "./4-zoom-controls";
 import { StatusBar } from "./5-status-bar";
+import { FlowDiagram, LoadDialog } from "@/features/rflow";
 
 export function PreviewPanel() {
     const scrollRef = useRef<HTMLDivElement>(null);
-    const { zoom } = useSnapshot(mermaidSettings);
+    const { zoom, outputFormat } = useSnapshot(mermaidSettings);
     const overflow = useViewportOverflow(scrollRef, [zoom]);
+    const isFlow = outputFormat === 'flow';
 
     return (
         <div className="h-full bg-muted/20 flex flex-col">
             <PreviewToolbar />
 
             <div className="relative flex-1 min-h-0">
-                <div className="absolute inset-0 overflow-hidden">
-                    <ScrollArea2
-                        ref={scrollRef}
-                        className={classNames(
-                            "h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full",
-                            !overflow.y && "*:data-[orientation=vertical]:hidden",
-                            !overflow.x && "*:data-[orientation=horizontal]:hidden",
-                        )}
-                        horizontal
-                        type="always"
-                    >
-                        <ErrorBoundary fallback={<PanelMessage>Failed to load the diagram renderer.</PanelMessage>}>
-                            <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
-                                <RenderView scrollRef={scrollRef} />
-                            </Suspense>
-                        </ErrorBoundary>
-                    </ScrollArea2>
+                {isFlow
+                    ? (
+                        <div className="absolute inset-0 overflow-hidden">
+                            <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
+                                <FlowDiagram />
+                            </ErrorBoundary>
+                        </div>
+                    )
+                    : (
+                        <div className="absolute inset-0 overflow-hidden">
+                            <ScrollArea2
+                                ref={scrollRef}
+                                className={classNames(
+                                    "h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full",
+                                    !overflow.y && "*:data-[orientation=vertical]:hidden",
+                                    !overflow.x && "*:data-[orientation=horizontal]:hidden",
+                                )}
+                                horizontal
+                                type="always"
+                            >
+                                <ErrorBoundary fallback={<PanelMessage>Failed to load the diagram renderer.</PanelMessage>}>
+                                    <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
+                                        <RenderView scrollRef={scrollRef} />
+                                    </Suspense>
+                                </ErrorBoundary>
+                            </ScrollArea2>
 
-                    <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
-                </div>
+                            <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
+                        </div>
+                    )}
             </div>
 
             <StatusBar />
+            <LoadDialog />
         </div>
     );
 }

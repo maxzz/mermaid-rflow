@@ -8,7 +8,7 @@ import { useMonacoSourceLink } from "@/components/2-main/2-editor-page/3-source-
 import { MONACO_LANGUAGE_MERMAID, MONACO_THEME_DARK, MONACO_THEME_LIGHT } from "./3-monaco-setup";
 
 /**
- * Lazy chunk: default export is consumed by React.lazy() in 1-editor-panel.tsx.
+ * Monaco editor bound to Valtio mermaidSettings.source.
  * Importing this file pulls Monaco + monaco-mermaid (see 3-monaco-setup.ts).
  */
 export default function MonacoMermaidEditor() {

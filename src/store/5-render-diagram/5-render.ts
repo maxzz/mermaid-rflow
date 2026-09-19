@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { proxy } from 'valtio';
 import { type AsciiRenderOptions, type DiagramColors, type RenderOptions } from 'beautiful-mermaid'; // `import type` only: keep the lazy chunk lazy
 import { type BeautifulMermaidModule } from '@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules';
-import { type DiagramTheme, type MermaidSettings, type OutputFormat } from '../2-mermaid-settings';
+import { type BmOutputFormat, type DiagramTheme, type MermaidSettings } from '../2-mermaid-settings';
 import { resolveCssVar } from '@/components/4-dialogs/2-export/8-export-utils';
 import { processExportedSvg, type SvgExportProcess } from '@/components/4-dialogs/2-export/8-flatten-svg-colors';
 import { fixMermaidAsciiBoxes } from '@/utils/local/fix-mermaid-ascii';
 import { detectGraphDirection, routeDiamondEdges } from '@/utils/local/route-diamond-edges';
 
 export type RenderResult = {
-    format: OutputFormat;
+    format: BmOutputFormat;
     output: string;         // SVG markup or plain text; empty when error or empty source
     error: string | null;
     ms: number;             // render time
@@ -18,7 +18,7 @@ export type RenderResult = {
 export type RenderSettings = Pick<MermaidSettings, 'diagramTheme' | 'ascii' | 'svg'>;
 export type { SvgExportProcess };
 
-const EMPTY_SOURCE_RESULT = (format: OutputFormat): RenderResult => ({ format, output: '', error: null, ms: 0 });
+const EMPTY_SOURCE_RESULT = (format: BmOutputFormat): RenderResult => ({ format, output: '', error: null, ms: 0 });
 
 /**
  * Colors for the SVG renderer.
@@ -99,7 +99,7 @@ export function buildAsciiOptions(settings: RenderSettings): AsciiRenderOptions 
 }
 
 /** Pure, synchronous render. Never throws; errors are returned in the result. */
-export function renderDiagram(bm: BeautifulMermaidModule, source: string, settings: RenderSettings, format: OutputFormat, exportProcess?: SvgExportProcess): RenderResult {
+export function renderDiagram(bm: BeautifulMermaidModule, source: string, settings: RenderSettings, format: BmOutputFormat, exportProcess?: SvgExportProcess): RenderResult {
     const text = source.trim();
     if (!text) {
         return EMPTY_SOURCE_RESULT(format);

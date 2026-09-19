@@ -1,6 +1,5 @@
 /**
- * Self-hosted Monaco setup (no CDN). This module is only reached through the lazy
- * `2-monaco-editor.tsx` chunk, so Monaco never lands in the initial bundle.
+ * Self-hosted Monaco setup (no CDN).
  *
  * - `editor/editor.api` is the editor core without the built-in TS/JSON/CSS/HTML language services.
  * - The editor worker is bundled by Vite via the `?worker` import.
