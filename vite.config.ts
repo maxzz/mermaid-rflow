@@ -26,26 +26,21 @@ export default defineConfig({
         rolldownOptions: {
             output: {
                 codeSplitting: {
-                    // Only the matched modules go into a group chunk. With the default (true), a group also
-                    // captures its dependencies (e.g. `react` via @monaco-editor/react), which would force the
-                    // main bundle to statically import the lazy monaco chunk.
+                    // Named groups are only for *lazy* packages. Statically imported mermaid/reactflow/dagre
+                    // must stay in the vendor chunk with lodash/d3. A separate reactflow group creates circular
+                    // chunks; lodash MapCache then runs before its prototype is assigned
+                    // (`this.clear is not a function` in production). Monaco is a leaf and is named in
+                    // vendorChunkName instead.
+                    //
+                    // `includeDependenciesRecursively: false` keeps React out of the beautiful-mermaid chunk.
+                    // With the default (true), that lazy group would also capture `react` and force the main
+                    // bundle to statically import it.
                     includeDependenciesRecursively: false,
                     groups: [
-                        // Lazy chunks: loaded only when the editor page mounts (see src/utils/lazy-modules.ts)
-                        {
-                            name: 'monaco',
-                            test: /[\\/]node_modules[\\/](monaco-editor|monaco-mermaid|@monaco-editor[\\/][^\\/]+|state-local)[\\/]/,
-                            priority: 30,
-                        },
                         {
                             name: 'beautiful-mermaid', // includes the ~1.6 MB ELK layout engine
                             test: /[\\/]node_modules[\\/](beautiful-mermaid|elkjs|entities)[\\/]/,
                             priority: 30,
-                        },
-                        {
-                            name: 'reactflow',
-                            test: /[\\/]node_modules[\\/](reactflow|@reactflow[\\/][^\\/]+|dagre|mermaid|khroma|dayjs|uuid|stylis|internmap|d3-|@braintree[\\/]sanitize-url|dompurify|marked)[\\/]/,
-                            priority: 25,
                         },
                         {
                             name: vendorChunkName,
@@ -67,6 +62,15 @@ function vendorChunkName(id: string): string | null {
 
     if (pkg === 'react' || pkg === 'react-dom' || pkg === 'scheduler') {
         return 'react';
+    }
+    // Leaf split: monaco is statically imported but does not share lodash/d3 with mermaid.
+    if (
+        pkg === 'monaco-editor' ||
+        pkg === 'monaco-mermaid' ||
+        pkg === 'state-local' ||
+        pkg.startsWith('@monaco-editor/')
+    ) {
+        return 'monaco';
     }
     if (pkg === 'motion' || pkg === 'framer-motion') {
         return 'motion';
