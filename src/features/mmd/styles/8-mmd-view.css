@@ -10,10 +10,12 @@
 
 .mmd-host svg {
     max-width: none;
+    overflow: visible;
     display: block;
 }
 
-.mmd-host.mmd-autofit svg {
+.mmd-host.mmd-autofit svg,
+.mmd-autofit .mmd-host svg {
     max-width: 100%;
     height: auto;
 }
@@ -51,6 +53,14 @@
 .is-mmd-dragging,
 .is-mmd-dragging .mmd-host g.node {
     cursor: grabbing;
+}
+
+.mmd-hit {
+    touch-action: none;
+}
+
+.mmd-hit:hover {
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 50%, transparent);
 }
 
 .mmd-add-handle {

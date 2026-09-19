@@ -3,7 +3,7 @@ import { debounceDevTools } from '@/utils/debounce';
 import { type MmdNodePos } from '../catalog/5-mmd-layout';
 
 const STORE_KEY = 'tm-mermaid-rflow-mmd-layout';
-const STORE_VER = 'v1.0';
+const STORE_VER = 'v1.1';
 const STORAGE_ID = `${STORE_KEY}__${STORE_VER}`;
 
 export type MmdLayoutState = {

@@ -32,7 +32,7 @@ export function MmdViewControls({
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => setPanMode((v) => !v)}
-                title={panMode ? 'Pan mode on: drag to scroll' : 'Pan mode: drag to scroll'}
+                title={panMode ? 'Pan tool on — click again to select, move, and connect blocks' : 'Pan the canvas. Leave this off to select and move blocks.'}
                 aria-pressed={panMode}
             >
                 <HandIcon />

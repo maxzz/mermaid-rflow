@@ -76,6 +76,57 @@ export function originOfNode(el: Element): MmdNodePos {
     return parseTranslateAttr(el.getAttribute(MMD_ORIGIN_TRANSFORM) ?? el.getAttribute('transform') ?? '');
 }
 
+export type MmdHitBox = {
+    id: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+};
+
+export function overlayScale(host: HTMLElement): { x: number; y: number; } {
+    const rect = host.getBoundingClientRect();
+    const sx = host.offsetWidth > 0 ? rect.width / host.offsetWidth : 1;
+    const sy = host.offsetHeight > 0 ? rect.height / host.offsetHeight : 1;
+    return {
+        x: Number.isFinite(sx) && sx > 0 ? sx : 1,
+        y: Number.isFinite(sy) && sy > 0 ? sy : 1,
+    };
+}
+
+export function clientPointInOverlay(host: HTMLElement, clientX: number, clientY: number): { x: number; y: number; } {
+    const rect = host.getBoundingClientRect();
+    const scale = overlayScale(host);
+    return {
+        x: (clientX - rect.left) / scale.x,
+        y: (clientY - rect.top) / scale.y,
+    };
+}
+
+export function measureMmdNodeBoxes(root: Element, host: HTMLElement): MmdHitBox[] {
+    const hostRect = host.getBoundingClientRect();
+    const scale = overlayScale(host);
+    const boxes: MmdHitBox[] = [];
+    for (const el of root.querySelectorAll('g.node')) {
+        const id = mermaidIdFromDomId(el.id);
+        if (!id) {
+            continue;
+        }
+        const rect = el.getBoundingClientRect();
+        if (rect.width < 2 || rect.height < 2) {
+            continue;
+        }
+        boxes.push({
+            id,
+            x: (rect.left - hostRect.left) / scale.x,
+            y: (rect.top - hostRect.top) / scale.y,
+            w: rect.width / scale.x,
+            h: rect.height / scale.y,
+        });
+    }
+    return boxes;
+}
+
 export function applyMmdLayout(root: Element, nodes: Record<string, MmdNodePos>): void {
     const originById: Record<string, MmdNodePos> = {};
     const knownIds: string[] = [];

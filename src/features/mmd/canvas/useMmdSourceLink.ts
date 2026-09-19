@@ -73,7 +73,7 @@ export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, outp
                 return;
             }
             return attachPanSafeClick(host, scrollRef.current, (target) => {
-                if (target instanceof Element && target.closest('[data-mmd-chrome]')) {
+                if (target instanceof Element && target.closest('[data-mmd-chrome], [data-mmd-hit]')) {
                     return;
                 }
                 const tagged = closestMmdTagged(target);

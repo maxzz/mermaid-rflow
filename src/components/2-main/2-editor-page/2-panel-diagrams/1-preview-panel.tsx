@@ -24,23 +24,18 @@ export function PreviewPanel() {
             <PreviewToolbar />
 
             <div className="relative flex-1 min-h-0">
-                {isFlow
+                <div className={classNames('absolute inset-0 overflow-hidden', !isFlow && 'hidden')}>
+                    <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
+                        <FlowDiagram />
+                    </ErrorBoundary>
+                </div>
+                <div className={classNames('absolute inset-0 overflow-hidden', !isMmd && 'hidden')}>
+                    <ErrorBoundary fallback={<PanelMessage>Failed to load the official Mermaid renderer.</PanelMessage>}>
+                        <MermaidView active={isMmd} />
+                    </ErrorBoundary>
+                </div>
+                {!isFlow && !isMmd
                     ? (
-                        <div className="absolute inset-0 overflow-hidden">
-                            <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
-                                <FlowDiagram />
-                            </ErrorBoundary>
-                        </div>
-                    )
-                    : isMmd
-                    ? (
-                        <div className="absolute inset-0 overflow-hidden">
-                            <ErrorBoundary fallback={<PanelMessage>Failed to load the official Mermaid renderer.</PanelMessage>}>
-                                <MermaidView />
-                            </ErrorBoundary>
-                        </div>
-                    )
-                    : (
                         <div className="absolute inset-0 overflow-hidden">
                             <ScrollArea2
                                 ref={scrollRef}
@@ -61,7 +56,8 @@ export function PreviewPanel() {
 
                             <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
                         </div>
-                    )}
+                    )
+                    : null}
             </div>
 
             <StatusBar />

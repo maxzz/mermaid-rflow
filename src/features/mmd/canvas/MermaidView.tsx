@@ -4,8 +4,7 @@ import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { isThemeDark } from '@/utils/theme-utils';
 import { appSettings } from '@/store/1-ui-settings';
-import { ZOOM_STEP, mermaidSettings } from '@/store/2-mermaid-settings';
-import { classifyMermaidSource, isFlowchartDiagramType } from '../catalog/1-flowchart-source';
+import { ZOOM_STEP } from '@/store/2-mermaid-settings';
 import { bindLastMermaidFunctions } from '../render/2-render-official';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { mmdSettings } from '../store/2-mmd-settings';
@@ -18,19 +17,18 @@ import { useMmdLayout } from './useMmdLayout';
 import { useMmdSourceLink } from './useMmdSourceLink';
 import '../styles/8-mmd-view.css';
 
-export function MermaidView() {
+export function MermaidView({ active = true }: { active?: boolean; }) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const paneRef = useRef<HTMLDivElement>(null);
     const hostRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
-    const { svg, error, diagramType } = useSnapshot(mmdDiagram);
-    const { source } = useSnapshot(mermaidSettings);
+    const { svg, error } = useSnapshot(mmdDiagram);
     const { autofit } = useSnapshot(mmdSettings);
     const { theme } = useSnapshot(appSettings);
     const zoom = useAtomValue(mmdZoomAtom);
     const panMode = useAtomValue(mmdPanModeAtom);
     const dark = isThemeDark(theme);
     const enabled = !!svg && !error;
-    const flowchart = classifyMermaidSource(source) === 'flowchart' || isFlowchartDiagramType(diagramType);
 
     useLayoutEffect(
         () => {
@@ -45,7 +43,7 @@ export function MermaidView() {
 
     useMmdSourceLink({
         contentRef,
-        hostRef,
+        hostRef: paneRef,
         scrollRef,
         enabled,
         output: svg,
@@ -54,10 +52,7 @@ export function MermaidView() {
 
     useMmdLayout({
         contentRef,
-        hostRef,
         enabled,
-        flowchart,
-        panMode,
         output: svg,
     });
 
@@ -93,7 +88,7 @@ export function MermaidView() {
                 onWheel={onWheel}
                 {...panHandlers}
             >
-                <div ref={hostRef} className="relative min-w-full min-h-full p-6 flex">
+                <div ref={paneRef} className="relative min-w-full min-h-full p-6 flex">
                     {error
                         ? (
                             <pre className="m-auto px-4 py-3 max-w-full text-xs font-code text-destructive bg-destructive/10 border border-destructive/30 rounded-md whitespace-pre-wrap">
@@ -108,13 +103,18 @@ export function MermaidView() {
                             )
                             : (
                                 <div
-                                    ref={contentRef}
-                                    className={classNames('mmd-host m-auto', autofit && 'mmd-autofit w-full')}
+                                    ref={hostRef}
+                                    className={classNames('relative m-auto', autofit && 'mmd-autofit w-full')}
                                     style={{ zoom }}
-                                    dangerouslySetInnerHTML={{ __html: svg }}
-                                />
+                                >
+                                    <div
+                                        ref={contentRef}
+                                        className="mmd-host"
+                                        dangerouslySetInnerHTML={{ __html: svg }}
+                                    />
+                                    <MmdEditOverlay hostRef={hostRef} contentRef={contentRef} enabled={enabled} active={active} />
+                                </div>
                             )}
-                    <MmdEditOverlay hostRef={hostRef} contentRef={contentRef} enabled={enabled} />
                 </div>
             </div>
             <MmdPaletteRail />
@@ -129,7 +129,13 @@ function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: bo
     function onPointerDown(e: PointerEvent<HTMLDivElement>) {
         const el = scrollRef.current;
         const middleButton = e.button === 1;
-        if (!el || (!panMode && !middleButton) || (e.button !== 0 && !middleButton)) {
+        if (!el || (e.button !== 0 && !middleButton)) {
+            return;
+        }
+        if (e.button === 0 && !panMode && e.target instanceof Element && e.target.closest('[data-mmd-hit], [data-mmd-chrome]')) {
+            return;
+        }
+        if (!panMode && !middleButton && e.target instanceof Element && e.target.closest('g.node, [data-mmd-hit]')) {
             return;
         }
         e.preventDefault();
