@@ -1,6 +1,6 @@
 # Mermaid Rflow
 
-A two-panel Mermaid editor: write diagrams in Monaco, then preview them as an editable React Flow canvas, as SVG, or as Unicode/ASCII text.
+A two-panel Mermaid editor: write diagrams in Monaco, then preview them as an editable React Flow canvas, official mermaid-js SVG, beautiful-mermaid SVG, or Unicode/ASCII text.
 
 ## Table of contents
 
@@ -11,11 +11,12 @@ A two-panel Mermaid editor: write diagrams in Monaco, then preview them as an ed
 
 ## What it is
 
-**Mermaid Rflow** keeps one Mermaid source string and shows it three ways:
+**Mermaid Rflow** keeps one Mermaid source string and shows it four ways:
 
 | Preview tab | What you get | Engine |
 | --- | --- | --- |
 | **Flow** (default) | Interactive nodes and edges you can pan, zoom, drag, connect, restyle, save, and export as PNG/JSON | Custom flowchart parser + [Dagre](https://github.com/dagrejs/dagre) + [React Flow](https://reactflow.dev/) |
+| **Mermaid** | Official mermaid-js SVG (Redux / neo themes). Flowcharts can be selected, relabeled, added, deleted, and connected; those gestures patch the source | [mermaid-js/mermaid](https://github.com/mermaid-js/mermaid) |
 | **SVG** | Themed vector diagram, including sequence / class / ER / XY charts | [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) (ELK layout) |
 | **Text** | Unicode box drawing or plain ASCII | beautiful-mermaid |
 
@@ -32,7 +33,9 @@ graph TD
     C --> E[Celebrate]
 ```
 
-**Flow is flowchart-oriented.** Sequence, class, ER, and XY samples still render on SVG and Text. On Flow they convert poorly or show “no flowchart nodes.” Adding, connecting, deleting, duplicating, and relabeling Flow nodes writes that topology back into the left editor (comments, `classDef`, and original wrapping are not preserved). Drag, align, colors, icons, and images stay on the canvas. Editing the source re-converts and replaces the graph (unless you are restoring a saved layout).
+**Flow is flowchart-oriented.** Sequence, class, ER, and XY samples still render on SVG, Text, and Mermaid. On Flow they convert poorly or show “no flowchart nodes.” Adding, connecting, deleting, duplicating, and relabeling Flow nodes writes that topology back into the left editor (comments, `classDef`, and original wrapping are not preserved). Drag, align, colors, icons, and images stay on the canvas. Editing the source re-converts and replaces the graph (unless you are restoring a saved layout).
+
+**Mermaid is official mermaid-js.** Theme, Adaptive, direction, and Autofit match the mermaid.ai-style preview. For `graph` / `flowchart` sources, selecting a node and renaming, adding, deleting, or connecting it patches only the affected lines. Pixel positions cannot live in Mermaid text, so nodes are not dragged. Other diagram types stay preview-plus-linking.
 
 The React Flow converter, canvas, and toolbars live under [`src/features/rflow/`](src/features/rflow/) and were adapted from [albingcj/mermaid-reactflow-editor](https://github.com/albingcj/mermaid-reactflow-editor) (MIT). AI generation from that project is not included.
 
@@ -47,7 +50,7 @@ flowchart TB
         Header[Header: theme, options]
         subgraph Panels[Resizable split]
             Editor[Monaco + mermaid source]
-            Preview[Preview: Flow / SVG / Text]
+            Preview[Preview: Flow / Mermaid / SVG / Text]
         end
         Header --- Panels
         Editor --- Preview
@@ -64,6 +67,9 @@ flowchart LR
     FlowStore --> Canvas[React Flow canvas]
     Canvas -->|"topology mutations"| Serialize[reactFlowToMermaid]
     Serialize -->|"lastAppliedSource first"| Source
+    Source --> Official[mermaid.render]
+    Official --> Mmd[Mermaid tab]
+    Mmd -->|"flowchart patches"| Source
     Source --> BmRender["beautiful-mermaid render"]
     BmRender --> Svg[SVG tab]
     BmRender --> Text[Text tab]
@@ -90,7 +96,7 @@ flowchart TB
     Selection --> Canvas2
 ```
 
-Ported React Flow code is isolated from the existing SVG/Text panels:
+Ported React Flow code and the official mermaid tab stay in their own feature folders:
 
 ```text
 src/features/rflow/
@@ -100,9 +106,16 @@ src/features/rflow/
   store/       Valtio graph + Jotai chrome
   storage/     saved { mermaid, nodes, edges } in localStorage
   styles/      React Flow and selected-edge CSS
+
+src/features/mmd/
+  render/      mermaid.initialize + mermaid.render, Redux/neo theme resolve
+  catalog/     official SVG → source index, incremental flowchart patches
+  canvas/      MermaidView, selection overlay, source link
+  ui/          converter, theme / direction / autofit toolbar
+  store/       Valtio render result + persisted view settings; Jotai chrome
 ```
 
-On the **SVG** and **Flow** tabs, clicking a shape can highlight the matching line in Monaco (and the other way around). Flow uses React Flow’s own controls and minimap instead of the SVG zoom bar.
+On the **SVG**, **Flow**, and **Mermaid** tabs, clicking a shape can highlight the matching line in Monaco (and the other way around). Flow uses React Flow’s own controls and minimap instead of the SVG zoom bar. The Mermaid tab uses official mermaid layout; pixel positions are not written back.
 
 ## How to Build the Project
 
@@ -167,7 +180,7 @@ Projects this app uses, plus others that are useful if you want to learn how dia
 
 - [albingcj/mermaid-reactflow-editor](https://github.com/albingcj/mermaid-reactflow-editor) — source of the flowchart converter and interactive canvas (MIT). Live demo: [diagram.albingcj.com](https://diagram.albingcj.com/)
 - [lukilabs/beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) — synchronous SVG and ASCII/Unicode renderer used by the SVG and Text tabs
-- [mermaid-js/mermaid](https://github.com/mermaid-js/mermaid) — diagram language; the Flow converter initializes `mermaid` at module load
+- [mermaid-js/mermaid](https://github.com/mermaid-js/mermaid) — diagram language and the official SVG renderer used by the Mermaid tab; the Flow converter also initializes `mermaid` at module load
 - [xyflow/xyflow](https://github.com/xyflow/xyflow) — React Flow (`reactflow` v11 in this repo)
 - [dagrejs/dagre](https://github.com/dagrejs/dagre) — layered graph layout for the Flow canvas
 - [kieler/elkjs](https://github.com/kieler/elkjs) — ELK layout engine bundled inside beautiful-mermaid for SVG

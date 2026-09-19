@@ -10,12 +10,14 @@ import { RenderView } from "./3-render-view";
 import { ZoomControls } from "./4-zoom-controls";
 import { StatusBar } from "./5-status-bar";
 import { FlowDiagram, LoadDialog } from "@/features/rflow";
+import { MermaidView } from "@/features/mmd";
 
 export function PreviewPanel() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { zoom, outputFormat } = useSnapshot(mermaidSettings);
     const overflow = useViewportOverflow(scrollRef, [zoom]);
     const isFlow = outputFormat === 'flow';
+    const isMmd = outputFormat === 'mmd';
 
     return (
         <div className="h-full bg-muted/20 flex flex-col">
@@ -27,6 +29,14 @@ export function PreviewPanel() {
                         <div className="absolute inset-0 overflow-hidden">
                             <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
                                 <FlowDiagram />
+                            </ErrorBoundary>
+                        </div>
+                    )
+                    : isMmd
+                    ? (
+                        <div className="absolute inset-0 overflow-hidden">
+                            <ErrorBoundary fallback={<PanelMessage>Failed to load the official Mermaid renderer.</PanelMessage>}>
+                                <MermaidView />
                             </ErrorBoundary>
                         </div>
                     )

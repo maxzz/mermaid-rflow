@@ -1,0 +1,54 @@
+.mmd-grid-light {
+    background-size: 22px 22px;
+    background-image: radial-gradient(circle, color-mix(in oklab, var(--foreground) 12%, transparent) 1.15px, transparent 1.15px);
+}
+
+.mmd-grid-dark {
+    background-size: 22px 22px;
+    background-image: radial-gradient(circle, color-mix(in oklab, var(--foreground) 18%, transparent) 1.15px, transparent 1.15px);
+}
+
+.mmd-host svg {
+    max-width: none;
+    display: block;
+}
+
+.mmd-host.mmd-autofit svg {
+    max-width: 100%;
+    height: auto;
+}
+
+.mmd-host.source-link-interactive g.node,
+.mmd-host.source-link-interactive g.cluster,
+.mmd-host.source-link-interactive g.actor,
+.mmd-host.source-link-interactive g.classGroup,
+.mmd-host.source-link-interactive path.flowchart-link,
+.mmd-host.source-link-interactive g.edgePath {
+    cursor: pointer;
+}
+
+.mmd-host g.is-source-link-caret > *:first-child,
+.mmd-host g.is-mmd-selected > *:first-child {
+    stroke: var(--primary);
+    stroke-width: 1.75;
+}
+
+.mmd-host g.is-source-link-click > *:first-child,
+.mmd-host g.is-mmd-selected.is-source-link-click > *:first-child {
+    stroke: var(--primary);
+    stroke-width: 2.5;
+}
+
+.mmd-host g.is-source-link-click,
+.mmd-host g.is-mmd-selected {
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--primary) 45%, transparent));
+}
+
+.mmd-add-handle {
+    box-shadow: 0 0 0 2px var(--background);
+}
+
+.mmd-connect-line {
+    transform-origin: 0 50%;
+    pointer-events: none;
+}

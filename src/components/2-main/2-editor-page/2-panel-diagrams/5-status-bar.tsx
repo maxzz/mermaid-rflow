@@ -3,19 +3,22 @@ import { classNames } from "@/utils";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { previewStatus } from "@/store/5-render-diagram/5-render";
 import { rflowDiagram } from "@/features/rflow";
+import { mmdDiagram } from "@/features/mmd";
 
 export function StatusBar() {
     const { outputFormat } = useSnapshot(mermaidSettings);
     const isFlow = outputFormat === 'flow';
+    const isMmd = outputFormat === 'mmd';
     const bm = useSnapshot(previewStatus);
     const flow = useSnapshot(rflowDiagram);
+    const mmd = useSnapshot(mmdDiagram);
 
-    const error = isFlow ? flow.error : bm.error;
-    const empty = isFlow ? flow.nodes.length === 0 && !flow.error : bm.empty;
-    const ms = isFlow ? flow.ms : bm.ms;
-    const converting = isFlow && flow.converting;
+    const error = isFlow ? flow.error : isMmd ? mmd.error : bm.error;
+    const empty = isFlow ? flow.nodes.length === 0 && !flow.error : isMmd ? !mmd.svg && !mmd.error : bm.empty;
+    const ms = isFlow ? flow.ms : isMmd ? mmd.ms : bm.ms;
+    const converting = isFlow ? flow.converting : isMmd && mmd.rendering;
     const state = converting ? 'ok' : error ? 'error' : empty ? 'idle' : 'ok';
-    const label = converting ? 'Converting…' : state === 'error' ? `Error: ${error}` : state === 'idle' ? 'Ready' : 'OK';
+    const label = converting ? (isMmd ? 'Rendering…' : 'Converting…') : state === 'error' ? `Error: ${error}` : state === 'idle' ? 'Ready' : 'OK';
 
     return (
         <div className="px-3 h-6 text-[.7rem] text-muted-foreground bg-muted/30 border-t border-border flex items-center justify-between gap-2">
@@ -32,7 +35,7 @@ export function StatusBar() {
                         {isFlow ? 'Converted' : 'Rendered'} in {ms.toFixed(0)} ms
                     </span>
                 )}
-                <span>{isFlow ? 'reactflow' : 'beautiful-mermaid'}</span>
+                <span>{isFlow ? 'reactflow' : isMmd ? 'mermaid' : 'beautiful-mermaid'}</span>
             </div>
         </div>
     );

@@ -41,7 +41,7 @@
         "jotai-valtio": "^0.6.0",
         "json5": "^2.2.3",
         "lucide-react": "^1.47.0",
-        "mermaid": "11.9.0",
+        "mermaid": "11.17.2",
         "monaco-editor": "^0.56.0",
         "monaco-mermaid": "^1.1.0",
         "motion": "^13.3.0",
