@@ -32,7 +32,7 @@ graph TD
     C --> E[Celebrate]
 ```
 
-**Flow is flowchart-oriented.** Sequence, class, ER, and XY samples still render on SVG and Text. On Flow they convert poorly or show “no flowchart nodes.” Canvas edits do not write back to Mermaid text; changing the source re-converts and replaces the graph (unless you are restoring a saved layout).
+**Flow is flowchart-oriented.** Sequence, class, ER, and XY samples still render on SVG and Text. On Flow they convert poorly or show “no flowchart nodes.” Adding, connecting, deleting, duplicating, and relabeling Flow nodes writes that topology back into the left editor (comments, `classDef`, and original wrapping are not preserved). Drag, align, colors, icons, and images stay on the canvas. Editing the source re-converts and replaces the graph (unless you are restoring a saved layout).
 
 The React Flow converter, canvas, and toolbars live under [`src/features/rflow/`](src/features/rflow/) and were adapted from [albingcj/mermaid-reactflow-editor](https://github.com/albingcj/mermaid-reactflow-editor) (MIT). AI generation from that project is not included.
 
@@ -62,6 +62,8 @@ flowchart LR
     Source --> Convert[convertMermaidToReactFlow]
     Convert --> FlowStore["rflowDiagram Valtio"]
     FlowStore --> Canvas[React Flow canvas]
+    Canvas -->|"topology mutations"| Serialize[reactFlowToMermaid]
+    Serialize -->|"lastAppliedSource first"| Source
     Source --> BmRender["beautiful-mermaid render"]
     BmRender --> Svg[SVG tab]
     BmRender --> Text[Text tab]
@@ -92,15 +94,15 @@ Ported React Flow code is isolated from the existing SVG/Text panels:
 
 ```text
 src/features/rflow/
-  converter/   mermaid → nodes/edges, sanitizer, Dagre spacing
-  canvas/      FlowDiagram, custom / diamond / subgraph nodes, PNG export
+  converter/   mermaid → nodes/edges, React Flow → mermaid, sanitizer, Dagre spacing
+  canvas/      FlowDiagram, custom / diamond / subgraph nodes, PNG export, source link
   ui/          palettes, toolbars, NodeEditor, search, LoadDialog
   store/       Valtio graph + Jotai chrome
   storage/     saved { mermaid, nodes, edges } in localStorage
   styles/      React Flow and selected-edge CSS
 ```
 
-On the **SVG** tab, clicking a shape can highlight the matching line in Monaco (and the other way around). That source↔diagram linking is SVG-only. Flow uses React Flow’s own controls and minimap instead of the SVG zoom bar.
+On the **SVG** and **Flow** tabs, clicking a shape can highlight the matching line in Monaco (and the other way around). Flow uses React Flow’s own controls and minimap instead of the SVG zoom bar.
 
 ## How to Build the Project
 
@@ -182,5 +184,5 @@ Projects this app uses, plus others that are useful if you want to learn how dia
 - [Eclipse ELK options](https://eclipse.dev/elk/reference/options.html) — knobs this app exposes in the SVG layout popover (node placement, cycle breaking, model order, merge edges)
 - [relliv/mermaid-to-reactflow-converter](https://github.com/relliv/mermaid-to-reactflow-converter) — smaller Mermaid → React Flow example
 - [vercel-labs/beautiful-mermaid](https://github.com/vercel-labs/beautiful-mermaid) — Vercel fork of beautiful-mermaid (themes and rank-by-rank SVG animation)
-- [inkeep/mermaid-wysiwyg](https://github.com/inkeep/mermaid-wysiwyg) — bidirectional visual editing that writes gestures back into Mermaid text (this app does not)
+- [inkeep/mermaid-wysiwyg](https://github.com/inkeep/mermaid-wysiwyg) — bidirectional visual editing that writes gestures back into Mermaid text (this app writes Flow topology back, not pixel layout or styles)
 - [tra-sco/mermify](https://github.com/tra-sco/mermify) — another Monaco + canvas editor with two-way sync for flowcharts and sequence diagrams

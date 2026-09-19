@@ -37,7 +37,7 @@ export function RflowConverter() {
                 const t0 = performance.now();
                 try {
                     const data = await convertMermaidToReactFlow(text);
-                    if (cancelled) {
+                    if (cancelled || text !== mermaidSettings.source) {
                         return;
                     }
                     rflowDiagram.nodes = data.nodes;
@@ -48,7 +48,7 @@ export function RflowConverter() {
                         ? null
                         : 'No flowchart nodes found. The React Flow converter supports graph/flowchart diagrams.';
                 } catch (err) {
-                    if (cancelled) {
+                    if (cancelled || text !== mermaidSettings.source) {
                         return;
                     }
                     rflowDiagram.error = err instanceof Error ? err.message : String(err);
