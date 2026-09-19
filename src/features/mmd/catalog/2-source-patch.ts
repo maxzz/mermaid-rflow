@@ -14,6 +14,7 @@ import {
     type FlowDirection,
     type NodeDefSpan,
     type NodeShape,
+    type WrapShapeExtra,
 } from './1-flowchart-source';
 
 export type PatchOk = { ok: true; source: string; changed: boolean; };
@@ -134,6 +135,34 @@ export function deleteNode(source: string, id: string): PatchResult {
     return { ok: true, source: next.join('\n'), changed: true };
 }
 
+export function setNodeShape(source: string, id: string, shape: NodeShape, extra: WrapShapeExtra = {}): PatchResult {
+    if (classifyMermaidSource(source) !== 'flowchart') {
+        return notFlowchart();
+    }
+    const def = findNodeDefinition(source, id);
+    if (!def) {
+        return { ok: false, reason: 'not-found' };
+    }
+    const label = def.label || id;
+    const parts = wrapShape(id, label, shape, extra).split('\n');
+    const head = parts[0]!;
+    const indent = def.lineText.slice(0, def.idStart);
+    const lines = source.replace(/\r\n/g, '\n').split('\n');
+    lines[def.line] = indent + head + def.lineText.slice(def.tokenEnd);
+    if (isTextShapeCompanion(lines[def.line + 1], id)) {
+        lines.splice(def.line + 1, 1);
+    }
+    const companions = parts.slice(1).map((part) => indent + part.trimStart());
+    if (companions.length) {
+        lines.splice(def.line + 1, 0, ...companions);
+    }
+    const next = lines.join('\n');
+    if (next === source) {
+        return unchanged(source);
+    }
+    return { ok: true, source: next, changed: true };
+}
+
 export function hasEdge(source: string, fromId: string, toId: string): boolean {
     for (const line of source.replace(/\r\n/g, '\n').split('\n')) {
         const stmt = parseFlowStmt(line);
@@ -142,6 +171,14 @@ export function hasEdge(source: string, fromId: string, toId: string): boolean {
         }
     }
     return false;
+}
+
+function isTextShapeCompanion(line: string | undefined, id: string): boolean {
+    if (!line) {
+        return false;
+    }
+    const clean = lineWithoutComment(line).trim();
+    return new RegExp(`^${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*@\\{\\s*shape:\\s*text\\s*\\}\\s*$`).test(clean);
 }
 
 function lineWithoutDeletedNode(line: string, id: string): string | null {

@@ -56,7 +56,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
 
     const flowchart = classifyMermaidSource(source) === 'flowchart' || isFlowchartDiagramType(diagramType);
     const selectedId = enabled && flowchart ? firstNodeId(link.keys as string[]) : null;
-    const interactive = enabled && flowchart && !panMode && active;
+    const interactive = enabled && flowchart && active;
 
     useLayoutEffect(
         () => {
@@ -158,10 +158,13 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
         }
         e.preventDefault();
         e.stopPropagation();
+        selectFromDiagram([`node:${id}`]);
+        if (panMode) {
+            return;
+        }
         const root = contentRef.current;
         const svgEl = root?.querySelector('svg');
         const nodeEl = root ? nodeElementById(root, id) : null;
-        selectFromDiagram([`node:${id}`]);
         if (!root || !(svgEl instanceof SVGSVGElement) || !(nodeEl instanceof Element)) {
             return;
         }

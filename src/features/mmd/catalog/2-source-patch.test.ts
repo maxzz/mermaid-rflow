@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { classifyMermaidSource, extractHeader, findNodeDefinition, readDirection } from './1-flowchart-source';
-import { addNode, connectNodes, deleteNode, renameNode, setDirection } from './2-source-patch';
+import { addNode, connectNodes, deleteNode, renameNode, setDirection, setNodeShape } from './2-source-patch';
 
 const FLOW = `\
 %% keep this comment
@@ -157,6 +157,28 @@ describe('addNode / connectNodes', () => {
         const src = 'sequenceDiagram\n    Alice->>Bob: Hi\n';
         expect(addNode(src, { shape: 'rect' }).ok).toBe(false);
         expect(connectNodes(src, 'Alice', 'Bob').ok).toBe(false);
+    });
+});
+
+describe('setNodeShape', () => {
+    it('rewrites a rectangle into a diamond on the same line', () => {
+        const result = setNodeShape(FLOW, 'A', 'diamond');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).toContain('A{Start} --> B{Is it working?}');
+        expect(findNodeDefinition(result.source, 'A')?.shape).toBe('diamond');
+    });
+
+    it('converts a node into a mermaid 11 text block', () => {
+        const result = setNodeShape(FLOW, 'C', 'text');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).toContain('C["Ship it"]');
+        expect(result.source).toContain('C@{ shape: text }');
     });
 });
 

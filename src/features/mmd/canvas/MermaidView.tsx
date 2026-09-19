@@ -46,6 +46,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
         hostRef: paneRef,
         scrollRef,
         enabled,
+        active,
         output: svg,
         panMode,
     });

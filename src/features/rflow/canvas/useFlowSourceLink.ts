@@ -16,7 +16,7 @@ import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKey
 const CARET_CLASS = 'is-source-link-caret';
 const CLICK_CLASS = 'is-source-link-click';
 
-export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: ReactFlowInstance) {
+export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: ReactFlowInstance, enabled = true) {
     const { source } = useSnapshot(mermaidSettings);
     const link = useSnapshot(sourceLink);
     const lastFitSig = useRef('');
@@ -33,9 +33,12 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
 
     useLayoutEffect(
         () => {
+            if (!enabled) {
+                return;
+            }
             setSourceIndex(buildSourceIndex(source, catalogFlowGraph(nodes, edges)));
         },
-        [topologyKey],
+        [enabled, topologyKey],
     );
 
     useLayoutEffect(
@@ -52,7 +55,7 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
 
     useLayoutEffect(
         () => {
-            if (link.origin !== 'editor' || intensity !== 'click' || !keys.length) {
+            if (!enabled || link.origin !== 'editor' || intensity !== 'click' || !keys.length) {
                 lastFitSig.current = '';
                 return;
             }
@@ -67,7 +70,7 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
             }
             reactFlow.fitView({ nodes: ids.map((id) => ({ id })), duration: 400, padding: 0.3 });
         },
-        [intensity, keys, link.origin, nodes, reactFlow],
+        [enabled, intensity, keys, link.origin, nodes, reactFlow],
     );
 
     const classForNode = useCallback(

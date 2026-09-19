@@ -3,13 +3,14 @@ import { useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { CloudIcon, ImageIcon, ShapesIcon, VideoIcon } from 'lucide-react';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
+import { sourceLink } from '@/store/6-source-render-links';
 import { classNames } from '@/utils';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { Label } from '@/ui/shadcn/label';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
 import { classifyMermaidSource, FLOW_SHAPE_ITEMS, type NodeShape } from '../catalog/1-flowchart-source';
-import { insertMmdPaletteNode } from '../catalog/4-apply-patch';
+import { insertMmdPaletteNode, selectedMmdNodeId } from '../catalog/4-apply-patch';
 import { mmdPaletteShapeAtom } from '../store/3-mmd-ui';
 
 const ICONS: { icon: string; label: string; }[] = [
@@ -29,17 +30,20 @@ const ICONS: { icon: string; label: string; }[] = [
 
 export function MmdPaletteRail() {
     const { source } = useSnapshot(mermaidSettings);
+    useSnapshot(sourceLink);
     const kind = classifyMermaidSource(source);
     const enabled = kind === 'flowchart' || kind === 'empty';
+    const selected = selectedMmdNodeId();
+    const applyTitle = selected ? `Change selected block (${selected})` : 'Add a shape';
 
     return (
         <div
             data-mmd-chrome=""
             className="absolute left-3 top-1/2 z-20 -translate-y-1/2 p-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl shadow-md flex flex-col gap-0.5"
             role="toolbar"
-            aria-label="Add shapes"
+            aria-label="Shapes"
         >
-            <ShapePopover enabled={enabled} />
+            <ShapePopover enabled={enabled} selected={selected} applyTitle={applyTitle} />
             <IconPopover enabled={enabled} />
             <UrlPopover
                 enabled={enabled}
@@ -67,21 +71,23 @@ export function MmdPaletteRail() {
     );
 }
 
-function ShapePopover({ enabled }: { enabled: boolean; }) {
+function ShapePopover({ enabled, selected, applyTitle }: { enabled: boolean; selected: string | null; applyTitle: string; }) {
     const setShape = useSetAtom(mmdPaletteShapeAtom);
     const [open, setOpen] = useState(false);
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon-sm" disabled={!enabled} title="Add a shape" aria-label="Add a shape">
+                <Button variant="ghost" size="icon-sm" disabled={!enabled} title={applyTitle} aria-label={applyTitle}>
                     <ShapesIcon />
                 </Button>
             </PopoverTrigger>
             <PopoverContent side="right" align="center" className="p-2 w-56">
                 <PopoverHeader>
-                    <PopoverTitle>Shapes</PopoverTitle>
-                    <PopoverDescription className="sr-only">Official mermaid flowchart shapes</PopoverDescription>
+                    <PopoverTitle>{selected ? 'Change shape' : 'Shapes'}</PopoverTitle>
+                    <PopoverDescription className="text-[0.65rem] text-muted-foreground">
+                        {selected ? `Applies to selected block ${selected}. Click empty canvas to add a new one.` : 'Adds a new block. Select a block first to change its shape.'}
+                    </PopoverDescription>
                 </PopoverHeader>
                 <div className="grid grid-cols-2 gap-1">
                     {FLOW_SHAPE_ITEMS.map((item) => (

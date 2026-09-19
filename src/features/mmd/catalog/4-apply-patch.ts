@@ -3,7 +3,7 @@ import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { sourceLink } from '@/store/6-source-render-links';
 import { captureMonacoView } from '@/components/2-main/2-editor-page/3-source-diagram-link/1-monaco/2-monaco-editor-handle';
 import { mmdDiagram } from '../store/1-mmd-diagram';
-import { addNode, type AddNodeOpts, type PatchResult } from './2-source-patch';
+import { addNode, setNodeShape, type AddNodeOpts, type PatchResult } from './2-source-patch';
 
 const SKIP_TOAST_ID = 'mmd-no-writeback';
 
@@ -41,7 +41,9 @@ export function selectedMmdNodeId(): string | null {
 }
 
 export function insertMmdPaletteNode(opts: AddNodeOpts): boolean {
-    const free = opts.shape === 'text' || opts.shape === 'image' || opts.shape === 'video';
-    const fromId = opts.fromId ?? (free ? undefined : selectedMmdNodeId() ?? undefined);
-    return applyMmdPatchResult(addNode(mermaidSettings.source, { ...opts, fromId }));
+    const selected = selectedMmdNodeId();
+    if (selected) {
+        return applyMmdPatchResult(setNodeShape(mermaidSettings.source, selected, opts.shape, opts));
+    }
+    return applyMmdPatchResult(addNode(mermaidSettings.source, opts));
 }

@@ -26,7 +26,7 @@ export function PreviewPanel() {
             <div className="relative flex-1 min-h-0">
                 <div className={classNames('absolute inset-0 overflow-hidden', !isFlow && 'hidden')}>
                     <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
-                        <FlowDiagram />
+                        <FlowDiagram active={isFlow} />
                     </ErrorBoundary>
                 </div>
                 <div className={classNames('absolute inset-0 overflow-hidden', !isMmd && 'hidden')}>

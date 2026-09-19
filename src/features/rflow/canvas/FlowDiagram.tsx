@@ -100,7 +100,7 @@ function ReactFlowErrorGuard({ children }: { children: React.ReactNode; }) {
     return children;
 }
 
-function FlowDiagramInternal() {
+function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const { nodes, edges } = useSnapshot(rflowDiagram);
     const { theme } = useSnapshot(appSettings);
     const isDark = isThemeDark(theme);
@@ -119,7 +119,7 @@ function FlowDiagramInternal() {
 
     const plainNodes = nodes as Node[];
     const plainEdges = edges as Edge[];
-    const sourceLink = useFlowSourceLink(plainNodes, plainEdges, reactFlowInstance);
+    const sourceLink = useFlowSourceLink(plainNodes, plainEdges, reactFlowInstance, active);
 
     const handleDownloadImage = useCallback(
         async () => {
@@ -545,11 +545,11 @@ function FlowDiagramInternal() {
     );
 }
 
-export function FlowDiagram() {
+export function FlowDiagram({ active = true }: { active?: boolean; }) {
     return (
         <ReactFlowProvider>
             <ReactFlowErrorGuard>
-                <FlowDiagramInternal />
+                <FlowDiagramInternal active={active} />
             </ReactFlowErrorGuard>
         </ReactFlowProvider>
     );

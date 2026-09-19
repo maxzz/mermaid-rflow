@@ -4,7 +4,6 @@ import { mermaidSettings } from '@/store/2-mermaid-settings';
 import {
     buildSourceIndex,
     clearSelection,
-    clearSourceLink,
     selectFromDiagram,
     setSourceIndex,
     SOURCE_LINK_HIT_ATTR,
@@ -25,16 +24,18 @@ export type MmdSourceLinkArgs = {
     hostRef: RefObject<HTMLElement | null>;
     scrollRef: RefObject<HTMLElement | null>;
     enabled: boolean;
+    active: boolean;
     output: string;
     panMode: boolean;
 };
 
-export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, output, panMode }: MmdSourceLinkArgs) {
+export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, active, output, panMode }: MmdSourceLinkArgs) {
+    const live = enabled && active;
+
     useLayoutEffect(
         () => {
             const root = contentRef.current;
-            if (!enabled || !root) {
-                clearSourceLink();
+            if (!live || !root) {
                 return;
             }
 
@@ -44,36 +45,46 @@ export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, outp
 
             let lastScrollSig = '';
             const unsub = subscribe(sourceLink, () => {
-                const live = contentRef.current;
-                if (!live) {
+                const next = contentRef.current;
+                if (!next) {
                     return;
                 }
-                applyHighlight(live, sourceLink.keys, sourceLink.intensity);
-                lastScrollSig = maybeScrollIntoView(live, lastScrollSig);
+                applyHighlight(next, sourceLink.keys, sourceLink.intensity);
+                lastScrollSig = maybeScrollIntoView(next, lastScrollSig);
             });
 
             return () => {
                 unsub();
             };
         },
-        [enabled, output],
+        [live, output],
     );
 
     useLayoutEffect(
         () => {
-            contentRef.current?.classList.toggle(INTERACTIVE_CLASS, enabled && !panMode);
+            contentRef.current?.classList.toggle(INTERACTIVE_CLASS, live && !panMode);
         },
-        [enabled, output, panMode],
+        [live, output, panMode],
     );
 
     useLayoutEffect(
         () => {
             const host = hostRef.current;
-            if (!host || !enabled) {
+            if (!host || !live) {
                 return;
             }
             return attachPanSafeClick(host, scrollRef.current, (target) => {
-                if (target instanceof Element && target.closest('[data-mmd-chrome], [data-mmd-hit]')) {
+                if (!(target instanceof Element)) {
+                    clearSelection();
+                    return;
+                }
+                const hit = target.closest('[data-mmd-hit]');
+                const hitId = hit?.getAttribute('data-mmd-id');
+                if (hitId) {
+                    selectFromDiagram([`node:${hitId}`]);
+                    return;
+                }
+                if (target.closest('[data-mmd-chrome]')) {
                     return;
                 }
                 const tagged = closestMmdTagged(target);
@@ -87,16 +98,7 @@ export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, outp
                 }
             });
         },
-        [enabled, output, panMode],
-    );
-
-    useLayoutEffect(
-        () => {
-            return () => {
-                clearSourceLink();
-            };
-        },
-        [],
+        [live, output, panMode],
     );
 }
 

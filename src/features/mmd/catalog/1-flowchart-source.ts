@@ -273,6 +273,7 @@ export type NodeDefSpan = {
     lineText: string;
     idStart: number;
     idEnd: number;
+    tokenEnd: number;
     label: string;
     labelStart: number;
     labelEnd: number;
@@ -302,6 +303,7 @@ export function findNodeDefinition(source: string, id: string): NodeDefSpan | nu
             lineText: line,
             idStart: token.start,
             idEnd: token.end,
+            tokenEnd: shape.end,
             label: shape.label,
             labelStart: shape.labelStart,
             labelEnd: shape.labelEnd,
