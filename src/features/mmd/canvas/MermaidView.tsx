@@ -1,4 +1,4 @@
-import { type PointerEvent, type RefObject, type WheelEvent, useLayoutEffect, useRef } from 'react';
+import { type PointerEvent, type RefObject, type WheelEvent, useLayoutEffect, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
@@ -20,6 +20,7 @@ import '../styles/8-mmd-view.css';
 export function MermaidView({ active = true }: { active?: boolean; }) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const paneRef = useRef<HTMLDivElement>(null);
+    const boardRef = useRef<HTMLDivElement>(null);
     const hostRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const { svg, error } = useSnapshot(mmdDiagram);
@@ -29,6 +30,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
     const panMode = useAtomValue(mmdPanModeAtom);
     const dark = isThemeDark(theme);
     const enabled = !!svg && !error;
+    const [natural, setNatural] = useState({ w: 0, h: 0 });
 
     useLayoutEffect(
         () => {
@@ -56,6 +58,25 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
         enabled,
         output: svg,
     });
+
+    useLayoutEffect(
+        () => {
+            const root = contentRef.current;
+            if (!root || !svg) {
+                setNatural({ w: 0, h: 0 });
+                return;
+            }
+            const svgEl = root.querySelector('svg');
+            const w = svgEl instanceof SVGSVGElement
+                ? (svgEl.viewBox.baseVal.width || svgEl.width.baseVal.value || root.offsetWidth)
+                : root.offsetWidth;
+            const h = svgEl instanceof SVGSVGElement
+                ? (svgEl.viewBox.baseVal.height || svgEl.height.baseVal.value || root.offsetHeight)
+                : root.offsetHeight;
+            setNatural({ w, h });
+        },
+        [svg],
+    );
 
     useLayoutEffect(
         () => {
@@ -104,16 +125,28 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                             )
                             : (
                                 <div
-                                    ref={hostRef}
-                                    className={classNames('relative m-auto', autofit && 'mmd-autofit w-full')}
-                                    style={{ zoom }}
+                                    ref={boardRef}
+                                    className="relative m-auto"
+                                    style={natural.w > 0 && natural.h > 0
+                                        ? { width: natural.w * zoom, height: natural.h * zoom }
+                                        : undefined}
                                 >
                                     <div
-                                        ref={contentRef}
-                                        className="mmd-host"
-                                        dangerouslySetInnerHTML={{ __html: svg }}
-                                    />
-                                    <MmdEditOverlay hostRef={hostRef} contentRef={contentRef} enabled={enabled} active={active} />
+                                        ref={hostRef}
+                                        className="relative origin-top-left"
+                                        style={natural.w > 0 && natural.h > 0
+                                            ? { width: natural.w, height: natural.h, transform: `scale(${zoom})` }
+                                            : undefined}
+                                    >
+                                        <div
+                                            ref={contentRef}
+                                            className="mmd-host"
+                                            dangerouslySetInnerHTML={{ __html: svg }}
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 z-5 pointer-events-none">
+                                        <MmdEditOverlay hostRef={boardRef} contentRef={contentRef} enabled={enabled} active={active} />
+                                    </div>
                                 </div>
                             )}
                 </div>

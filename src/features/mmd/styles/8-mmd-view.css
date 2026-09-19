@@ -57,6 +57,7 @@
 
 .mmd-hit {
     touch-action: none;
+    pointer-events: auto;
 }
 
 .mmd-hit:hover {

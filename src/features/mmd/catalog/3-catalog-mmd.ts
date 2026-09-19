@@ -15,35 +15,44 @@ export const MMD_TAGGED_SELECTOR = [
     'g.er.entityBox',
 ].join(',');
 
+/** mermaid.render(id) prefixes every SVG id with `${id}-`. */
+const MMD_RENDER_PREFIX = /^mermaid-mmd-\d+-/;
+
+export function stripMmdRenderPrefix(domId: string): string {
+    return domId.replace(MMD_RENDER_PREFIX, '');
+}
+
 export function mermaidIdFromDomId(domId: string): string | null {
-    const flowchart = domId.match(/^flowchart-(.+)-(\d+)$/);
+    const id = stripMmdRenderPrefix(domId);
+    const flowchart = id.match(/^flowchart-(.+)-(\d+)$/);
     if (flowchart?.[1]) {
         return decodeMermaidId(flowchart[1]);
     }
-    const cluster = domId.match(/^cluster(?:-|_)(.+)$/);
+    const cluster = id.match(/^cluster(?:-|_)(.+)$/);
     if (cluster?.[1]) {
         return decodeMermaidId(cluster[1].replace(/-\d+$/, ''));
     }
-    if (domId && !/^(mermaid-|id-|L[_-]|edge)/i.test(domId)) {
-        return decodeMermaidId(domId);
+    if (id && !/^(mermaid-|id-|L[_-]|edge)/i.test(id)) {
+        return decodeMermaidId(id);
     }
     return null;
 }
 
 export function edgeEndpointsFromDomId(domId: string, knownIds: string[] = []): { from: string; to: string; } | null {
-    const underscored = domId.match(/^(?:L|id)_(.+)_([^_]+)_(\d+)$/);
+    const id = stripMmdRenderPrefix(domId);
+    const underscored = id.match(/^(?:L|id)_(.+)_([^_]+)_(\d+)$/);
     if (underscored?.[1] && underscored[2]) {
         const guessed = { from: decodeMermaidId(underscored[1]), to: decodeMermaidId(underscored[2]) };
         if (!knownIds.length || (knownIds.includes(guessed.from) && knownIds.includes(guessed.to))) {
             return guessed;
         }
     }
-    const hyphen = domId.match(/^L-(.+)-(.+)-(\d+)$/);
+    const hyphen = id.match(/^L-(.+)-(.+)-(\d+)$/);
     if (hyphen?.[1] && hyphen[2] && !knownIds.length) {
         return { from: decodeMermaidId(hyphen[1]), to: decodeMermaidId(hyphen[2]) };
     }
     if (knownIds.length) {
-        return matchKnownPair(domId, knownIds);
+        return matchKnownPair(id, knownIds);
     }
     return null;
 }

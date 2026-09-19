@@ -272,7 +272,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
                         aria-label={`Select ${box.id}`}
                         aria-pressed={selectedBox}
                         title="Drag to move. Double-click to rename."
-                        className="mmd-hit absolute z-5 rounded-sm bg-transparent cursor-grab active:cursor-grabbing"
+                        className="mmd-hit absolute z-5 rounded-sm bg-transparent cursor-grab active:cursor-grabbing pointer-events-auto"
                         style={{
                             left: box.x,
                             top: box.y,
@@ -341,7 +341,7 @@ function InlineLabelEditor({ onClose }: { onClose: () => void; }) {
     return (
         <input
             data-mmd-chrome=""
-            className="absolute z-20 px-1.5 h-7 text-xs bg-background border border-primary rounded-sm shadow-sm outline-none"
+            className="absolute z-20 px-1.5 h-7 text-xs bg-background border border-primary rounded-sm shadow-sm outline-none pointer-events-auto"
             style={{ left: inline.x, top: inline.y, width: inline.w }}
             value={inline.text}
             autoFocus
