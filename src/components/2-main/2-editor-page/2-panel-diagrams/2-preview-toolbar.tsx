@@ -10,7 +10,7 @@ import { isOpenExportDialogAtom } from "@/components/4-dialogs/2-export/a-types-
 import { Button } from "@/ui/shadcn/button";
 import { Tabs, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import { RenderOptionsPopover } from "./6-render-options-popover";
-import { addSavedDiagram, cloneGraphData, rflowCanvasMethodsAtom, rflowDiagram, rflowLoadDialogOpenAtom } from "@/features/rflow";
+import { addSavedDiagram, cloneGraphData, rflowCanvasMethodsAtom, rflowDiagram, rflowLoadDialogOpenAtom } from "./2-rflow";
 import { MmdToolbarActions } from "./1-mmd";
 import { uuid } from "@/utils/uuid";
 

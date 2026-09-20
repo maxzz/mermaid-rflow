@@ -5,7 +5,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/ui/shadc
 import { Header } from "@/components/1-header";
 import { EditorPanel } from "../1-panel-editor/1-editor-panel";
 import { PreviewPanel } from "../2-panel-diagrams/1-0-preview-panel";
-import { RflowConverter } from "@/features/rflow";
+import { RflowConverter } from "../2-panel-diagrams/2-rflow";
 import { MmdConverter } from "../2-panel-diagrams/1-mmd";
 
 export function EditorPage() {

@@ -37,7 +37,7 @@ graph TD
 
 **Mermaid is official mermaid-js.** Theme, Adaptive, direction, and Autofit stay in the preview toolbar. The canvas has a left shape palette (shapes, icons, image, video) and a right pan/zoom strip. For `graph` / `flowchart` sources you can drag nodes (positions persist beside the source), delete them, rename them, and add mermaid 11 shapes such as `n1@{ shape: text }`. Topology still patches only the affected lines. Other diagram types stay preview-plus-linking.
 
-The React Flow converter, canvas, and toolbars live under [`src/features/rflow/`](src/features/rflow/) and were adapted from [albingcj/mermaid-reactflow-editor](https://github.com/albingcj/mermaid-reactflow-editor) (MIT). AI generation from that project is not included.
+The React Flow converter, canvas, and toolbars live under [`src/components/2-main/2-editor-page/2-panel-diagrams/2-rflow/`](src/components/2-main/2-editor-page/2-panel-diagrams/2-rflow/) and were adapted from [albingcj/mermaid-reactflow-editor](https://github.com/albingcj/mermaid-reactflow-editor) (MIT). AI generation from that project is not included.
 
 ## How it works
 
@@ -96,10 +96,10 @@ flowchart TB
     Selection --> Canvas2
 ```
 
-Ported React Flow code stays under `src/features/rflow/`. The official mermaid tab lives next to the preview panel:
+Ported React Flow and official mermaid code live next to the preview panel:
 
 ```text
-src/features/rflow/
+src/components/2-main/2-editor-page/2-panel-diagrams/2-rflow/
   converter/   mermaid → nodes/edges, React Flow → mermaid, sanitizer, Dagre spacing
   canvas/      FlowDiagram, custom / diamond / subgraph nodes, PNG export, source link
   ui/          palettes, toolbars, NodeEditor, search, LoadDialog

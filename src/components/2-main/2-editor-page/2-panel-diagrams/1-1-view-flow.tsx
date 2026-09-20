@@ -1,7 +1,7 @@
 import { useSnapshot } from "valtio";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
-import { FlowDiagram } from "@/features/rflow";
+import { FlowDiagram } from "./2-rflow";
 import { canvasTabClass, PanelMessage, useMountedOnce } from "./1-4-view-shared";
 
 export function Preview_Flow() {

@@ -29,9 +29,9 @@ import ReactFlow, {
     type NodeTypes,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import '@/features/rflow/styles/selected-edge.css';
-import '@/features/rflow/styles/rflow-nodes.css';
-import '@/features/rflow/styles/source-link.css';
+import '../styles/selected-edge.css';
+import '../styles/rflow-nodes.css';
+import '../styles/source-link.css';
 
 import { rflowDiagram, setFlowEdges, setFlowNodes } from '../store/1-flow-diagram';
 import { syncMermaidFromGraph } from '../store/3-sync-source';
