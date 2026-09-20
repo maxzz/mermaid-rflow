@@ -22,6 +22,9 @@ export function setSourceIndex(index: SourceIndex | null) {
         return;
     }
     const valid = new Set(index.keyToHits.keys());
+    if (valid.size === 0 && sourceLink.origin === 'diagram' && sourceLink.keys.length) {
+        return;
+    }
     const next = sourceLink.keys.filter((key) => valid.has(key));
     if (next.length !== sourceLink.keys.length) {
         sourceLink.keys = next;
@@ -34,6 +37,9 @@ export function setSourceIndex(index: SourceIndex | null) {
 }
 
 export function selectFromEditor(keys: string[], intensity: LinkIntensity, line: number) {
+    if (sourceLink.origin === 'diagram' && intensity !== 'click') {
+        return;
+    }
     if (
         sourceLink.origin === 'editor'
         && sourceLink.intensity === intensity

@@ -10,27 +10,42 @@ import { RenderView } from "./3-render-view";
 import { ZoomControls } from "./4-zoom-controls";
 import { StatusBar } from "./5-status-bar";
 import { FlowDiagram, LoadDialog } from "@/features/rflow";
+import { MermaidView } from "@/features/mmd";
 
 export function PreviewPanel() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { zoom, outputFormat } = useSnapshot(mermaidSettings);
     const overflow = useViewportOverflow(scrollRef, [zoom]);
     const isFlow = outputFormat === 'flow';
+    const isMmd = outputFormat === 'mmd';
+    const flowMounted = useMountedOnce(isFlow);
+    const mmdMounted = useMountedOnce(isMmd);
 
     return (
         <div className="h-full bg-muted/20 flex flex-col">
             <PreviewToolbar />
 
             <div className="relative flex-1 min-h-0">
-                {isFlow
+                {flowMounted
                     ? (
-                        <div className="absolute inset-0 overflow-hidden">
+                        <div className={previewPaneClass(isFlow)} aria-hidden={!isFlow} inert={!isFlow || undefined}>
                             <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
-                                <FlowDiagram />
+                                <FlowDiagram active={isFlow} />
                             </ErrorBoundary>
                         </div>
                     )
-                    : (
+                    : null}
+                {mmdMounted
+                    ? (
+                        <div className={previewPaneClass(isMmd)} aria-hidden={!isMmd} inert={!isMmd || undefined}>
+                            <ErrorBoundary fallback={<PanelMessage>Failed to load the official Mermaid renderer.</PanelMessage>}>
+                                <MermaidView active={isMmd} />
+                            </ErrorBoundary>
+                        </div>
+                    )
+                    : null}
+                {!isFlow && !isMmd
+                    ? (
                         <div className="absolute inset-0 overflow-hidden">
                             <ScrollArea2
                                 ref={scrollRef}
@@ -51,13 +66,27 @@ export function PreviewPanel() {
 
                             <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
                         </div>
-                    )}
+                    )
+                    : null}
             </div>
 
             <StatusBar />
             <LoadDialog />
         </div>
     );
+}
+
+/** `display:none` makes React Flow report error 004 and leaves the Mermaid overlay with no hit targets. */
+function previewPaneClass(active: boolean) {
+    return classNames('absolute inset-0 overflow-hidden', !active && 'invisible pointer-events-none');
+}
+
+function useMountedOnce(active: boolean) {
+    const [mounted, setMounted] = useState(active);
+    if (active && !mounted) {
+        setMounted(true);
+    }
+    return mounted;
 }
 
 function PanelMessage({ children }: { children: React.ReactNode; }) {

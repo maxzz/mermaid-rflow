@@ -6,6 +6,7 @@ import { Header } from "@/components/1-header";
 import { EditorPanel } from "../1-panel-editor/1-editor-panel";
 import { PreviewPanel } from "../2-panel-diagrams/1-preview-panel";
 import { RflowConverter } from "@/features/rflow";
+import { MmdConverter } from "@/features/mmd";
 
 export function EditorPage() {
     const { panelSizes } = useSnapshot(appSettings);
@@ -18,6 +19,7 @@ export function EditorPage() {
         <div className="h-dvh text-foreground bg-background overflow-hidden grid grid-rows-[auto_1fr]">
             <Header />
             <RflowConverter />
+            <MmdConverter />
 
             <div className="min-h-0">
                 <ResizablePanelGroup orientation="horizontal" defaultLayout={panelSizes.horizontal as Layout} onLayoutChanged={onLayoutChanged}>

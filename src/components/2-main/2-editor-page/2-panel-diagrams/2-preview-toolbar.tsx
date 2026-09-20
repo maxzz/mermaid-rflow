@@ -11,15 +11,17 @@ import { Button } from "@/ui/shadcn/button";
 import { Tabs, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import { RenderOptionsPopover } from "./6-render-options-popover";
 import { addSavedDiagram, cloneGraphData, rflowCanvasMethodsAtom, rflowDiagram, rflowLoadDialogOpenAtom } from "@/features/rflow";
+import { MmdToolbarActions } from "@/features/mmd";
 import { uuid } from "@/utils/uuid";
 
 export function PreviewToolbar() {
     const { outputFormat } = useSnapshot(mermaidSettings);
     const setOpenExport = useSetAtom(isOpenExportDialogAtom);
     const isFlow = outputFormat === 'flow';
+    const isMmd = outputFormat === 'mmd';
 
     return (
-        <div className="px-3 h-9 bg-muted/30 border-b border-border flex items-center justify-between gap-2">
+        <div className="px-3 h-9 bg-muted/30 border-b border-border flex items-center justify-between gap-2 overflow-x-auto">
             <div className="flex items-center gap-3">
                 <span className="text-xs font-medium text-muted-foreground">
                     Preview
@@ -28,6 +30,7 @@ export function PreviewToolbar() {
                 <Tabs value={outputFormat} onValueChange={(v) => { mermaidSettings.outputFormat = v as OutputFormat; }}>
                     <TabsList className="p-0.5 h-6!">
                         <TabsTrigger value="flow" className="px-2 text-[.7rem]">Flow</TabsTrigger>
+                        <TabsTrigger value="mmd" className="px-2 text-[.7rem]">Mermaid</TabsTrigger>
                         <TabsTrigger value="svg" className="px-2 text-[.7rem]">SVG</TabsTrigger>
                         <TabsTrigger value="text" className="px-2 text-[.7rem]">Text</TabsTrigger>
                     </TabsList>
@@ -37,6 +40,8 @@ export function PreviewToolbar() {
             <div className="flex items-center">
                 {isFlow
                     ? <FlowToolbarActions />
+                    : isMmd
+                    ? <MmdToolbarActions />
                     : (
                         <>
                             <Button variant="ghost" size="xs" onClick={() => copyCurrentOutput()} title={`Copy ${outputFormat === 'svg' ? 'SVG markup' : 'text'} to clipboard`}>
