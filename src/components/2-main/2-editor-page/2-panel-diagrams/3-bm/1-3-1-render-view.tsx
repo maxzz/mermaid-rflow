@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 
-import { mermaidSettings, setZoom, ZOOM_STEP } from "@/store/2-mermaid-settings";
+import { mermaidSettings, OutputFormat, setZoom, ZOOM_STEP } from "@/store/2-mermaid-settings";
 import { publishPreviewStatus, renderDiagram, useDebouncedValue } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
 import { usePreviewSourceLink } from "./2-source-diagram-link-diagram";
@@ -24,7 +24,7 @@ export function RenderView({ scrollRef }: RenderViewProps) {
     const debouncedSource = useDebouncedValue(source, RENDER_DEBOUNCE_MS);
 
     // Synchronous, memoized render: no flash, only recomputed when inputs change
-    const bmFormat = outputFormat === 'text' ? 'text' : 'svg';
+    const bmFormat = outputFormat === OutputFormat.text ? OutputFormat.text : OutputFormat.svg;
     const renderResult = useMemo(
         () => renderDiagram(bm, debouncedSource, { diagramTheme, ascii, svg }, bmFormat),
         [bm, debouncedSource, diagramTheme, ascii, svg, bmFormat],
@@ -37,7 +37,7 @@ export function RenderView({ scrollRef }: RenderViewProps) {
     const hostRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     
-    const svgEnabled = renderResult.format === "svg" && !!renderResult.output && !renderResult.error;
+    const svgEnabled = renderResult.format === OutputFormat.svg && !!renderResult.output && !renderResult.error;
 
     usePreviewSourceLink({
         contentRef,
@@ -73,7 +73,7 @@ export function RenderView({ scrollRef }: RenderViewProps) {
                                 Start typing to render your diagram
                             </div>
                         )
-                        : renderResult.format === 'svg'
+                        : renderResult.format === OutputFormat.svg
                             ? (
                                 <div
                                     ref={contentRef}

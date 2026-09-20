@@ -2,7 +2,7 @@ import { Suspense, useRef } from "react";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 import { useViewportOverflow } from "@/utils/local/use-viewport-overflow";
-import { mermaidSettings } from "@/store/2-mermaid-settings";
+import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { ScrollArea2 } from "@/ui/shadcn/scroll-area";
@@ -15,7 +15,7 @@ export function Preview_BeautifullMarmaid() {
     const { zoom, outputFormat } = useSnapshot(mermaidSettings);
     const overflow = useViewportOverflow(scrollRef, [outputFormat, zoom]);
 
-    if (outputFormat === 'flow' || outputFormat === 'mmd') {
+    if (outputFormat === OutputFormat.flow || outputFormat === OutputFormat.mmd) {
         return null;
     }
 

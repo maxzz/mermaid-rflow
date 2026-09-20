@@ -1,5 +1,5 @@
 import { useSnapshot } from "valtio";
-import { mermaidSettings } from "@/store/2-mermaid-settings";
+import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { FlowDiagram } from "../canvas/FlowDiagram";
 import { useMountedOnce } from "@/utils/local/use-mounted-once";
@@ -7,7 +7,7 @@ import { canvasTabClass, PanelFallbackMessage } from "../../../../../../ui/local
 
 export function Preview_Flow() {
     const { outputFormat } = useSnapshot(mermaidSettings);
-    const active = outputFormat === 'flow';
+    const active = outputFormat === OutputFormat.flow;
     
     const mounted = useMountedOnce(active);
     if (!mounted) {

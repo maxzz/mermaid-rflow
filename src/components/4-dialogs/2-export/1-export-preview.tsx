@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { type ExportFormat, type PngScale } from "@/store/2-mermaid-settings";
+import { ExportFormat, type PngScale } from "@/store/2-mermaid-settings";
 import { type RenderResult } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { svgToPngBlob, type PngResult } from "@/components/4-dialogs/2-export/8-export-utils";
 import { BarsLoaderIcon } from "@/ui/local-ui";
@@ -21,11 +21,11 @@ export function ExportPreview({ format, result, pngUrl, pngSize }: { format: Exp
                             Nothing to export: the diagram is empty.
                         </div>
                     )
-                    : format === 'text'
+                    : format === ExportFormat.text
                         ? (
                             <DiagramText className="m-auto p-4" text={result.output} />
                         )
-                        : format === 'png'
+                        : format === ExportFormat.png
                             ? (pngUrl
                                 ? <img className="m-auto p-4 max-w-full max-h-full object-contain" src={pngUrl} width={pngSize?.w} height={pngSize?.h} alt="PNG preview" />
                                 : <div className="m-auto"><BarsLoaderIcon /></div>

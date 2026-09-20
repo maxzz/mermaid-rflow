@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 
-import { type ExportFormat, mermaidSettings, type PngScale } from "@/store/2-mermaid-settings";
+import { ExportFormat, mermaidSettings, OutputFormat, type PngScale } from "@/store/2-mermaid-settings";
 import { renderDiagram, type RenderResult } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
 import { copyPngBlob, copyText, downloadBlob, downloadText, getSvgNaturalSize } from "@/components/4-dialogs/2-export/8-export-utils";
@@ -49,14 +49,14 @@ function Body() {
     const { source, outputFormat, diagramTheme, ascii, svg, pngScale, exportFlattenColors, exportIncludeFontImport } = useSnapshot(mermaidSettings);
 
     // Start from the format currently shown in the preview pane
-    const [format, setFormat] = useState<ExportFormat>(outputFormat === 'text' ? 'text' : 'svg');
+    const [format, setFormat] = useState<ExportFormat>(outputFormat === OutputFormat.text ? ExportFormat.text : ExportFormat.svg);
 
     const renderResult = useMemo(
         () => renderDiagram(
             bm,
             source,
             { diagramTheme, ascii, svg },
-            format === 'text' ? 'text' : 'svg',
+            format === ExportFormat.text ? ExportFormat.text : ExportFormat.svg,
             {
                 flattenColors: exportFlattenColors,
                 includeFontImport: exportIncludeFontImport,
@@ -64,10 +64,10 @@ function Body() {
         ),
         [bm, source, diagramTheme, ascii, svg, format, exportFlattenColors, exportIncludeFontImport]);
 
-    const png = usePngPreview(format === 'png' ? renderResult : null, pngScale);
+    const png = usePngPreview(format === ExportFormat.png ? renderResult : null, pngScale);
     const [busy, setBusy] = useState(false);
 
-    const canExport = !renderResult.error && !!renderResult.output && (format !== 'png' || !!png.blob);
+    const canExport = !renderResult.error && !!renderResult.output && (format !== ExportFormat.png || !!png.blob);
 
     async function run(action: 'copy' | 'download') {
         setBusy(true);
@@ -95,14 +95,14 @@ function Body() {
                     </TabsList>
                 </Tabs>
 
-                {format === 'png' && (
+                {format === ExportFormat.png && (
                     <TabPngScaleMultipliers value={pngScale} onChange={(v) => { mermaidSettings.pngScale = v; }} />
                 )}
             </div>
 
             <ExportPreview format={format} result={renderResult} pngUrl={png.url} pngSize={png.size} />
 
-            {format !== 'text' && (
+            {format !== ExportFormat.text && (
                 <ExportSvgOptions format={format} flatten={exportFlattenColors} fontImport={exportIncludeFontImport} />
             )}
 
@@ -165,7 +165,7 @@ function ExportSvgOptions({ format, flatten, fontImport }: { format: ExportForma
                 checked={flatten}
                 onChange={(v) => { mermaidSettings.exportFlattenColors = v; }}
             />
-            {format === 'svg' && (
+            {format === ExportFormat.svg && (
                 <ExportSwitch
                     label="Font import"
                     hint="Include a Google Fonts @import in the SVG. Turn off for offline files or fonts that are already installed (such as Geist)."
@@ -193,7 +193,7 @@ async function doExport(action: 'copy' | 'download', format: ExportFormat, resul
     const def = EXPORT_FORMATS.find((f) => f.value === format)!;
     const filename = `${EXPORT_FILENAME}.${def.ext}`;
 
-    if (format === 'png') {
+    if (format === ExportFormat.png) {
         if (!pngBlob) {
             throw new Error('PNG is not ready yet.');
         }
@@ -209,7 +209,7 @@ async function doExport(action: 'copy' | 'download', format: ExportFormat, resul
 
     if (action === 'copy') {
         await copyText(result.output);
-        toast.success(format === 'svg' ? 'SVG markup copied to clipboard' : 'Text copied to clipboard');
+        toast.success(format === ExportFormat.svg ? 'SVG markup copied to clipboard' : 'Text copied to clipboard');
     } else {
         downloadText(result.output, filename, def.mime);
         toast.success(`Saved ${filename}`);
@@ -217,9 +217,9 @@ async function doExport(action: 'copy' | 'download', format: ExportFormat, resul
 }
 
 const EXPORT_FORMATS: { value: ExportFormat; label: string; ext: string; mime: string; }[] = [
-    { value: 'svg', label: 'SVG', ext: 'svg', mime: 'image/svg+xml' },
-    { value: 'text', label: 'Text', ext: 'txt', mime: 'text/plain' },
-    { value: 'png', label: 'PNG', ext: 'png', mime: 'image/png' },
+    { value: ExportFormat.svg, label: 'SVG', ext: 'svg', mime: 'image/svg+xml' },
+    { value: ExportFormat.text, label: 'Text', ext: 'txt', mime: 'text/plain' },
+    { value: ExportFormat.png, label: 'PNG', ext: 'png', mime: 'image/png' },
 ];
 
 const EXPORT_FILENAME = 'diagram';
@@ -231,10 +231,10 @@ function describeOutput(format: ExportFormat, result: RenderResult, pngSize: { w
     if (result.error || !result.output) {
         return '';
     }
-    if (format === 'png') {
+    if (format === ExportFormat.png) {
         return pngSize ? `PNG ${pngSize.w} x ${pngSize.h} px` : 'Rendering PNG...';
     }
-    if (format === 'text') {
+    if (format === ExportFormat.text) {
         const lines = result.output.split('\n').length;
         return `${lines} lines, ${formatBytes(result.output.length)}`;
     }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { proxy } from 'valtio';
 import { type AsciiRenderOptions, type DiagramColors, type RenderOptions } from 'beautiful-mermaid'; // `import type` only: keep the lazy chunk lazy
 import { type BeautifulMermaidModule } from '@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules';
-import { type BmOutputFormat, type DiagramTheme, type MermaidSettings } from '../../../../../../store/2-mermaid-settings';
+import { BmOutputFormat, type DiagramTheme, type MermaidSettings } from '../../../../../../store/2-mermaid-settings';
 import { resolveCssVar } from '@/components/4-dialogs/2-export/8-export-utils';
 import { processExportedSvg, type SvgExportProcess } from '@/components/4-dialogs/2-export/8-flatten-svg-colors';
 import { fixMermaidAsciiBoxes } from '@/utils/local/fix-mermaid-ascii';
@@ -108,7 +108,7 @@ export function renderDiagram(bm: BeautifulMermaidModule, source: string, settin
     const t0 = performance.now();
     try {
         const forExport = !!exportProcess;
-        const output = format === 'svg'
+        const output = format === BmOutputFormat.svg
             ? applyExportProcess(
                 routeDiamondEdges(bm.renderMermaidSVG(text, buildSvgOptions(bm, settings, forExport)), detectGraphDirection(text)),
                 exportProcess,

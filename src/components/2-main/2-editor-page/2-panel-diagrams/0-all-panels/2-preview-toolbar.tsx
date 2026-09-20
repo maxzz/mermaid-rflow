@@ -2,7 +2,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useSnapshot } from "valtio";
 import { toast } from "sonner";
 import { CopyIcon, DownloadIcon, FolderOpenIcon, ImageIcon, SaveIcon } from "lucide-react";
-import { mermaidSettings, type OutputFormat } from "@/store/2-mermaid-settings";
+import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { renderDiagram } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
 import { copyText } from "@/components/4-dialogs/2-export/8-export-utils";
@@ -21,8 +21,8 @@ import { uuid } from "@/utils/uuid";
 export function PreviewToolbar() {
     const { outputFormat } = useSnapshot(mermaidSettings);
     const setOpenExport = useSetAtom(isOpenExportDialogAtom);
-    const isFlow = outputFormat === 'flow';
-    const isMmd = outputFormat === 'mmd';
+    const isFlow = outputFormat === OutputFormat.flow;
+    const isMmd = outputFormat === OutputFormat.mmd;
 
     return (
         <div className="px-3 h-9 bg-muted/30 border-b border-border flex items-center justify-between gap-2 overflow-x-auto">
@@ -33,10 +33,10 @@ export function PreviewToolbar() {
 
                 <Tabs value={outputFormat} onValueChange={(v) => { mermaidSettings.outputFormat = v as OutputFormat; }}>
                     <TabsList className="p-0.5 h-6!">
-                        <TabsTrigger value="mmd" className="px-2 text-[.7rem]">Mermaid</TabsTrigger>
-                        <TabsTrigger value="flow" className="px-2 text-[.7rem]">Flow</TabsTrigger>
-                        <TabsTrigger value="svg" className="px-2 text-[.7rem]">SVG</TabsTrigger>
-                        <TabsTrigger value="text" className="px-2 text-[.7rem]">Text</TabsTrigger>
+                        <TabsTrigger value={OutputFormat.mmd} className="px-2 text-[.7rem]">Mermaid</TabsTrigger>
+                        <TabsTrigger value={OutputFormat.flow} className="px-2 text-[.7rem]">Flow</TabsTrigger>
+                        <TabsTrigger value={OutputFormat.svg} className="px-2 text-[.7rem]">SVG</TabsTrigger>
+                        <TabsTrigger value={OutputFormat.text} className="px-2 text-[.7rem]">Text</TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>
@@ -47,7 +47,7 @@ export function PreviewToolbar() {
                     : isMmd
                         ? <MmdToolbarActions />
                         : (<>
-                            <Button variant="ghost" size="xs" onClick={() => copyCurrentOutput()} title={`Copy ${outputFormat === 'svg' ? 'SVG markup' : 'text'} to clipboard`}>
+                            <Button variant="ghost" size="xs" onClick={() => copyCurrentOutput()} title={`Copy ${outputFormat === OutputFormat.svg ? 'SVG markup' : 'text'} to clipboard`}>
                                 <CopyIcon />
                             </Button>
 
@@ -138,7 +138,7 @@ async function copyCurrentOutput() {
             bm,
             source,
             { diagramTheme, ascii, svg },
-            outputFormat === 'text' ? 'text' : 'svg',
+            outputFormat === OutputFormat.text ? OutputFormat.text : OutputFormat.svg,
             {
                 flattenColors: exportFlattenColors,
                 includeFontImport: exportIncludeFontImport,
@@ -155,7 +155,7 @@ async function copyCurrentOutput() {
         }
 
         await copyText(result.output);
-        toast.success(outputFormat === 'svg' ? 'SVG copied to clipboard' : 'Text copied to clipboard');
+        toast.success(outputFormat === OutputFormat.svg ? 'SVG copied to clipboard' : 'Text copied to clipboard');
     } catch (err) {
         toast.error(err instanceof Error ? err.message : String(err));
     }

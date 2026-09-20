@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { appSettings } from '@/store/1-ui-settings';
-import { mermaidSettings } from '@/store/2-mermaid-settings';
+import { mermaidSettings, OutputFormat } from '@/store/2-mermaid-settings';
 import { useDebouncedValue } from '@/utils/util-hooks/useDebouncedValue';
 import { isThemeDark } from '@/utils/theme-utils';
 import { mmdDiagram } from '../store/1-mmd-diagram';
@@ -17,14 +17,14 @@ export function MmdConverter() {
     const { theme, adaptive, look } = useSnapshot(mmdSettings);
     const { immediate } = useSnapshot(mmdDiagram);
     const { theme: appTheme } = useSnapshot(appSettings);
-    const delay = outputFormat === 'mmd' && immediate ? 0 : RENDER_DEBOUNCE_MS;
+    const delay = outputFormat === OutputFormat.mmd && immediate ? 0 : RENDER_DEBOUNCE_MS;
     const debounced = useDebouncedValue(source, delay);
     const resolvedTheme = resolveMmdTheme(theme, adaptive, isThemeDark(appTheme));
     const configSig = officialConfigSig(resolvedTheme, look);
 
     useEffect(
         () => {
-            if (outputFormat !== 'mmd') {
+            if (outputFormat !== OutputFormat.mmd) {
                 return;
             }
 

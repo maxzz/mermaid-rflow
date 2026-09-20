@@ -1,14 +1,14 @@
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
-import { mermaidSettings } from "@/store/2-mermaid-settings";
+import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { previewStatus } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { rflowDiagram } from "../2-rflow/store/1-flow-diagram";
 import { mmdDiagram } from "../1-mmd/store/1-mmd-diagram";
 
 export function StatusBar() {
     const { outputFormat } = useSnapshot(mermaidSettings);
-    const isFlow = outputFormat === 'flow';
-    const isMmd = outputFormat === 'mmd';
+    const isFlow = outputFormat === OutputFormat.flow;
+    const isMmd = outputFormat === OutputFormat.mmd;
     const bm = useSnapshot(previewStatus);
     const flow = useSnapshot(rflowDiagram);
     const mmd = useSnapshot(mmdDiagram);

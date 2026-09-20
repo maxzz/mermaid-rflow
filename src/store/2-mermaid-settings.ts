@@ -9,9 +9,26 @@ const STORAGE_ID = `${STORE_KEY}__${STORE_VER}`;
 
 //---------------------------------------------------------------------------
 
-export type OutputFormat = 'flow' | 'mmd' | 'svg' | 'text';
-export type BmOutputFormat = Exclude<OutputFormat, 'flow' | 'mmd'>;
-export type ExportFormat = BmOutputFormat | 'png';
+export const OutputFormat = {
+    flow: 'flow',
+    mmd: 'mmd',
+    svg: 'svg',
+    text: 'text',
+} as const;
+export type OutputFormat = (typeof OutputFormat)[keyof typeof OutputFormat];
+
+export const BmOutputFormat = {
+    svg: OutputFormat.svg,
+    text: OutputFormat.text,
+} as const;
+export type BmOutputFormat = (typeof BmOutputFormat)[keyof typeof BmOutputFormat];
+
+export const ExportFormat = {
+    svg: OutputFormat.svg,
+    text: OutputFormat.text,
+    png: 'png',
+} as const;
+export type ExportFormat = (typeof ExportFormat)[keyof typeof ExportFormat];
 
 export type DiagramTheme = 'auto' | ThemeName;
 export type PngScale = 1 | 2 | 4;
@@ -85,7 +102,7 @@ export const DIAGRAM_FONTS = [
 const DEFAULT_SETTINGS: MermaidSettings = {
     showWelcome: true,
     source: DEFAULT_MERMAID_SOURCE,
-    outputFormat: 'flow',
+    outputFormat: OutputFormat.flow,
     zoom: 1,
     diagramTheme: 'auto',
     ascii: {

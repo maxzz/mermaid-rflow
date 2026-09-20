@@ -8,7 +8,7 @@ import { FolderOpenIcon, Trash2Icon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/shadcn/dialog';
 import { Button } from '@/ui/shadcn/button';
-import { mermaidSettings } from '@/store/2-mermaid-settings';
+import { mermaidSettings, OutputFormat } from '@/store/2-mermaid-settings';
 import { renderDiagram } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render';
 import { loadBeautifulMermaid } from '@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules';
 import { restoreRflow } from '../store/1-flow-diagram';
@@ -184,7 +184,7 @@ function SavedSvgPreview({ source }: { source: string; }) {
             void (async () => {
                 try {
                     const bm = await loadBeautifulMermaid();
-                    const result = renderDiagram(bm, source, { diagramTheme, ascii, svg }, 'svg');
+                    const result = renderDiagram(bm, source, { diagramTheme, ascii, svg }, OutputFormat.svg);
                     if (!cancelled) {
                         setMarkup(result.error ? `<pre>${escapeHtml(result.error)}</pre>` : result.output);
                     }

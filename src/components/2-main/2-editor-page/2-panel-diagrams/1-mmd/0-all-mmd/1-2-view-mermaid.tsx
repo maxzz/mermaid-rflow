@@ -1,5 +1,5 @@
 import { useSnapshot } from "valtio";
-import { mermaidSettings } from "@/store/2-mermaid-settings";
+import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { MermaidView } from "../canvas/MermaidView";
 import { useMountedOnce } from "@/utils/local/use-mounted-once";
@@ -7,7 +7,7 @@ import { canvasTabClass, PanelFallbackMessage } from "../../../../../../ui/local
 
 export function Preview_Mermaid() {
     const { outputFormat } = useSnapshot(mermaidSettings);
-    const active = outputFormat === 'mmd';
+    const active = outputFormat === OutputFormat.mmd;
     const mounted = useMountedOnce(active);
     if (!mounted) {
         return null;
