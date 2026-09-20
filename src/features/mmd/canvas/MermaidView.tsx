@@ -5,6 +5,7 @@ import { classNames } from '@/utils';
 import { isThemeDark } from '@/utils/theme-utils';
 import { appSettings } from '@/store/1-ui-settings';
 import { ZOOM_STEP } from '@/store/2-mermaid-settings';
+import { ScrollArea2 } from '@/ui/shadcn/scroll-area';
 import { bindLastMermaidFunctions } from '../render/2-render-official';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { mmdSettings } from '../store/2-mmd-settings';
@@ -87,6 +88,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
         [active, autofit, enabled, svg],
     );
 
+    const overflow = useViewportOverflow(scrollRef, [active, autofit, zoom, svg]);
     const panHandlers = usePanToScroll(scrollRef, panMode);
 
     function onWheel(e: WheelEvent<HTMLDivElement>) {
@@ -99,18 +101,26 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
     }
 
     return (
-        <div className="absolute inset-0">
-            <div
-                ref={scrollRef}
-                className={classNames(
-                    'absolute inset-0 overflow-auto',
-                    dark ? 'mmd-grid-dark' : 'mmd-grid-light',
-                    panMode && 'cursor-grab select-none',
-                )}
-                onWheel={onWheel}
-                {...panHandlers}
-            >
-                <div ref={paneRef} className="relative min-w-full min-h-full p-6 flex">
+        <div className="relative h-full">
+            <div className="absolute inset-0">
+                <ScrollArea2
+                    ref={scrollRef}
+                    className={classNames(
+                        'h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full',
+                        dark ? 'mmd-grid-dark' : 'mmd-grid-light',
+                        panMode && 'cursor-grab select-none',
+                        !overflow.y && '*:data-[orientation=vertical]:hidden',
+                        !overflow.x && '*:data-[orientation=horizontal]:hidden',
+                    )}
+                    horizontal
+                    type="always"
+                >
+                    <div
+                        ref={paneRef}
+                        className="relative min-w-full min-h-full p-6 flex"
+                        onWheel={onWheel}
+                        {...panHandlers}
+                    >
                     {error
                         ? (
                             <pre className="m-auto px-4 py-3 max-w-full text-xs font-code text-destructive bg-destructive/10 border border-destructive/30 rounded-md whitespace-pre-wrap">
@@ -155,12 +165,43 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                                     </div>
                                 </div>
                             )}
-                </div>
+                    </div>
+                </ScrollArea2>
             </div>
             <MmdPaletteRail />
             <MmdViewControls scrollRef={scrollRef} contentRef={contentRef} />
         </div>
     );
+}
+
+function useViewportOverflow(ref: RefObject<HTMLElement | null>, deps: unknown[]) {
+    const [overflow, setOverflow] = useState({ x: false, y: false });
+
+    useLayoutEffect(
+        () => {
+            const el = ref.current;
+            if (!el) {
+                return;
+            }
+
+            const check = () => {
+                setOverflow({
+                    x: el.scrollWidth > el.clientWidth + 1,
+                    y: el.scrollHeight > el.clientHeight + 1,
+                });
+            };
+
+            check();
+            const ro = new ResizeObserver(check);
+            ro.observe(el);
+            if (el.firstElementChild) {
+                ro.observe(el.firstElementChild);
+            }
+            return () => ro.disconnect();
+        },
+        deps);
+
+    return overflow;
 }
 
 function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: boolean) {
