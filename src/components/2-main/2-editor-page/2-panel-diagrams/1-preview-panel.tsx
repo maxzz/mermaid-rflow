@@ -19,9 +19,9 @@ export function PreviewPanel() {
 
             <div className="relative flex-1 min-h-0">
                 <div className="absolute inset-0 overflow-hidden">
-                    <FlowPreview />
-                    <MmdPreview />
-                    <BmPreview />
+                    <Preview_Flow />
+                    <Preview_Mermaid />
+                    <Preview_BeautifullMarmaid />
                 </div>
             </div>
 
@@ -31,7 +31,7 @@ export function PreviewPanel() {
     );
 }
 
-function FlowPreview() {
+function Preview_Flow() {
     const { outputFormat } = useSnapshot(mermaidSettings);
     const active = outputFormat === 'flow';
     const mounted = useMountedOnce(active);
@@ -48,7 +48,7 @@ function FlowPreview() {
     );
 }
 
-function MmdPreview() {
+function Preview_Mermaid() {
     const { outputFormat } = useSnapshot(mermaidSettings);
     const active = outputFormat === 'mmd';
     const mounted = useMountedOnce(active);
@@ -65,36 +65,35 @@ function MmdPreview() {
     );
 }
 
-function BmPreview() {
+function Preview_BeautifullMarmaid() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { zoom, outputFormat } = useSnapshot(mermaidSettings);
     const overflow = useViewportOverflow(scrollRef, [outputFormat, zoom]);
+
     if (outputFormat === 'flow' || outputFormat === 'mmd') {
         return null;
     }
 
-    return (
-        <>
-            <ScrollArea2
-                ref={scrollRef}
-                className={classNames(
-                    "h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full",
-                    !overflow.y && "*:data-[orientation=vertical]:hidden",
-                    !overflow.x && "*:data-[orientation=horizontal]:hidden",
-                )}
-                horizontal
-                type="always"
-            >
-                <ErrorBoundary fallback={<PanelMessage>Failed to load the diagram renderer.</PanelMessage>}>
-                    <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
-                        <RenderView scrollRef={scrollRef} />
-                    </Suspense>
-                </ErrorBoundary>
-            </ScrollArea2>
+    return (<>
+        <ScrollArea2
+            ref={scrollRef}
+            className={classNames(
+                "h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full",
+                !overflow.y && "*:data-[orientation=vertical]:hidden",
+                !overflow.x && "*:data-[orientation=horizontal]:hidden",
+            )}
+            horizontal
+            type="always"
+        >
+            <ErrorBoundary fallback={<PanelMessage>Failed to load the diagram renderer.</PanelMessage>}>
+                <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
+                    <RenderView scrollRef={scrollRef} />
+                </Suspense>
+            </ErrorBoundary>
+        </ScrollArea2>
 
-            <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
-        </>
-    );
+        <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
+    </>);
 }
 
 /** Fill the preview pane. Size comes from the relative + absolute inset-0 parent, not from a scroller. */
