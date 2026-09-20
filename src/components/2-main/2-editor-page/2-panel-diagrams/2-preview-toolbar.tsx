@@ -29,8 +29,8 @@ export function PreviewToolbar() {
 
                 <Tabs value={outputFormat} onValueChange={(v) => { mermaidSettings.outputFormat = v as OutputFormat; }}>
                     <TabsList className="p-0.5 h-6!">
-                        <TabsTrigger value="flow" className="px-2 text-[.7rem]">Flow</TabsTrigger>
                         <TabsTrigger value="mmd" className="px-2 text-[.7rem]">Mermaid</TabsTrigger>
+                        <TabsTrigger value="flow" className="px-2 text-[.7rem]">Flow</TabsTrigger>
                         <TabsTrigger value="svg" className="px-2 text-[.7rem]">SVG</TabsTrigger>
                         <TabsTrigger value="text" className="px-2 text-[.7rem]">Text</TabsTrigger>
                     </TabsList>
@@ -41,9 +41,8 @@ export function PreviewToolbar() {
                 {isFlow
                     ? <FlowToolbarActions />
                     : isMmd
-                    ? <MmdToolbarActions />
-                    : (
-                        <>
+                        ? <MmdToolbarActions />
+                        : (<>
                             <Button variant="ghost" size="xs" onClick={() => copyCurrentOutput()} title={`Copy ${outputFormat === 'svg' ? 'SVG markup' : 'text'} to clipboard`}>
                                 <CopyIcon />
                             </Button>
@@ -53,8 +52,7 @@ export function PreviewToolbar() {
                             <Button variant="ghost" size="xs" onClick={() => setOpenExport(true)} title="Export as SVG, text or PNG">
                                 <DownloadIcon />
                             </Button>
-                        </>
-                    )}
+                        </>)}
             </div>
         </div>
     );
@@ -64,22 +62,20 @@ function FlowToolbarActions() {
     const setLoadOpen = useSetAtom(rflowLoadDialogOpenAtom);
     const methods = useAtomValue(rflowCanvasMethodsAtom);
 
-    return (
-        <>
-            <Button variant="ghost" size="xs" onClick={saveCurrentFlow} title="Save diagram (Mermaid + canvas layout)">
-                <SaveIcon />
-            </Button>
-            <Button variant="ghost" size="xs" onClick={() => setLoadOpen(true)} title="Load a saved diagram">
-                <FolderOpenIcon />
-            </Button>
-            <Button variant="ghost" size="xs" onClick={exportFlowJson} title="Export JSON">
-                <DownloadIcon />
-            </Button>
-            <Button variant="ghost" size="xs" onClick={() => void methods.exportImage?.()} title="Export canvas PNG">
-                <ImageIcon />
-            </Button>
-        </>
-    );
+    return (<>
+        <Button variant="ghost" size="xs" onClick={saveCurrentFlow} title="Save diagram (Mermaid + canvas layout)">
+            <SaveIcon />
+        </Button>
+        <Button variant="ghost" size="xs" onClick={() => setLoadOpen(true)} title="Load a saved diagram">
+            <FolderOpenIcon />
+        </Button>
+        <Button variant="ghost" size="xs" onClick={exportFlowJson} title="Export JSON">
+            <DownloadIcon />
+        </Button>
+        <Button variant="ghost" size="xs" onClick={() => void methods.exportImage?.()} title="Export canvas PNG">
+            <ImageIcon />
+        </Button>
+    </>);
 }
 
 function saveCurrentFlow() {
