@@ -11,11 +11,11 @@ import { Button } from "@/ui/shadcn/button";
 import { Tabs, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import { RenderOptionsPopover } from "./6-render-options-popover";
 
-import { addSavedDiagram, cloneGraphData } from "./2-rflow/storage/saved-diagrams";
-import { rflowDiagram } from "./2-rflow/store/1-flow-diagram";
-import { rflowLoadDialogOpenAtom, rflowCanvasMethodsAtom } from "./2-rflow/store/2-flow-ui";
+import { addSavedDiagram, cloneGraphData } from "../2-rflow/storage/saved-diagrams";
+import { rflowDiagram } from "../2-rflow/store/1-flow-diagram";
+import { rflowLoadDialogOpenAtom, rflowCanvasMethodsAtom } from "../2-rflow/store/2-flow-ui";
 
-import { MmdToolbarActions } from "./1-mmd/ui/MmdToolbar";
+import { MmdToolbarActions } from "../1-mmd/ui/MmdToolbar";
 import { uuid } from "@/utils/uuid";
 
 export function PreviewToolbar() {

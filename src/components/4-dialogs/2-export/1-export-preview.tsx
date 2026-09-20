@@ -4,7 +4,7 @@ import { type ExportFormat, type PngScale } from "@/store/2-mermaid-settings";
 import { type RenderResult } from "@/store/5-render-diagram/5-render";
 import { svgToPngBlob, type PngResult } from "@/components/4-dialogs/2-export/8-export-utils";
 import { BarsLoaderIcon } from "@/ui/local-ui";
-import { DiagramText } from "@/components/2-main/2-editor-page/2-panel-diagrams/7-diagram-text";
+import { DiagramText } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/7-diagram-text";
 
 export function ExportPreview({ format, result, pngUrl, pngSize }: { format: ExportFormat; result: RenderResult; pngUrl: string | null; pngSize: { w: number; h: number; } | null; }) {
     return (
