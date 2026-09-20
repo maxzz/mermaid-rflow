@@ -47,18 +47,21 @@ export function shiftPathD(d: string, from: MmdNodeOffset | undefined, to: MmdNo
     return out + d.slice(last);
 }
 
+/** Pointer pixels → SVG user units via the live screen CTM (viewBox/rect is non-uniform after SVG size pinning). */
 export function clientDeltaToSvg(svg: SVGSVGElement, dx: number, dy: number): MmdNodeOffset {
-    const rect = svg.getBoundingClientRect();
-    const vb = svg.viewBox.baseVal;
-    const width = vb.width || svg.width.baseVal.value || rect.width;
-    const height = vb.height || svg.height.baseVal.value || rect.height;
-    if (rect.width === 0 || rect.height === 0) {
+    const ctm = svg.getScreenCTM();
+    if (!ctm) {
         return { dx, dy };
     }
-    return {
-        dx: dx * (width / rect.width),
-        dy: dy * (height / rect.height),
-    };
+    try {
+        const inv = ctm.inverse();
+        const from = new DOMPoint(0, 0).matrixTransform(inv);
+        const to = new DOMPoint(dx, dy).matrixTransform(inv);
+        return { dx: to.x - from.x, dy: to.y - from.y };
+    }
+    catch {
+        return { dx, dy };
+    }
 }
 
 export function collectMmdNodeIds(root: Element): string[] {
@@ -245,6 +248,79 @@ export function applyMmdLayout(root: Element, nodes: Record<string, MmdNodePos>)
         }
         const from = offsetOf(pair.from, nodes, originById);
         const to = offsetOf(pair.to, nodes, originById);
+        const dx = (from.dx + to.dx) / 2;
+        const dy = (from.dy + to.dy) / 2;
+        if (dx === 0 && dy === 0) {
+            return;
+        }
+        const ot = label.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '';
+        label.setAttribute('transform', joinTransform(ot, dx, dy));
+    });
+}
+
+/** Move one node and its incident edges without resetting the rest of the graph. */
+export function applyMmdNodeDrag(root: Element, dragId: string, pos: MmdNodePos, nodes: Record<string, MmdNodePos>): void {
+    const originById: Record<string, MmdNodePos> = {};
+    const knownIds: string[] = [];
+    const liveNodes = { ...nodes, [dragId]: pos };
+
+    for (const el of root.querySelectorAll('g.node')) {
+        snapshotOriginTransform(el);
+        const id = mermaidIdFromDomId(el.id);
+        if (!id) {
+            continue;
+        }
+        knownIds.push(id);
+        originById[id] = parseTranslateAttr(el.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '');
+        if (id !== dragId) {
+            continue;
+        }
+        const origin = originById[id];
+        const dx = pos.x - origin.x;
+        const dy = pos.y - origin.y;
+        const ot = el.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '';
+        if (dx === 0 && dy === 0) {
+            if (ot) {
+                el.setAttribute('transform', ot);
+            }
+            else {
+                el.removeAttribute('transform');
+            }
+        }
+        else {
+            el.setAttribute('transform', joinTransform(ot, dx, dy));
+        }
+    }
+
+    const paths = [...root.querySelectorAll('path.flowchart-link')];
+    const livePaths = paths.filter((path) => !path.hasAttribute(SOURCE_LINK_HIT_ATTR));
+    for (const path of paths) {
+        snapshotOriginD(path);
+        const pair = edgeEndpointsFromDomId(path.id || path.parentElement?.id || '', knownIds);
+        if (!pair || (pair.from !== dragId && pair.to !== dragId)) {
+            continue;
+        }
+        const d0 = path.getAttribute(MMD_ORIGIN_D) ?? path.getAttribute('d') ?? '';
+        path.setAttribute('d', shiftPathD(d0, offsetOf(pair.from, liveNodes, originById), offsetOf(pair.to, liveNodes, originById)));
+    }
+
+    const labels = [...root.querySelectorAll('g.edgeLabel')];
+    if (livePaths.length !== labels.length) {
+        return;
+    }
+    livePaths.forEach((path, i) => {
+        const label = labels[i];
+        if (!(label instanceof Element)) {
+            return;
+        }
+        const pair = edgeEndpointsFromDomId(path.id || path.parentElement?.id || '', knownIds);
+        if (!pair || (pair.from !== dragId && pair.to !== dragId)) {
+            return;
+        }
+        snapshotOriginTransform(label);
+        restoreOrigin(label);
+        const from = offsetOf(pair.from, liveNodes, originById);
+        const to = offsetOf(pair.to, liveNodes, originById);
         const dx = (from.dx + to.dx) / 2;
         const dy = (from.dy + to.dy) / 2;
         if (dx === 0 && dy === 0) {

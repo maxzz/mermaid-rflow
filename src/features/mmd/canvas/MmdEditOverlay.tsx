@@ -1,6 +1,6 @@
-import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useLayoutEffect, useState } from 'react';
+import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getDefaultStore, useAtom, useAtomValue } from 'jotai';
-import { useSnapshot } from 'valtio';
+import { subscribe, useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { selectFromDiagram, sourceLink } from '@/store/6-source-render-links';
@@ -10,13 +10,16 @@ import { applyMmdPatchResult } from '../catalog/4-apply-patch';
 import { catalogEdgeKey, mermaidIdFromDomId, parseCatalogEdgeKey } from '../catalog/3-catalog-mmd';
 import {
     applyMmdLayout,
+    applyMmdNodeDrag,
     clientDeltaToSvg,
     clientPointInOverlay,
     measureMmdEdges,
     measureMmdNodeBoxes,
     originOfNode,
+    overlayScale,
     type MmdEdgeHit,
     type MmdHitBox,
+    type MmdNodePos,
 } from '../catalog/5-mmd-layout';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { mmdLayout, setMmdNodePos } from '../store/4-mmd-layout';
@@ -50,15 +53,14 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
     const { svg, diagramType } = useSnapshot(mmdDiagram);
     const { autofit } = useSnapshot(mmdSettings);
     const link = useSnapshot(sourceLink);
-    const layout = useSnapshot(mmdLayout);
     const zoom = useAtomValue(mmdZoomAtom);
     const panMode = useAtomValue(mmdPanModeAtom);
     const shape = useAtomValue(mmdPaletteShapeAtom);
-    const dragging = useAtomValue(mmdNodeDraggingAtom);
     const [inline, setInline] = useAtom(mmdInlineEditAtom);
     const [boxes, setBoxes] = useState<MmdHitBox[]>([]);
     const [edges, setEdges] = useState<MmdEdgeHit[]>([]);
     const [connect, setConnect] = useState<DragLine | null>(null);
+    const draggingRef = useRef(false);
 
     const flowchart = classifyMermaidSource(source) === 'flowchart' || isFlowchartDiagramType(diagramType);
     const selection = enabled && flowchart ? selectionFromKeys(link.keys as string[]) : { nodeId: null, edge: null };
@@ -80,7 +82,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
             function syncBoxes(): boolean {
                 const pane = hostRef.current;
                 const live = contentRef.current;
-                if (cancelled || !pane || !live || !pane.getClientRects().length) {
+                if (cancelled || draggingRef.current || !pane || !live || !pane.getClientRects().length) {
                     return false;
                 }
                 applyMmdLayout(live, mmdLayout.nodes);
@@ -125,6 +127,9 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
 
             pump();
             const timeout = window.setTimeout(pump, 400);
+            const unsubLayout = subscribe(mmdLayout, () => {
+                syncBoxes();
+            });
             void document.fonts?.ready.then(() => {
                 if (!cancelled) {
                     observe();
@@ -137,9 +142,10 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                 cancelAnimationFrame(raf);
                 ro?.disconnect();
                 window.clearTimeout(timeout);
+                unsubLayout();
             };
         },
-        [active, autofit, contentRef, enabled, flowchart, hostRef, layout.nodes, layoutKey, svg, zoom],
+        [active, autofit, contentRef, enabled, flowchart, hostRef, layoutKey, svg, zoom],
     );
 
     useEffect(
@@ -242,19 +248,27 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
         e.stopPropagation();
         selectFromDiagram([`node:${id}`]);
         const root = contentRef.current;
+        const overlayHost = hostRef.current;
         const svgEl = root?.querySelector('svg');
         const nodeEl = root ? nodeElementById(root, id) : null;
-        if (!root || !(svgEl instanceof SVGSVGElement) || !(nodeEl instanceof Element)) {
+        if (!root || !overlayHost || !(svgEl instanceof SVGSVGElement) || !(nodeEl instanceof Element)) {
             return;
         }
+        const liveRoot = root;
+        const board = overlayHost;
         const liveSvg = svgEl;
         const handle = e.currentTarget;
+        const startBox = boxes.find((box) => box.id === id);
+        const nodes = { ...mmdLayout.nodes };
         const start = {
             x: e.clientX,
             y: e.clientY,
-            pos: mmdLayout.nodes[id] ?? originOfNode(nodeEl),
+            pos: nodes[id] ?? originOfNode(nodeEl),
+            scale: clientDeltaToSvg(liveSvg, 1, 1),
+            overlay: overlayScale(board),
         };
         let moved = false;
+        let lastPos: MmdNodePos = start.pos;
         try {
             handle.setPointerCapture(e.pointerId);
         }
@@ -271,14 +285,28 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                     return;
                 }
                 moved = true;
+                draggingRef.current = true;
+                board.classList.add('is-mmd-dragging');
                 store.set(mmdNodeDraggingAtom, true);
             }
-            const delta = clientDeltaToSvg(liveSvg, dx, dy);
-            setMmdNodePos(id, { x: start.pos.x + delta.dx, y: start.pos.y + delta.dy });
+            lastPos = {
+                x: start.pos.x + dx * start.scale.dx,
+                y: start.pos.y + dy * start.scale.dy,
+            };
+            applyMmdNodeDrag(liveRoot, id, lastPos, nodes);
+            if (startBox) {
+                handle.style.left = `${startBox.x + dx / start.overlay.x}px`;
+                handle.style.top = `${startBox.y + dy / start.overlay.y}px`;
+            }
         }
 
         function up() {
+            draggingRef.current = false;
+            board.classList.remove('is-mmd-dragging');
             store.set(mmdNodeDraggingAtom, false);
+            if (moved) {
+                setMmdNodePos(id, lastPos);
+            }
         }
 
         watchDrag(move, up);
@@ -407,7 +435,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                     />
                 );
             })}
-            {selected && !dragging && !selectedEdge && !panMode && HANDLES.map(({ side }) => {
+            {selected && !selectedEdge && !panMode && HANDLES.map(({ side }) => {
                 const pos = handleStyle(selected, side);
                 return (
                     <button
@@ -422,7 +450,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                     />
                 );
             })}
-            {selectedEdge && !dragging && !panMode && (
+            {selectedEdge && !panMode && (
                 <>
                     <EndpointHandle
                         pt={selectedEdge.points[0]!}

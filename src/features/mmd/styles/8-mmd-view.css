@@ -51,8 +51,14 @@
 }
 
 .is-mmd-dragging,
-.is-mmd-dragging .mmd-host g.node {
+.is-mmd-dragging .mmd-host g.node,
+.is-mmd-dragging .mmd-hit {
     cursor: grabbing;
+}
+
+.is-mmd-dragging .mmd-add-handle,
+.is-mmd-dragging .mmd-edge-handle {
+    display: none;
 }
 
 .mmd-hit {
