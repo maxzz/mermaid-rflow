@@ -2,7 +2,8 @@ import { useSnapshot } from "valtio";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { MermaidView } from "../canvas/MermaidView";
-import { canvasTabClass, PanelMessage, useMountedOnce } from "../../3-bm/1-4-view-shared";
+import { useMountedOnce } from "@/utils/local/use-mounted-once";
+import { canvasTabClass, PanelFallbackMessage } from "../../../../../../ui/local-ui/1-4-view-shared";
 
 export function Preview_Mermaid() {
     const { outputFormat } = useSnapshot(mermaidSettings);
@@ -14,7 +15,7 @@ export function Preview_Mermaid() {
 
     return (
         <div className={canvasTabClass(active)} aria-hidden={!active} inert={!active || undefined}>
-            <ErrorBoundary fallback={<PanelMessage>Failed to load the official Mermaid renderer.</PanelMessage>}>
+            <ErrorBoundary fallback={<PanelFallbackMessage>Failed to load the official Mermaid renderer.</PanelFallbackMessage>}>
                 <MermaidView active={active} />
             </ErrorBoundary>
         </div>

@@ -11,9 +11,9 @@ import { Textarea } from '@/ui/shadcn/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 import { COLOR_PRESETS } from '../converter/constants';
 import { rflowDiagram } from '../store/1-flow-diagram';
-import { syncMermaidFromGraph } from '../store/3-sync-source';
-import { rflowIconSearchAtom, defaultIconSearchState, rflowNodeEditorDraftAtom } from '../store/2-flow-ui';
-import { IconSearch } from './IconSearch';
+import { syncMermaidFromGraph } from '../store/3-sync-with-source';
+import { rflowIconSearchAtom, defaultIconSearchState, rflowNodeEditorDraftAtom } from '../store/a-rflow-ui';
+import { IconSearch } from './7-dlg-search';
 
 export function NodeEditor() {
     const [draft, setDraft] = useAtom(rflowNodeEditorDraftAtom);

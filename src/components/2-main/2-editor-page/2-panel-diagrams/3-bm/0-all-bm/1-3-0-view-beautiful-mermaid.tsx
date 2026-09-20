@@ -1,13 +1,14 @@
 import { Suspense, useRef } from "react";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
+import { useViewportOverflow } from "@/utils/local/use-viewport-overflow";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { ScrollArea2 } from "@/ui/shadcn/scroll-area";
 import { RenderView } from "../1-3-1-render-view";
 import { ZoomControls } from "../1-3-2-zoom-controls";
-import { PanelMessage, useViewportOverflow } from "../1-4-view-shared";
+import { PanelFallbackMessage } from "../../../../../../ui/local-ui/1-4-view-shared";
 
 export function Preview_BeautifullMarmaid() {
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -29,8 +30,8 @@ export function Preview_BeautifullMarmaid() {
             horizontal
             type="always"
         >
-            <ErrorBoundary fallback={<PanelMessage>Failed to load the diagram renderer.</PanelMessage>}>
-                <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
+            <ErrorBoundary fallback={<PanelFallbackMessage>Failed to load the diagram renderer.</PanelFallbackMessage>}>
+                <Suspense fallback={<PanelFallbackMessage><BarsLoaderIcon /></PanelFallbackMessage>}>
                     <RenderView scrollRef={scrollRef} />
                 </Suspense>
             </ErrorBoundary>

@@ -7,9 +7,12 @@ const STORE_KEY = "tm-mermaid-rflow-settings";
 const STORE_VER = "v1.0";
 const STORAGE_ID = `${STORE_KEY}__${STORE_VER}`;
 
+//---------------------------------------------------------------------------
+
 export type OutputFormat = 'flow' | 'mmd' | 'svg' | 'text';
 export type BmOutputFormat = Exclude<OutputFormat, 'flow' | 'mmd'>;
 export type ExportFormat = BmOutputFormat | 'png';
+
 export type DiagramTheme = 'auto' | ThemeName;
 export type PngScale = 1 | 2 | 4;
 
@@ -18,6 +21,8 @@ export interface AsciiSettings {
     paddingX: number;       // horizontal spacing between nodes
     paddingY: number;       // vertical spacing between nodes
 }
+
+//---------------------------------------------------------------------------
 
 export const NODE_PLACEMENT_STRATEGIES = ['SIMPLE', 'NETWORK_SIMPLEX', 'LINEAR_SEGMENTS', 'BRANDES_KOEPF'] as const;
 export type NodePlacementStrategy = typeof NODE_PLACEMENT_STRATEGIES[number];

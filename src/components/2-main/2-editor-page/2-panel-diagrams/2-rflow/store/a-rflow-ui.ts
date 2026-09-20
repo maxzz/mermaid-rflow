@@ -31,6 +31,9 @@ export const rflowDraggingAtom = atom(false);
 export const rflowEdgeLabelEditorAtom = atom<EdgeLabelEditorState | null>(null);
 export const rflowNodeEditorDraftAtom = atom<NodeEditorDraft | null>(null);
 
+//---------------------------------------------------------------------------
+// Canvas methods
+
 export type RflowCanvasMethods = {
     exportImage?: () => Promise<void>;
     openSearch?: () => void;
@@ -39,6 +42,8 @@ export type RflowCanvasMethods = {
 };
 
 export const rflowCanvasMethodsAtom = atom<RflowCanvasMethods>({});
+
+//---------------------------------------------------------------------------
 
 export function draftFromNode(node: Node): NodeEditorDraft {
     return {
@@ -54,6 +59,9 @@ export function draftFromNode(node: Node): NodeEditorDraft {
     };
 }
 
+//---------------------------------------------------------------------------
+// Icon search
+
 export type IconSearchState = {
     query: string;
     results: { provider: string; prefix: string; name: string; }[];
@@ -65,30 +73,37 @@ export type IconSearchState = {
     offset: number;
 };
 
-export const defaultIconSearchState = (): IconSearchState => ({
-    query: '',
-    results: [],
-    loading: false,
-    loadingMore: false,
-    error: '',
-    isExpanded: false,
-    hasMore: true,
-    offset: 0,
-});
+export function defaultIconSearchState(): IconSearchState {
+    return ({
+        query: '',
+        results: [],
+        loading: false,
+        loadingMore: false,
+        error: '',
+        isExpanded: false,
+        hasMore: true,
+        offset: 0,
+    });
+}
 
 export const rflowIconSearchAtom = atom<IconSearchState>(defaultIconSearchState());
 
+//---------------------------------------------------------------------------
+// Load dialog
+
 export type LoadDialogUi = {
     selectedId: string | null;
-    imported: import('../storage/saved-diagrams').SavedDiagram | null;
+    imported: import('../8-store/1-local-storage-saved-diagrams').SavedDiagram | null;
     confirmDeleteId: string | null;
 };
 
-export const defaultLoadDialogUi = (): LoadDialogUi => ({
-    selectedId: null,
-    imported: null,
-    confirmDeleteId: null,
-});
+export function defaultLoadDialogUi(): LoadDialogUi {
+    return ({
+        selectedId: null,
+        imported: null,
+        confirmDeleteId: null,
+    });
+}
 
 export const rflowLoadUiAtom = atom<LoadDialogUi>(defaultLoadDialogUi());
 export const rflowLoadPreviewAtom = atom('');

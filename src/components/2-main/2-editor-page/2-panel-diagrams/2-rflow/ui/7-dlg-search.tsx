@@ -6,7 +6,7 @@ import { Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { searchIconify } from '../lib/iconify';
-import { defaultIconSearchState, rflowIconSearchAtom } from '../store/2-flow-ui';
+import { defaultIconSearchState, rflowIconSearchAtom } from '../store/a-rflow-ui';
 
 const ICONS_PER_PAGE = 48;
 
@@ -71,9 +71,11 @@ export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; 
                         className="pl-7"
                     />
                 </div>
+
                 <Button type="button" size="xs" onClick={() => void handleSearch()} disabled={state.loading || !state.query.trim()}>
                     {state.loading ? <Loader2Icon className="animate-spin" /> : <SearchIcon />}
                 </Button>
+
                 {(state.isExpanded || state.results.length > 0) && (
                     <Button type="button" variant="ghost" size="icon-xs" onClick={() => setState(defaultIconSearchState())}>
                         <XIcon />
@@ -90,24 +92,27 @@ export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; 
             {state.results.length > 0 && (
                 <div className="p-2 max-h-48 bg-muted/30 border rounded-md overflow-y-auto">
                     <div className="grid grid-cols-6 gap-1.5">
-                        {state.results.map((icon, idx) => {
-                            const iconId = `${icon.prefix}:${icon.name}`;
-                            const iconUrl = `https://api.iconify.design/${icon.prefix}/${icon.name}.svg`;
-                            const isLast = idx === state.results.length - 1;
-                            return (
-                                <button
-                                    key={`${iconId}-${idx}`}
-                                    type="button"
-                                    onClick={() => handleSelectIcon(icon.prefix, icon.name)}
-                                    onMouseEnter={() => { if (isLast) void loadMore(); }}
-                                    className="aspect-square p-1 border rounded hover:border-primary flex items-center justify-center"
-                                    title={iconId}
-                                >
-                                    <img src={iconUrl} alt={icon.name} className="size-5 object-contain" loading="lazy" />
-                                </button>
-                            );
-                        })}
+                        {state.results.map(
+                            (icon, idx) => {
+                                const iconId = `${icon.prefix}:${icon.name}`;
+                                const iconUrl = `https://api.iconify.design/${icon.prefix}/${icon.name}.svg`;
+                                const isLast = idx === state.results.length - 1;
+                                return (
+                                    <button
+                                        key={`${iconId}-${idx}`}
+                                        type="button"
+                                        onClick={() => handleSelectIcon(icon.prefix, icon.name)}
+                                        onMouseEnter={() => { if (isLast) void loadMore(); }}
+                                        className="aspect-square p-1 border rounded hover:border-primary flex items-center justify-center"
+                                        title={iconId}
+                                    >
+                                        <img src={iconUrl} alt={icon.name} className="size-5 object-contain" loading="lazy" />
+                                    </button>
+                                );
+                            }
+                        )}
                     </div>
+
                     {state.loadingMore && (
                         <div className="pt-2 text-[.65rem] text-muted-foreground text-center">Loading more...</div>
                     )}

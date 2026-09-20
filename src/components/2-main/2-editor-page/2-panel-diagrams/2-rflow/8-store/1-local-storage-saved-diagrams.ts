@@ -6,6 +6,8 @@ const STORE_KEY = 'tm-mermaid-rflow-saved';
 const STORE_VER = 'v1.0';
 const STORAGE_ID = `${STORE_KEY}__${STORE_VER}`;
 
+//---------------------------------------------------------------------------
+
 export type SavedDiagram = {
     id: string;
     name: string;
@@ -19,6 +21,8 @@ export type SavedDiagram = {
 export type RflowSavedState = {
     diagrams: SavedDiagram[];
 };
+
+//---------------------------------------------------------------------------
 
 function loadSaved(): RflowSavedState {
     try {
@@ -50,6 +54,9 @@ subscribe(
         300,
     ),
 );
+
+//---------------------------------------------------------------------------
+// Saved diagrams
 
 export function addSavedDiagram(item: SavedDiagram) {
     rflowSaved.diagrams = [item, ...rflowSaved.diagrams];

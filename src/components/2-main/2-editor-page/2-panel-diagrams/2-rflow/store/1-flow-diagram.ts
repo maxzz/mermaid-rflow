@@ -1,7 +1,10 @@
-import { type Edge, type Node } from 'reactflow';
 import { proxy } from 'valtio';
+import { type Edge, type Node } from 'reactflow';
 import { type ReactFlowData } from '../converter';
-import { cloneGraphData } from '../storage/saved-diagrams';
+import { cloneGraphData } from '../8-store/1-local-storage-saved-diagrams';
+
+//---------------------------------------------------------------------------
+// Flow diagram
 
 export type RflowDiagramState = {
     nodes: Node[];
@@ -21,20 +24,23 @@ export const rflowDiagram = proxy<RflowDiagramState>({
     lastAppliedSource: '',
 });
 
-export function setFlowData(data: ReactFlowData) {
+//---------------------------------------------------------------------------
+// Flow diagram methods
+
+export function setRflowData(data: ReactFlowData) {
     rflowDiagram.nodes = data.nodes;
     rflowDiagram.edges = data.edges;
 }
 
-export function setFlowNodes(nodes: Node[]) {
+export function setRflowNodes(nodes: Node[]) {
     rflowDiagram.nodes = nodes;
 }
 
-export function setFlowEdges(edges: Edge[]) {
+export function setRflowEdges(edges: Edge[]) {
     rflowDiagram.edges = edges;
 }
 
-export function restoreFlow(source: string, data: ReactFlowData) {
+export function restoreRflow(source: string, data: ReactFlowData) {
     rflowDiagram.lastAppliedSource = source;
     rflowDiagram.nodes = cloneGraphData(data.nodes);
     rflowDiagram.edges = cloneGraphData(data.edges);

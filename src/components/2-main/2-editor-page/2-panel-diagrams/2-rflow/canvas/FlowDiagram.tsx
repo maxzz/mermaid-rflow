@@ -33,8 +33,8 @@ import '../styles/selected-edge.css';
 import '../styles/rflow-nodes.css';
 import '../styles/source-link.css';
 
-import { rflowDiagram, setFlowEdges, setFlowNodes } from '../store/1-flow-diagram';
-import { syncMermaidFromGraph } from '../store/3-sync-source';
+import { rflowDiagram, setRflowEdges, setRflowNodes } from '../store/1-flow-diagram';
+import { syncMermaidFromGraph } from '../store/3-sync-with-source';
 import {
     draftFromNode,
     rflowCanvasMethodsAtom,
@@ -46,7 +46,7 @@ import {
     rflowSelectedEdgeIdAtom,
     rflowSelectedEdgesAtom,
     rflowSelectedNodesAtom,
-} from '../store/2-flow-ui';
+} from '../store/a-rflow-ui';
 import { exportReactFlowImage } from './exportImage';
 import {
     alignNodes,
@@ -165,8 +165,8 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
             const updatedNodes = (rflowDiagram.nodes as Node[]).map((n) => ({ ...n, selected: n.parentNode === subgraphNodeId }));
             const nodeIds = new Set(updatedNodes.filter((n) => n.parentNode === subgraphNodeId).map((n) => n.id));
             const updatedEdges = (rflowDiagram.edges as Edge[]).map((e) => ({ ...e, selected: nodeIds.has(e.source) && nodeIds.has(e.target) }));
-            setFlowNodes(updatedNodes);
-            setFlowEdges(updatedEdges);
+            setRflowNodes(updatedNodes);
+            setRflowEdges(updatedEdges);
             setSelectedNodes(updatedNodes.filter((n) => n.selected));
             setSelectedEdges(updatedEdges.filter((e) => e.selected));
         },
@@ -189,7 +189,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => {
             const updated = applyNodeChanges(changes, rflowDiagram.nodes as Node[]);
-            setFlowNodes(updated);
+            setRflowNodes(updated);
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedNodes(updated.filter((n) => n.selected));
             }
@@ -198,7 +198,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                     const ids = new Set(updated.map((n) => n.id));
                     const nextEdges = (rflowDiagram.edges as Edge[]).filter((e) => ids.has(e.source) && ids.has(e.target));
                     if (nextEdges.length !== rflowDiagram.edges.length) {
-                        setFlowEdges(nextEdges);
+                        setRflowEdges(nextEdges);
                     }
                 }
                 syncMermaidFromGraph();
@@ -210,7 +210,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const onEdgesChange = useCallback(
         (changes: EdgeChange[]) => {
             const updated = applyEdgeChanges(changes, rflowDiagram.edges as Edge[]);
-            setFlowEdges(updated);
+            setRflowEdges(updated);
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedEdges(updated.filter((e) => e.selected));
             }
@@ -223,7 +223,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
 
     const onConnect = useCallback(
         (connection: Connection) => {
-            setFlowEdges(
+            setRflowEdges(
                 addEdge(
                     {
                         ...defaultEdgeOptions,
@@ -242,7 +242,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
         (event: MouseEvent, edge: Edge) => {
             setSelectedEdgeId(edge.id);
             const updated = (rflowDiagram.edges as Edge[]).map((e) => ({ ...e, selected: e.id === edge.id }));
-            setFlowEdges(updated);
+            setRflowEdges(updated);
             setSelectedEdges(updated.filter((e) => e.selected));
             sourceLink.onEdgeClick(event, edge);
         },
@@ -255,10 +255,10 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
             const highlighted = (rflowDiagram.nodes as Node[]).map((n) =>
                 n.id === nodeId ? { ...n, style: { ...n.style, outline: '3px solid #ff6b6b' } } : n
             );
-            setFlowNodes(highlighted);
+            setRflowNodes(highlighted);
             window.setTimeout(
                 () => {
-                    setFlowNodes(
+                    setRflowNodes(
                         (rflowDiagram.nodes as Node[]).map((n) =>
                             n.id === nodeId ? { ...n, style: { ...n.style, outline: undefined } } : n
                         ),
@@ -330,7 +330,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
 
     const commitNodes = useCallback(
         (next: Node[]) => {
-            setFlowNodes(next);
+            setRflowNodes(next);
             setSelectedNodes(next.filter((n) => n.selected));
         },
         [setSelectedNodes],
@@ -361,8 +361,8 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const onDeleteSelected = useCallback(
         () => {
             const { newNodes, newEdges } = deleteSelected(rflowDiagram.nodes as Node[], rflowDiagram.edges as Edge[], selectedNodes, selectedEdges);
-            setFlowNodes(newNodes);
-            setFlowEdges(newEdges);
+            setRflowNodes(newNodes);
+            setRflowEdges(newEdges);
             setSelectedNodes([]);
             setSelectedEdges([]);
             syncMermaidFromGraph();
@@ -373,7 +373,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const onLockNodes = useCallback(
         () => {
             const next = lockNodes(rflowDiagram.nodes as Node[], selectedNodes);
-            setFlowNodes(next);
+            setRflowNodes(next);
             setSelectedNodes(
                 selectedNodes
                     .map((n) => next.find((x) => x.id === n.id))
@@ -386,7 +386,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const onUnlockNodes = useCallback(
         () => {
             const next = unlockNodes(rflowDiagram.nodes as Node[], selectedNodes);
-            setFlowNodes(next);
+            setRflowNodes(next);
             setSelectedNodes(
                 selectedNodes
                     .map((n) => next.find((x) => x.id === n.id))
@@ -398,7 +398,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
 
     const saveEdgeLabel = useCallback(
         (edgeId: string, text: string) => {
-            setFlowEdges((rflowDiagram.edges as Edge[]).map((e) => (e.id === edgeId ? { ...e, label: text } : e)));
+            setRflowEdges((rflowDiagram.edges as Edge[]).map((e) => (e.id === edgeId ? { ...e, label: text } : e)));
             setEdgeLabelEditor(null);
             syncMermaidFromGraph();
         },
@@ -480,7 +480,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                             if (!newConnection.source || !newConnection.target) {
                                 return;
                             }
-                            setFlowEdges(
+                            setRflowEdges(
                                 (rflowDiagram.edges as Edge[]).map((e) =>
                                     e.id === oldEdge.id
                                         ? {
@@ -536,7 +536,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                                 };
                             }
                             if (newNode) {
-                                setFlowNodes([...current, newNode]);
+                                setRflowNodes([...current, newNode]);
                                 syncMermaidFromGraph();
                             }
                         }}
