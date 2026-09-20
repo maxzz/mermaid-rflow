@@ -3,7 +3,7 @@ import { classNames } from "@/utils";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { previewStatus } from "@/store/5-render-diagram/5-render";
 import { rflowDiagram } from "@/features/rflow";
-import { mmdDiagram } from "@/features/mmd";
+import { mmdDiagram } from "./1-mmd";
 
 export function StatusBar() {
     const { outputFormat } = useSnapshot(mermaidSettings);

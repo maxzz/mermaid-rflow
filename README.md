@@ -96,7 +96,7 @@ flowchart TB
     Selection --> Canvas2
 ```
 
-Ported React Flow code and the official mermaid tab stay in their own feature folders:
+Ported React Flow code stays under `src/features/rflow/`. The official mermaid tab lives next to the preview panel:
 
 ```text
 src/features/rflow/
@@ -107,7 +107,7 @@ src/features/rflow/
   storage/     saved { mermaid, nodes, edges } in localStorage
   styles/      React Flow and selected-edge CSS
 
-src/features/mmd/
+src/components/2-main/2-editor-page/2-panel-diagrams/1-mmd/
   render/      mermaid.initialize + mermaid.render, Redux/neo theme resolve
   catalog/     official SVG → source index, incremental flowchart patches
   canvas/      MermaidView, selection overlay, source link

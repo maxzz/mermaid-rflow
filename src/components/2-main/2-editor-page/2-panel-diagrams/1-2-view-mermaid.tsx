@@ -1,7 +1,7 @@
 import { useSnapshot } from "valtio";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
-import { MermaidView } from "@/features/mmd";
+import { MermaidView } from "./1-mmd";
 import { canvasTabClass, PanelMessage, useMountedOnce } from "./1-4-view-shared";
 
 export function Preview_Mermaid() {
