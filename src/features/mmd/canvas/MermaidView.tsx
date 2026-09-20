@@ -11,7 +11,7 @@ import { mmdSettings } from '../store/2-mmd-settings';
 import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
 import { MmdPaletteRail } from '../ui/MmdPaletteRail';
 import { MmdViewControls } from '../ui/MmdViewControls';
-import { fitMmdToView, measureMmdNaturalSize, setMmdPan, setMmdZoom } from './mmd-zoom';
+import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdPan, setMmdZoom } from './mmd-zoom';
 import { MmdEditOverlay } from './MmdEditOverlay';
 import { useMmdLayout } from './useMmdLayout';
 import { useMmdSourceLink } from './useMmdSourceLink';
@@ -61,11 +61,17 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
 
     useLayoutEffect(
         () => {
-            if (!svg) {
+            const root = contentRef.current;
+            if (!root || !svg) {
                 setNatural({ w: 0, h: 0 });
                 return;
             }
-            setNatural(measureMmdNaturalSize(contentRef.current));
+            const svgEl = root.querySelector('svg');
+            if (svgEl instanceof SVGSVGElement) {
+                setNatural(normalizeMmdSvg(svgEl));
+                return;
+            }
+            setNatural(measureMmdNaturalSize(root));
         },
         [svg],
     );
