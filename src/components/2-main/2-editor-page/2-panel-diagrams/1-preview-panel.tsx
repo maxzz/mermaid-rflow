@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { Suspense, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
@@ -13,69 +13,87 @@ import { FlowDiagram, LoadDialog } from "@/features/rflow";
 import { MermaidView } from "@/features/mmd";
 
 export function PreviewPanel() {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const { zoom, outputFormat } = useSnapshot(mermaidSettings);
-    const isFlow = outputFormat === 'flow';
-    const isMmd = outputFormat === 'mmd';
-    const isBmPreview = !isFlow && !isMmd;
-    const overflow = useViewportOverflow(scrollRef, [outputFormat, zoom]);
-    const flowMounted = useMountedOnce(isFlow);
-    const mmdMounted = useMountedOnce(isMmd);
-
     return (
         <div className="h-full bg-muted/20 flex flex-col">
             <PreviewToolbar />
 
             <div className="relative flex-1 min-h-0">
                 <div className="absolute inset-0 overflow-hidden">
-                    {flowMounted
-                        ? (
-                            <div className={canvasTabClass(isFlow)} aria-hidden={!isFlow} inert={!isFlow || undefined}>
-                                <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
-                                    <FlowDiagram active={isFlow} />
-                                </ErrorBoundary>
-                            </div>
-                        )
-                        : null}
-                    {mmdMounted
-                        ? (
-                            <div className={canvasTabClass(isMmd)} aria-hidden={!isMmd} inert={!isMmd || undefined}>
-                                <ErrorBoundary fallback={<PanelMessage>Failed to load the official Mermaid renderer.</PanelMessage>}>
-                                    <MermaidView active={isMmd} />
-                                </ErrorBoundary>
-                            </div>
-                        )
-                        : null}
-                    {isBmPreview
-                        ? (
-                            <ScrollArea2
-                                ref={scrollRef}
-                                className={classNames(
-                                    "h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full",
-                                    !overflow.y && "*:data-[orientation=vertical]:hidden",
-                                    !overflow.x && "*:data-[orientation=horizontal]:hidden",
-                                )}
-                                horizontal
-                                type="always"
-                            >
-                                <ErrorBoundary fallback={<PanelMessage>Failed to load the diagram renderer.</PanelMessage>}>
-                                    <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
-                                        <RenderView scrollRef={scrollRef} />
-                                    </Suspense>
-                                </ErrorBoundary>
-                            </ScrollArea2>
-                        )
-                        : null}
-
-                    {isBmPreview
-                        ? <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
-                        : null}
+                    <FlowPreview />
+                    <MmdPreview />
+                    <BmPreview />
                 </div>
             </div>
 
             <StatusBar />
             <LoadDialog />
         </div>
+    );
+}
+
+function FlowPreview() {
+    const { outputFormat } = useSnapshot(mermaidSettings);
+    const active = outputFormat === 'flow';
+    const mounted = useMountedOnce(active);
+    if (!mounted) {
+        return null;
+    }
+
+    return (
+        <div className={canvasTabClass(active)} aria-hidden={!active} inert={!active || undefined}>
+            <ErrorBoundary fallback={<PanelMessage>Failed to load the React Flow canvas.</PanelMessage>}>
+                <FlowDiagram active={active} />
+            </ErrorBoundary>
+        </div>
+    );
+}
+
+function MmdPreview() {
+    const { outputFormat } = useSnapshot(mermaidSettings);
+    const active = outputFormat === 'mmd';
+    const mounted = useMountedOnce(active);
+    if (!mounted) {
+        return null;
+    }
+
+    return (
+        <div className={canvasTabClass(active)} aria-hidden={!active} inert={!active || undefined}>
+            <ErrorBoundary fallback={<PanelMessage>Failed to load the official Mermaid renderer.</PanelMessage>}>
+                <MermaidView active={active} />
+            </ErrorBoundary>
+        </div>
+    );
+}
+
+function BmPreview() {
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const { zoom, outputFormat } = useSnapshot(mermaidSettings);
+    const overflow = useViewportOverflow(scrollRef, [outputFormat, zoom]);
+    if (outputFormat === 'flow' || outputFormat === 'mmd') {
+        return null;
+    }
+
+    return (
+        <>
+            <ScrollArea2
+                ref={scrollRef}
+                className={classNames(
+                    "h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full",
+                    !overflow.y && "*:data-[orientation=vertical]:hidden",
+                    !overflow.x && "*:data-[orientation=horizontal]:hidden",
+                )}
+                horizontal
+                type="always"
+            >
+                <ErrorBoundary fallback={<PanelMessage>Failed to load the diagram renderer.</PanelMessage>}>
+                    <Suspense fallback={<PanelMessage><BarsLoaderIcon /></PanelMessage>}>
+                        <RenderView scrollRef={scrollRef} />
+                    </Suspense>
+                </ErrorBoundary>
+            </ScrollArea2>
+
+            <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
+        </>
     );
 }
 
@@ -92,7 +110,7 @@ function useMountedOnce(active: boolean) {
     return mounted;
 }
 
-function PanelMessage({ children }: { children: React.ReactNode; }) {
+function PanelMessage({ children }: { children: ReactNode; }) {
     return (
         <div className="h-full text-xs text-muted-foreground flex items-center justify-center">
             {children}
