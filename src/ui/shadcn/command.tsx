@@ -25,13 +25,15 @@ export function CommandDialog({
 }: ComponentProps<typeof Dialog> & { title?: string; description?: string; className?: string; showCloseButton?: boolean; }) {
     return (
         <Dialog {...rest}>
-            <DialogHeader className="sr-only">
-                <DialogTitle>{title}</DialogTitle>
-                <DialogDescription>{description}</DialogDescription>
-            </DialogHeader>
-
             <DialogContent className={cn("top-1/3 p-0 rounded-xl! overflow-hidden translate-y-0", className)} noClose={!showCloseButton}>
-                {children}
+                <DialogHeader className="sr-only">
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
+                </DialogHeader>
+
+                <Command>
+                    {children}
+                </Command>
             </DialogContent>
         </Dialog>
     );
