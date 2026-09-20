@@ -10,7 +10,7 @@ import {
     setSourceIndex,
     sourceLink,
     type LinkIntensity,
-} from '@/store/6-source-render-links';
+} from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKeys } from './catalog-flow';
 
 const CARET_CLASS = 'is-source-link-caret';

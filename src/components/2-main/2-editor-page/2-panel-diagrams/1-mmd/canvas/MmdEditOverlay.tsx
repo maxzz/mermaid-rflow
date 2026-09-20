@@ -3,7 +3,7 @@ import { getDefaultStore, useAtom, useAtomValue } from 'jotai';
 import { subscribe, useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { selectFromDiagram, sourceLink } from '@/store/6-source-render-links';
+import { selectFromDiagram, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { classifyMermaidSource, isFlowchartDiagramType, readNodeLabel } from '../catalog/1-flowchart-source';
 import { addNode, connectNodes, deleteEdge, deleteNode, reconnectEdge, renameNode } from '../catalog/2-source-patch';
 import { applyMmdPatchResult } from '../catalog/4-apply-patch';

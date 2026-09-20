@@ -3,7 +3,7 @@ import { useSnapshot } from "valtio";
 import { toast } from "sonner";
 import { CopyIcon, DownloadIcon, FolderOpenIcon, ImageIcon, SaveIcon } from "lucide-react";
 import { mermaidSettings, type OutputFormat } from "@/store/2-mermaid-settings";
-import { renderDiagram } from "@/store/5-render-diagram/5-render";
+import { renderDiagram } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
 import { copyText } from "@/components/4-dialogs/2-export/8-export-utils";
 import { isOpenExportDialogAtom } from "@/components/4-dialogs/2-export/a-types-export";

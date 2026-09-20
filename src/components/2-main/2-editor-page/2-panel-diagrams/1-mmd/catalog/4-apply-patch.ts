@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { selectFromDiagram, sourceLink } from '@/store/6-source-render-links';
-import { captureMonacoView } from '@/components/2-main/2-editor-page/3-source-diagram-link/1-monaco/2-monaco-editor-handle';
+import { selectFromDiagram, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
+import { captureMonacoView } from '../../3-bm/1-source-diagram-link-monaco/2-monaco-editor-handle';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { parseCatalogEdgeKey } from './3-catalog-mmd';
 import { addNode, readEdgeStroke, readNodeStroke, setEdgeStroke, setNodeShape, setNodeStroke, type AddNodeOpts, type PatchResult } from './2-source-patch';

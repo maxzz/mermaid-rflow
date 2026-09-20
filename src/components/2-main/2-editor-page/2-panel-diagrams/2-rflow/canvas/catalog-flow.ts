@@ -1,5 +1,5 @@
 import { type Edge, type Node } from 'reactflow';
-import type { CatalogEntry } from '@/store/6-source-render-links';
+import type { CatalogEntry } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { isSubgraphNode, mermaidIdFromEndpoint, mermaidIdOf } from '../converter/mermaid-ids';
 
 export function catalogKeyForNode(node: Node): string {

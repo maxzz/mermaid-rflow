@@ -1,4 +1,4 @@
-import { escapeRegExp, lineWithoutComment } from '@/store/6-source-render-links';
+import { escapeRegExp, lineWithoutComment } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { collectFlowEdges } from './1-flowchart-source';
 
 export type LineDash = 'solid' | 'dashed' | 'dotted';

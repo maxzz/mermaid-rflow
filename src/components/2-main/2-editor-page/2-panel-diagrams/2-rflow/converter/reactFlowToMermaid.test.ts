@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { type Edge, type Node } from 'reactflow';
 import { catalogFlowGraph } from '../canvas/catalog-flow';
-import { buildSourceIndex } from '@/store/6-source-render-links';
+import { buildSourceIndex } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { classifyMermaidSource, extractHeader, reactFlowToMermaid } from './reactFlowToMermaid';
 
 function node(partial: Partial<Node> & Pick<Node, 'id'>): Node {

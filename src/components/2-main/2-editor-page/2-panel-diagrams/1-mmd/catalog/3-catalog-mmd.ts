@@ -2,7 +2,7 @@ import {
     SOURCE_LINK_HIT_ATTR,
     SOURCE_LINK_KEY_ATTR,
     type CatalogEntry,
-} from '@/store/6-source-render-links';
+} from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 
 export const MMD_TAGGED_SELECTOR = [
     'g.node',

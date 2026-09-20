@@ -1,7 +1,7 @@
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
-import { previewStatus } from "@/store/5-render-diagram/5-render";
+import { previewStatus } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { rflowDiagram } from "../2-rflow/store/1-flow-diagram";
 import { mmdDiagram } from "../1-mmd/store/1-mmd-diagram";
 

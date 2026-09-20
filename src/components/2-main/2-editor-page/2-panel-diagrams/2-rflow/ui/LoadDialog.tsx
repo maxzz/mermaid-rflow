@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/shadcn/dialog';
 import { Button } from '@/ui/shadcn/button';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { renderDiagram } from '@/store/5-render-diagram/5-render';
+import { renderDiagram } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render';
 import { loadBeautifulMermaid } from '@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules';
 import { restoreFlow } from '../store/1-flow-diagram';
 import { defaultLoadDialogUi, rflowLoadDialogOpenAtom, rflowLoadPreviewAtom, rflowLoadUiAtom } from '../store/2-flow-ui';
@@ -92,7 +92,7 @@ export function LoadDialog() {
                     <Button size="xs" onClick={onLoad} disabled={!selected}>Load</Button>
                 </div>
 
-                <div className="grid grid-cols-[minmax(0,14rem)_1fr] min-h-72 max-h-[28rem]">
+                <div className="grid grid-cols-[minmax(0,14rem)_1fr] min-h-72 max-h-112">
                     <div className="border-r overflow-y-auto">
                         {list.length === 0
                             ? (

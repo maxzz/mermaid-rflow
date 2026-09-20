@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import { PaintbrushIcon } from 'lucide-react';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { sourceLink } from '@/store/6-source-render-links';
+import { sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { classNames } from '@/utils';
 import { Button } from '@/ui/shadcn/button';
 import { Label } from '@/ui/shadcn/label';

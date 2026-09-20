@@ -5,8 +5,8 @@ import { appSettings } from "@/store/1-ui-settings";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { isThemeDark } from "@/utils/theme-utils";
 import { BarsLoaderIcon } from "@/ui/local-ui";
-import { useMonacoSourceLink } from "@/components/2-main/2-editor-page/3-source-diagram-link/1-monaco";
-import { restoreMonacoViewIfNeeded } from "@/components/2-main/2-editor-page/3-source-diagram-link/1-monaco/2-monaco-editor-handle";
+import { useMonacoSourceLink } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/1-source-diagram-link-monaco";
+import { restoreMonacoViewIfNeeded } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/1-source-diagram-link-monaco/2-monaco-editor-handle";
 import { MONACO_LANGUAGE_MERMAID, MONACO_THEME_DARK, MONACO_THEME_LIGHT } from "./3-monaco-setup";
 
 /**

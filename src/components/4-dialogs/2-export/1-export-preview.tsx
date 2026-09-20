@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { type ExportFormat, type PngScale } from "@/store/2-mermaid-settings";
-import { type RenderResult } from "@/store/5-render-diagram/5-render";
+import { type RenderResult } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { svgToPngBlob, type PngResult } from "@/components/4-dialogs/2-export/8-export-utils";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 import { DiagramText } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/7-diagram-text";

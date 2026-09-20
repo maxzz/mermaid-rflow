@@ -1,4 +1,4 @@
-import { SOURCE_LINK_HIT_ATTR, SOURCE_LINK_KEY_ATTR } from '@/store/6-source-render-links';
+import { SOURCE_LINK_HIT_ATTR, SOURCE_LINK_KEY_ATTR } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { edgeEndpointsFromDomId, mermaidIdFromDomId } from './3-catalog-mmd';
 
 export type MmdNodePos = { x: number; y: number; };

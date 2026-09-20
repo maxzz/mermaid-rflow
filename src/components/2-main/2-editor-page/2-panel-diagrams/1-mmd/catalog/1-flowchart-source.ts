@@ -1,4 +1,4 @@
-import { findToken, lineWithoutComment } from '@/store/6-source-render-links';
+import { findToken, lineWithoutComment } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 
 export type FlowDirection = 'TD' | 'TB' | 'BT' | 'LR' | 'RL';
 export const NODE_SHAPES = [

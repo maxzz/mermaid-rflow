@@ -12,9 +12,9 @@ import {
     SOURCE_LINK_KEY_ATTR,
     sourceLink,
     type LinkIntensity,
-} from '@/store/6-source-render-links';
+} from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { catalogMmdSvg, closestMmdTagged } from '../catalog/3-catalog-mmd';
-import '@/components/2-main/2-editor-page/3-source-diagram-link/2-diagram/8-highlight.css';
+import '../../3-bm/2-diagram/8-highlight.css';
 
 const CARET_CLASS = 'is-source-link-caret';
 const CLICK_CLASS = 'is-source-link-click';
