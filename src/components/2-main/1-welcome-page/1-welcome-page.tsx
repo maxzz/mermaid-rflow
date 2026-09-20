@@ -1,7 +1,7 @@
 import { useEffect, useId } from "react";
 import { useSnapshot } from "valtio";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
-import { AppPage, useNavigateToPage } from "@/store/4-ui-atoms";
+import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
 import { preloadEditorPageModules } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
 import { Button } from "@/ui/shadcn/button";
 import { Checkbox } from "@/ui/shadcn/checkbox";

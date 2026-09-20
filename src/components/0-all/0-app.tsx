@@ -2,7 +2,7 @@ import { ViewTransition } from 'react';
 import { useAtomValue } from 'jotai';
 import { Toaster } from '@/ui/shadcn/sonner';
 import { AllDialogs } from './1-globals';
-import { AppPage, pageAtom, TRANSITION_TYPE_TO_MAIN, TRANSITION_TYPE_TO_WELCOME } from '@/store/4-ui-atoms';
+import { AppPage, pageAtom, TRANSITION_TYPE_TO_MAIN, TRANSITION_TYPE_TO_WELCOME } from '@/store/4-ui-app-page-atoms';
 import { WelcomePage, EditorPage } from '../2-main';
 import './2-view-transitions.css';
 

@@ -1,4 +1,4 @@
-import { LoadDialog } from "../2-rflow/ui/LoadDialog";
+import { LoadDialog } from "../2-rflow/ui/6-dlg-load";
 import { PreviewToolbar } from "./2-preview-toolbar";
 import { StatusBar } from "./5-status-bar";
 import { Preview_Flow } from "../2-rflow/0-all-rflow/1-1-view-flow";

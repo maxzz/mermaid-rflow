@@ -57,10 +57,10 @@ import {
     unlockNodes,
 } from './diagramEditingUtils';
 import { CustomNode, DiamondNode, SubgraphNode } from './nodes';
-import { EditingToolbar } from '../ui/EditingToolbar';
+import { EditingToolbar } from '../ui/2-rflow-toolbar';
 import { PaletteToolbar } from '../ui/PaletteToolbar';
-import { EdgeLabelEditor } from '../ui/EdgeLabelEditor';
-import { NodeEditor } from '../ui/NodeEditor';
+import { EdgeLabelEditor } from '../ui/5-2-dlg-edge-label-editor';
+import { NodeEditor } from '../ui/5-1-dlg-node-editor';
 import { NodeSearchDialog } from '../ui/NodeSearchDialog';
 import { type AlignmentType, type DistributionType } from '../converter/constants';
 import { nextRfId } from '../converter/mermaid-ids';
