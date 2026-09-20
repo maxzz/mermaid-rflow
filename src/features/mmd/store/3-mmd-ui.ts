@@ -9,7 +9,10 @@ export type MmdInlineEdit = {
     w: number;
 };
 
+export type MmdPan = { x: number; y: number; };
+
 export const mmdZoomAtom = atom(1);
+export const mmdPanAtom = atom<MmdPan>({ x: 0, y: 0 });
 export const mmdPanModeAtom = atom(false);
 export const mmdNodeDraggingAtom = atom(false);
 export const mmdInlineEditAtom = atom<MmdInlineEdit | null>(null);

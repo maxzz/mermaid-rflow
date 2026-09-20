@@ -1,26 +1,24 @@
-import { type PointerEvent, type RefObject, type WheelEvent, useLayoutEffect, useRef, useState } from 'react';
-import { useAtomValue } from 'jotai';
+import { type PointerEvent, type RefObject, useLayoutEffect, useRef, useState } from 'react';
+import { getDefaultStore, useAtomValue } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { isThemeDark } from '@/utils/theme-utils';
 import { appSettings } from '@/store/1-ui-settings';
 import { ZOOM_STEP } from '@/store/2-mermaid-settings';
-import { ScrollArea2 } from '@/ui/shadcn/scroll-area';
 import { bindLastMermaidFunctions } from '../render/2-render-official';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { mmdSettings } from '../store/2-mmd-settings';
-import { mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
+import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
 import { MmdPaletteRail } from '../ui/MmdPaletteRail';
 import { MmdViewControls } from '../ui/MmdViewControls';
-import { fitMmdToView, setMmdZoom } from './mmd-zoom';
+import { fitMmdToView, measureMmdNaturalSize, setMmdPan, setMmdZoom } from './mmd-zoom';
 import { MmdEditOverlay } from './MmdEditOverlay';
 import { useMmdLayout } from './useMmdLayout';
 import { useMmdSourceLink } from './useMmdSourceLink';
 import '../styles/8-mmd-view.css';
 
 export function MermaidView({ active = true }: { active?: boolean; }) {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const paneRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
     const boardRef = useRef<HTMLDivElement>(null);
     const hostRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -28,6 +26,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
     const { autofit } = useSnapshot(mmdSettings);
     const { theme } = useSnapshot(appSettings);
     const zoom = useAtomValue(mmdZoomAtom);
+    const pan = useAtomValue(mmdPanAtom);
     const panMode = useAtomValue(mmdPanModeAtom);
     const dark = isThemeDark(theme);
     const enabled = !!svg && !error;
@@ -46,8 +45,8 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
 
     useMmdSourceLink({
         contentRef,
-        hostRef: paneRef,
-        scrollRef,
+        hostRef: viewportRef,
+        viewportRef,
         enabled,
         active,
         output: svg,
@@ -62,19 +61,11 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
 
     useLayoutEffect(
         () => {
-            const root = contentRef.current;
-            if (!root || !svg) {
+            if (!svg) {
                 setNatural({ w: 0, h: 0 });
                 return;
             }
-            const svgEl = root.querySelector('svg');
-            const w = svgEl instanceof SVGSVGElement
-                ? (svgEl.viewBox.baseVal.width || svgEl.width.baseVal.value || root.offsetWidth)
-                : root.offsetWidth;
-            const h = svgEl instanceof SVGSVGElement
-                ? (svgEl.viewBox.baseVal.height || svgEl.height.baseVal.value || root.offsetHeight)
-                : root.offsetHeight;
-            setNatural({ w, h });
+            setNatural(measureMmdNaturalSize(contentRef.current));
         },
         [svg],
     );
@@ -82,145 +73,146 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
     useLayoutEffect(
         () => {
             if (autofit && enabled && active) {
-                fitMmdToView(scrollRef.current, contentRef.current);
+                fitMmdToView(viewportRef.current, contentRef.current);
             }
         },
         [active, autofit, enabled, svg, natural.w, natural.h],
     );
 
-    const overflow = useViewportOverflow(scrollRef, [active, autofit, zoom, svg]);
-    const panHandlers = usePanToScroll(scrollRef, panMode);
+    useLayoutEffect(
+        () => {
+            const viewport = viewportRef.current;
+            if (!viewport || !autofit) {
+                return;
+            }
+            const ro = new ResizeObserver(() => {
+                if (mmdSettings.autofit) {
+                    fitMmdToView(viewport, contentRef.current);
+                }
+            });
+            ro.observe(viewport);
+            return () => ro.disconnect();
+        },
+        [autofit, enabled],
+    );
 
-    function onWheel(e: WheelEvent<HTMLDivElement>) {
-        if (!e.ctrlKey && !e.metaKey) {
-            return;
-        }
-        e.preventDefault();
-        mmdSettings.autofit = false;
-        setMmdZoom(e.deltaY < 0 ? zoom * ZOOM_STEP : zoom / ZOOM_STEP);
-    }
+    useLayoutEffect(
+        () => {
+            const viewport = viewportRef.current;
+            if (!viewport) {
+                return;
+            }
+            function onWheel(e: WheelEvent) {
+                e.preventDefault();
+                mmdSettings.autofit = false;
+                const store = getDefaultStore();
+                if (e.ctrlKey || e.metaKey) {
+                    const currentZoom = store.get(mmdZoomAtom);
+                    setMmdZoom(e.deltaY < 0 ? currentZoom * ZOOM_STEP : currentZoom / ZOOM_STEP, viewport);
+                    return;
+                }
+                const current = store.get(mmdPanAtom);
+                store.set(mmdPanAtom, { x: current.x - e.deltaX, y: current.y - e.deltaY });
+            }
+            viewport.addEventListener('wheel', onWheel, { passive: false });
+            return () => viewport.removeEventListener('wheel', onWheel);
+        },
+        [],
+    );
+
+    const panHandlers = usePanToTranslate(boardRef, panMode);
 
     return (
         <div className="relative h-full">
-            <div className="absolute inset-0">
-                <ScrollArea2
-                    ref={scrollRef}
-                    className={classNames(
-                        'h-full [&_[data-radix-scroll-area-viewport]>div]:min-h-full',
-                        dark ? 'mmd-grid-dark' : 'mmd-grid-light',
-                        panMode && 'cursor-grab select-none',
-                        !overflow.y && '*:data-[orientation=vertical]:hidden',
-                        !overflow.x && '*:data-[orientation=horizontal]:hidden',
-                    )}
-                    horizontal
-                    type="always"
-                >
-                    <div
-                        ref={paneRef}
-                        className="relative min-w-full min-h-full p-6 flex"
-                        onWheel={onWheel}
-                        {...panHandlers}
-                    >
-                    {error
-                        ? (
-                            <pre className="m-auto px-4 py-3 max-w-full text-xs font-code text-destructive bg-destructive/10 border border-destructive/30 rounded-md whitespace-pre-wrap">
+            <div
+                ref={viewportRef}
+                className={classNames(
+                    'absolute inset-0 overflow-hidden touch-none',
+                    dark ? 'mmd-grid-dark' : 'mmd-grid-light',
+                    panMode && 'cursor-grab select-none',
+                )}
+                {...panHandlers}
+            >
+                {error
+                    ? (
+                        <div className="absolute inset-0 p-6 flex items-center justify-center">
+                            <pre className="whitespace-pre-wrap px-4 py-3 max-w-full text-xs font-code text-destructive bg-destructive/10 border border-destructive/30 rounded-md">
                                 {error}
                             </pre>
+                        </div>
+                    )
+                    : !svg
+                        ? (
+                            <div className="absolute inset-0 text-sm text-muted-foreground flex items-center justify-center">
+                                Start typing to render your diagram
+                            </div>
                         )
-                        : !svg
-                            ? (
-                                <div className="m-auto text-sm text-muted-foreground">
-                                    Start typing to render your diagram
-                                </div>
-                            )
-                            : (
+                        : (
+                            <div
+                                ref={boardRef}
+                                className="absolute top-0 left-0"
+                                style={natural.w > 0 && natural.h > 0
+                                    ? {
+                                        width: natural.w * zoom,
+                                        height: natural.h * zoom,
+                                        transform: `translate(${pan.x}px, ${pan.y}px)`,
+                                    }
+                                    : undefined}
+                            >
                                 <div
-                                    ref={boardRef}
-                                    className="relative m-auto"
+                                    ref={hostRef}
+                                    className="relative origin-top-left"
                                     style={natural.w > 0 && natural.h > 0
-                                        ? { width: natural.w * zoom, height: natural.h * zoom }
+                                        ? { width: natural.w, height: natural.h, transform: `scale(${zoom})` }
                                         : undefined}
                                 >
                                     <div
-                                        ref={hostRef}
-                                        className="relative origin-top-left"
-                                        style={natural.w > 0 && natural.h > 0
-                                            ? { width: natural.w, height: natural.h, transform: `scale(${zoom})` }
-                                            : undefined}
-                                    >
-                                        <div
-                                            ref={contentRef}
-                                            className="mmd-host"
-                                            dangerouslySetInnerHTML={{ __html: svg }}
-                                        />
-                                    </div>
-                                    <div className="absolute inset-0 z-5 pointer-events-none">
-                                        <MmdEditOverlay
-                                            hostRef={boardRef}
-                                            contentRef={contentRef}
-                                            enabled={enabled}
-                                            active={active}
-                                            layoutKey={`${natural.w}x${natural.h}:${zoom}`}
-                                        />
-                                    </div>
+                                        ref={contentRef}
+                                        className="mmd-host"
+                                        dangerouslySetInnerHTML={{ __html: svg }}
+                                    />
                                 </div>
-                            )}
-                    </div>
-                </ScrollArea2>
+                                <div className="absolute inset-0 z-5 pointer-events-none">
+                                    <MmdEditOverlay
+                                        hostRef={boardRef}
+                                        contentRef={contentRef}
+                                        enabled={enabled}
+                                        active={active}
+                                        layoutKey={`${natural.w}x${natural.h}:${zoom}`}
+                                    />
+                                </div>
+                            </div>
+                        )}
             </div>
             <MmdPaletteRail />
-            <MmdViewControls scrollRef={scrollRef} contentRef={contentRef} />
+            <MmdViewControls viewportRef={viewportRef} contentRef={contentRef} />
         </div>
     );
 }
 
-function useViewportOverflow(ref: RefObject<HTMLElement | null>, deps: unknown[]) {
-    const [overflow, setOverflow] = useState({ x: false, y: false });
-
-    useLayoutEffect(
-        () => {
-            const el = ref.current;
-            if (!el) {
-                return;
-            }
-
-            const check = () => {
-                setOverflow({
-                    x: el.scrollWidth > el.clientWidth + 1,
-                    y: el.scrollHeight > el.clientHeight + 1,
-                });
-            };
-
-            check();
-            const ro = new ResizeObserver(check);
-            ro.observe(el);
-            if (el.firstElementChild) {
-                ro.observe(el.firstElementChild);
-            }
-            return () => ro.disconnect();
-        },
-        deps);
-
-    return overflow;
-}
-
-function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: boolean) {
-    const dragRef = useRef<{ x: number; y: number; left: number; top: number; pointerId: number; } | null>(null);
+function usePanToTranslate(boardRef: RefObject<HTMLDivElement | null>, panMode: boolean) {
+    const dragRef = useRef<{
+        x: number;
+        y: number;
+        panX: number;
+        panY: number;
+        pointerId: number;
+        curX: number;
+        curY: number;
+    } | null>(null);
 
     function onPointerDown(e: PointerEvent<HTMLDivElement>) {
-        const el = scrollRef.current;
         const middleButton = e.button === 1;
-        if (!el || (e.button !== 0 && !middleButton)) {
+        if (e.button !== 0 && !middleButton) {
             return;
         }
-        // Without pan tool: only empty canvas pans (hits / chrome keep select & edit).
         if (!panMode && !middleButton && e.target instanceof Element
             && e.target.closest('[data-mmd-hit], [data-mmd-chrome], [data-mmd-edge], g.node')) {
             return;
         }
         e.preventDefault();
         mmdSettings.autofit = false;
-        // Capture on the pane (handler host), not the viewport — otherwise move/up never reach us.
+        const pan = getDefaultStore().get(mmdPanAtom);
         try {
             e.currentTarget.setPointerCapture(e.pointerId);
         }
@@ -230,21 +222,28 @@ function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: bo
         dragRef.current = {
             x: e.clientX,
             y: e.clientY,
-            left: el.scrollLeft,
-            top: el.scrollTop,
+            panX: pan.x,
+            panY: pan.y,
             pointerId: e.pointerId,
+            curX: pan.x,
+            curY: pan.y,
         };
         e.currentTarget.style.cursor = 'grabbing';
     }
 
     function onPointerMove(e: PointerEvent<HTMLDivElement>) {
-        const el = scrollRef.current;
         const drag = dragRef.current;
-        if (!el || !drag || e.pointerId !== drag.pointerId) {
+        const board = boardRef.current;
+        if (!drag || e.pointerId !== drag.pointerId) {
             return;
         }
-        el.scrollLeft = drag.left - (e.clientX - drag.x);
-        el.scrollTop = drag.top - (e.clientY - drag.y);
+        const x = drag.panX + (e.clientX - drag.x);
+        const y = drag.panY + (e.clientY - drag.y);
+        drag.curX = x;
+        drag.curY = y;
+        if (board) {
+            board.style.transform = `translate(${x}px, ${y}px)`;
+        }
     }
 
     function onPointerUp(e: PointerEvent<HTMLDivElement>) {
@@ -252,6 +251,7 @@ function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: bo
         if (!drag || e.pointerId !== drag.pointerId) {
             return;
         }
+        setMmdPan({ x: drag.curX, y: drag.curY });
         try {
             if (e.currentTarget.hasPointerCapture(e.pointerId)) {
                 e.currentTarget.releasePointerCapture(e.pointerId);

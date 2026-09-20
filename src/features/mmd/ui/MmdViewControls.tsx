@@ -10,10 +10,10 @@ import { mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
 import { fitMmdToView, setMmdZoom } from '../canvas/mmd-zoom';
 
 export function MmdViewControls({
-    scrollRef,
+    viewportRef,
     contentRef,
 }: {
-    scrollRef: RefObject<HTMLDivElement | null>;
+    viewportRef: RefObject<HTMLDivElement | null>;
     contentRef: RefObject<HTMLDivElement | null>;
 }) {
     const [zoom] = useAtom(mmdZoomAtom);
@@ -42,7 +42,7 @@ export function MmdViewControls({
                 size="icon-sm"
                 onClick={() => {
                     mmdSettings.autofit = false;
-                    setMmdZoom(zoom * ZOOM_STEP);
+                    setMmdZoom(zoom * ZOOM_STEP, viewportRef.current);
                 }}
                 disabled={zoom >= ZOOM_MAX}
                 title="Zoom in"
@@ -54,7 +54,7 @@ export function MmdViewControls({
                 size="icon-sm"
                 onClick={() => {
                     mmdSettings.autofit = false;
-                    setMmdZoom(zoom / ZOOM_STEP);
+                    setMmdZoom(zoom / ZOOM_STEP, viewportRef.current);
                 }}
                 disabled={zoom <= ZOOM_MIN}
                 title="Zoom out"
@@ -67,19 +67,21 @@ export function MmdViewControls({
                 className="text-[0.6rem] font-medium"
                 onClick={() => {
                     mmdSettings.autofit = false;
-                    setMmdZoom(1);
+                    setMmdZoom(1, viewportRef.current);
                 }}
                 title="Reset zoom to 100%"
             >
                 1:1
             </Button>
             <Button
+                className={classNames(autofit && 'bg-muted text-foreground')}
                 variant="ghost"
                 size="icon-sm"
                 title={autofit ? 'Fit (autofit on)' : 'Fit to view'}
+                aria-pressed={autofit}
                 onClick={() => {
                     mmdSettings.autofit = true;
-                    fitMmdToView(scrollRef.current, contentRef.current);
+                    fitMmdToView(viewportRef.current, contentRef.current);
                 }}
             >
                 <MaximizeIcon />

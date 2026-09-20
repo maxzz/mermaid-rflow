@@ -1,6 +1,8 @@
 import { type RefObject, useLayoutEffect } from 'react';
+import { getDefaultStore } from 'jotai';
 import { subscribe } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
+import { mmdPanAtom } from '../store/3-mmd-ui';
 import {
     buildSourceIndex,
     clearSelection,
@@ -22,14 +24,14 @@ const CLICK_SLOP_PX = 4;
 export type MmdSourceLinkArgs = {
     contentRef: RefObject<HTMLElement | null>;
     hostRef: RefObject<HTMLElement | null>;
-    scrollRef: RefObject<HTMLElement | null>;
+    viewportRef: RefObject<HTMLElement | null>;
     enabled: boolean;
     active: boolean;
     output: string;
     panMode: boolean;
 };
 
-export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, active, output, panMode }: MmdSourceLinkArgs) {
+export function useMmdSourceLink({ contentRef, hostRef, viewportRef, enabled, active, output, panMode }: MmdSourceLinkArgs) {
     const live = enabled && active;
 
     useLayoutEffect(
@@ -50,7 +52,7 @@ export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, acti
                     return;
                 }
                 applyHighlight(next, sourceLink.keys, sourceLink.intensity);
-                lastScrollSig = maybeScrollIntoView(next, lastScrollSig);
+                lastScrollSig = maybePanIntoView(next, viewportRef.current, lastScrollSig);
             });
 
             return () => {
@@ -73,7 +75,7 @@ export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, acti
             if (!host || !live) {
                 return;
             }
-            return attachPanSafeClick(host, scrollRef.current, (target) => {
+            return attachPanSafeClick(host, viewportRef.current, (target) => {
                 if (!(target instanceof Element)) {
                     clearSelection();
                     return;
@@ -123,7 +125,7 @@ function applyHighlight(root: Element, keys: string[], intensity: LinkIntensity)
     }
 }
 
-function maybeScrollIntoView(root: Element, lastSig: string): string {
+function maybePanIntoView(root: Element, viewport: HTMLElement | null, lastSig: string): string {
     if (sourceLink.origin !== 'editor' || sourceLink.intensity !== 'click' || !sourceLink.keys.length) {
         return lastSig;
     }
@@ -133,7 +135,30 @@ function maybeScrollIntoView(root: Element, lastSig: string): string {
     }
     const el = firstHighlighted(root, sourceLink.keys);
     const shape = el?.querySelector('rect, polygon, circle, path, polyline, line, ellipse') ?? el;
-    shape?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    if (shape && viewport) {
+        const er = shape.getBoundingClientRect();
+        const vr = viewport.getBoundingClientRect();
+        const pad = 16;
+        let dx = 0;
+        let dy = 0;
+        if (er.left < vr.left + pad) {
+            dx = vr.left + pad - er.left;
+        }
+        else if (er.right > vr.right - pad) {
+            dx = vr.right - pad - er.right;
+        }
+        if (er.top < vr.top + pad) {
+            dy = vr.top + pad - er.top;
+        }
+        else if (er.bottom > vr.bottom - pad) {
+            dy = vr.bottom - pad - er.bottom;
+        }
+        if (dx || dy) {
+            const store = getDefaultStore();
+            const pan = store.get(mmdPanAtom);
+            store.set(mmdPanAtom, { x: pan.x + dx, y: pan.y + dy });
+        }
+    }
     return sig;
 }
 
