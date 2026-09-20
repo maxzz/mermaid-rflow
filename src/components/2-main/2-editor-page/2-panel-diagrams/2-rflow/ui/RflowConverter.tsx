@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { useDebouncedValue } from '@/utils/util-hooks/useDebouncedValue';
+import { useDebouncedValue } from '@/utils/util-hooks/use-debounced-value';
 import { convertMermaidToReactFlow } from '../converter';
 import { rflowDiagram } from '../store/1-flow-diagram';
 

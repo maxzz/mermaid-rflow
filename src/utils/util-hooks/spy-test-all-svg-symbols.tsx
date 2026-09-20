@@ -1,7 +1,7 @@
 import { type HTMLAttributes, useEffect, useState } from "react";
 import { classNames } from "@/utils";
 
-export function SpyTestAllSvgSymbols({ fontID = "svgfont", className, ...rest  }: { fontID?: string; } & HTMLAttributes<HTMLDivElement>) {
+export function SpyTestAllSvgSymbols({ fontID = "svgfont", className, ...rest }: { fontID?: string; } & HTMLAttributes<HTMLDivElement>) {
 
     const [ids, setIds] = useState<string[]>([]);
 
@@ -10,8 +10,7 @@ export function SpyTestAllSvgSymbols({ fontID = "svgfont", className, ...rest  }
             const fontElChildren = document.querySelector(`#${fontID} > defs`)?.children;
             const ids = (fontElChildren ? [...fontElChildren] : []).map(item => item.id);
             setIds(ids);
-        }, []
-    );
+        }, []);
 
     if (!ids.length) {
         return null;

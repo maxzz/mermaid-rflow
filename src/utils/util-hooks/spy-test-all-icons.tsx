@@ -7,15 +7,16 @@ export function SpyTestAllIcons({ allIcons, className, ...rest }: { allIcons: Al
     const [printIcons, setPrintIcons] = useState(false);
     useEffect(
         () => {
-            setPrintIcons((v) => {
-                if (!v) {
-                    print_IconsLocation(allIcons);
-                    return !v;
+            setPrintIcons(
+                (v) => {
+                    if (!v) {
+                        print_IconsLocation(allIcons);
+                        return !v;
+                    }
+                    return v;
                 }
-                return v;
-            });
-        }, [printIcons, allIcons]
-    );
+            );
+        }, [printIcons, allIcons]);
 
     return (
         <div className={classNames("flex flex-wrap gap-2", className)} {...rest}>

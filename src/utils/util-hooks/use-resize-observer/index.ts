@@ -7,8 +7,8 @@ import {
     type RefCallback,
     useCallback,
 } from "react";
-import useResolvedElement from "./utils/useResolvedElement";
-import extractSize from "./utils/extractSize";
+import useResolvedElement from "./utils/use-resolved-element";
+import extractSize from "./utils/extract-size";
 
 export type ObservedSize = {
     width: number | undefined;

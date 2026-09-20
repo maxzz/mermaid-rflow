@@ -7,7 +7,7 @@ import { Button } from "@/ui/shadcn/button";
 
 import { mermaidSettings, setZoom, zoomIn, zoomOut, ZOOM_MAX, ZOOM_MIN } from "@/store/2-mermaid-settings";
 
-export function ZoomControls({ scrollRef, className, ...rest }: ComponentProps<'div'> & { scrollRef: RefObject<HTMLDivElement | null> }) {
+export function ZoomControls_Bm({ scrollRef, className, ...rest }: ComponentProps<'div'> & { scrollRef: RefObject<HTMLDivElement | null> }) {
     const { zoom } = useSnapshot(mermaidSettings);
     const [panMode, setPanMode] = useAtom(panModeAtom);
 

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { proxy } from 'valtio';
 import { type AsciiRenderOptions, type DiagramColors, type RenderOptions } from 'beautiful-mermaid'; // `import type` only: keep the lazy chunk lazy
 import { type BeautifulMermaidModule } from '@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules';
@@ -136,18 +135,4 @@ export function publishPreviewStatus(result: RenderResult) {
     previewStatus.error = result.error;
     previewStatus.ms = result.ms;
     previewStatus.empty = !result.output && !result.error;
-}
-
-/** Debounced value: re-rendering the diagram on every keystroke is wasteful. */
-export function useDebouncedValue<T>(value: T, delayMs: number): T {
-    const [debounced, setDebounced] = useState(value);
-
-    useEffect(
-        () => {
-            const id = setTimeout(() => setDebounced(value), delayMs);
-            return () => clearTimeout(id);
-        },
-        [value, delayMs]);
-
-    return debounced;
 }

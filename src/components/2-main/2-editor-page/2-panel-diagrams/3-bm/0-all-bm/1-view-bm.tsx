@@ -1,16 +1,16 @@
 import { Suspense, useRef } from "react";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
-import { useViewportOverflow } from "@/utils/local/use-viewport-overflow";
+import { useViewportOverflow } from "@/utils/util-hooks/use-viewport-overflow";
 import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { ScrollArea2 } from "@/ui/shadcn/scroll-area";
 import { RenderView } from "../1-3-1-render-view";
-import { ZoomControls } from "../1-3-2-zoom-controls";
+import { ZoomControls_Bm } from "../1-3-2-zoom-controls-bm";
 import { PanelFallbackMessage } from "../../../../../../ui/local-ui/1-4-view-shared";
 
-export function Preview_BeautifullMarmaid() {
+export function Preview_Bm() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { zoom, outputFormat } = useSnapshot(mermaidSettings);
     const overflow = useViewportOverflow(scrollRef, [outputFormat, zoom]);
@@ -37,6 +37,6 @@ export function Preview_BeautifullMarmaid() {
             </ErrorBoundary>
         </ScrollArea2>
 
-        <ZoomControls scrollRef={scrollRef} className="absolute left-4 bottom-4" />
+        <ZoomControls_Bm scrollRef={scrollRef} className="absolute left-4 bottom-4" />
     </>);
 }

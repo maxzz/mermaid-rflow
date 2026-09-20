@@ -6,7 +6,7 @@ import { Button } from '@/ui/shadcn/button';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { MmdOptionsPopover } from './MmdOptionsPopover';
 
-export function MmdToolbarActions() {
+export function PreviewToolbar_Mmd() {
     const { svg, error } = useSnapshot(mmdDiagram);
 
     return (

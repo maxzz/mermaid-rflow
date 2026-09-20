@@ -4,10 +4,11 @@ import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 
 import { mermaidSettings, OutputFormat, setZoom, ZOOM_STEP } from "@/store/2-mermaid-settings";
-import { publishPreviewStatus, renderDiagram, useDebouncedValue } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
+import { publishPreviewStatus, renderDiagram } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
-import { usePreviewSourceLink } from "./2-source-diagram-link-diagram";
-import { panModeAtom, PREVIEW_CONTENT_ATTR } from "./1-3-2-zoom-controls";
+import { useDebouncedValue } from "@/utils/util-hooks/use-debounced-value";
+import { usePreviewSourceLink } from "./5-2-source-diagram-link-diagram";
+import { panModeAtom, PREVIEW_CONTENT_ATTR } from "./1-3-2-zoom-controls-bm";
 import { DiagramText } from "./7-diagram-text";
 
 const RENDER_DEBOUNCE_MS = 300;

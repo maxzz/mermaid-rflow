@@ -15,7 +15,7 @@ import {
     buildSourceIndex,
     type LinkIntensity,
 } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links";
-import "./8-highlight.css";
+import "./8-highlight-diagram.css";
 
 const CARET_CLASS = "is-source-link-caret";
 const CLICK_CLASS = "is-source-link-click";

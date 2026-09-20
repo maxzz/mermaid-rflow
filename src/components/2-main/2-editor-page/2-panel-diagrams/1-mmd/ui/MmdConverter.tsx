@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { appSettings } from '@/store/1-ui-settings';
 import { mermaidSettings, OutputFormat } from '@/store/2-mermaid-settings';
-import { useDebouncedValue } from '@/utils/util-hooks/useDebouncedValue';
+import { useDebouncedValue } from '@/utils/util-hooks/use-debounced-value';
 import { isThemeDark } from '@/utils/theme-utils';
 import { mmdDiagram } from '../store/1-mmd-diagram';
 import { mmdSettings } from '../store/2-mmd-settings';
