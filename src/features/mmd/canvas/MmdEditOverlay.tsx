@@ -1,6 +1,7 @@
 import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useLayoutEffect, useState } from 'react';
 import { getDefaultStore, useAtom, useAtomValue } from 'jotai';
 import { useSnapshot } from 'valtio';
+import { classNames } from '@/utils';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { selectFromDiagram, sourceLink } from '@/store/6-source-render-links';
 import { classifyMermaidSource, isFlowchartDiagramType, readNodeLabel } from '../catalog/1-flowchart-source';
@@ -183,7 +184,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
     const selectedEdge = selectedEdgeKey ? edges.find((edge) => edge.key === selectedEdgeKey) : undefined;
 
     function onEdgePointerDown(e: ReactPointerEvent<SVGPolylineElement>, key: string) {
-        if (e.button !== 0) {
+        if (e.button !== 0 || panMode) {
             return;
         }
         e.preventDefault();
@@ -234,15 +235,12 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
     }
 
     function onNodePointerDown(e: ReactPointerEvent<HTMLButtonElement>, id: string) {
-        if (e.button !== 0) {
+        if (e.button !== 0 || panMode) {
             return;
         }
         e.preventDefault();
         e.stopPropagation();
         selectFromDiagram([`node:${id}`]);
-        if (panMode) {
-            return;
-        }
         const root = contentRef.current;
         const svgEl = root?.querySelector('svg');
         const nodeEl = root ? nodeElementById(root, id) : null;
@@ -287,6 +285,9 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
     }
 
     function onHandlePointerDown(e: ReactPointerEvent<HTMLButtonElement>, fromId: string, box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
+        if (panMode) {
+            return;
+        }
         e.preventDefault();
         e.stopPropagation();
         const host = hostRef.current;
@@ -356,7 +357,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                                 strokeWidth={14}
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                pointerEvents="stroke"
+                                pointerEvents={panMode ? 'none' : 'stroke'}
                                 onPointerDown={(e) => onEdgePointerDown(e, edge.key)}
                             />
                             {selectedLine && (
@@ -386,7 +387,10 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                         aria-label={`Select ${box.id}`}
                         aria-pressed={selectedBox}
                         title="Drag to move. Double-click to rename."
-                        className="mmd-hit absolute z-5 rounded-sm bg-transparent cursor-grab active:cursor-grabbing pointer-events-auto"
+                        className={classNames(
+                            'mmd-hit absolute z-5 rounded-sm bg-transparent cursor-grab active:cursor-grabbing',
+                            panMode ? 'pointer-events-none' : 'pointer-events-auto',
+                        )}
                         style={{
                             left: box.x,
                             top: box.y,
@@ -403,7 +407,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                     />
                 );
             })}
-            {selected && !dragging && !selectedEdge && HANDLES.map(({ side }) => {
+            {selected && !dragging && !selectedEdge && !panMode && HANDLES.map(({ side }) => {
                 const pos = handleStyle(selected, side);
                 return (
                     <button
@@ -418,7 +422,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                     />
                 );
             })}
-            {selectedEdge && !dragging && (
+            {selectedEdge && !dragging && !panMode && (
                 <>
                     <EndpointHandle
                         pt={selectedEdge.points[0]!}

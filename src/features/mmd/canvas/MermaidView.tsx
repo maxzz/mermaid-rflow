@@ -85,7 +85,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                 fitMmdToView(scrollRef.current, contentRef.current);
             }
         },
-        [active, autofit, enabled, svg],
+        [active, autofit, enabled, svg, natural.w, natural.h],
     );
 
     const overflow = useViewportOverflow(scrollRef, [active, autofit, zoom, svg]);
@@ -205,7 +205,7 @@ function useViewportOverflow(ref: RefObject<HTMLElement | null>, deps: unknown[]
 }
 
 function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: boolean) {
-    const dragRef = useRef<{ x: number; y: number; left: number; top: number; } | null>(null);
+    const dragRef = useRef<{ x: number; y: number; left: number; top: number; pointerId: number; } | null>(null);
 
     function onPointerDown(e: PointerEvent<HTMLDivElement>) {
         const el = scrollRef.current;
@@ -213,22 +213,34 @@ function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: bo
         if (!el || (e.button !== 0 && !middleButton)) {
             return;
         }
-        if (e.button === 0 && !panMode && e.target instanceof Element && e.target.closest('[data-mmd-hit], [data-mmd-chrome]')) {
-            return;
-        }
-        if (!panMode && !middleButton && e.target instanceof Element && e.target.closest('g.node, [data-mmd-hit]')) {
+        // Without pan tool: only empty canvas pans (hits / chrome keep select & edit).
+        if (!panMode && !middleButton && e.target instanceof Element
+            && e.target.closest('[data-mmd-hit], [data-mmd-chrome], [data-mmd-edge], g.node')) {
             return;
         }
         e.preventDefault();
-        el.setPointerCapture(e.pointerId);
-        dragRef.current = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop };
-        el.style.cursor = 'grabbing';
+        mmdSettings.autofit = false;
+        // Capture on the pane (handler host), not the viewport — otherwise move/up never reach us.
+        try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+        }
+        catch {
+            // window path below still works if capture is unavailable
+        }
+        dragRef.current = {
+            x: e.clientX,
+            y: e.clientY,
+            left: el.scrollLeft,
+            top: el.scrollTop,
+            pointerId: e.pointerId,
+        };
+        e.currentTarget.style.cursor = 'grabbing';
     }
 
     function onPointerMove(e: PointerEvent<HTMLDivElement>) {
         const el = scrollRef.current;
         const drag = dragRef.current;
-        if (!el || !drag) {
+        if (!el || !drag || e.pointerId !== drag.pointerId) {
             return;
         }
         el.scrollLeft = drag.left - (e.clientX - drag.x);
@@ -236,11 +248,19 @@ function usePanToScroll(scrollRef: RefObject<HTMLDivElement | null>, panMode: bo
     }
 
     function onPointerUp(e: PointerEvent<HTMLDivElement>) {
-        const el = scrollRef.current;
-        if (el && dragRef.current) {
-            el.releasePointerCapture(e.pointerId);
-            el.style.cursor = '';
+        const drag = dragRef.current;
+        if (!drag || e.pointerId !== drag.pointerId) {
+            return;
         }
+        try {
+            if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+                e.currentTarget.releasePointerCapture(e.pointerId);
+            }
+        }
+        catch {
+            // ignore
+        }
+        e.currentTarget.style.cursor = '';
         dragRef.current = null;
     }
 
