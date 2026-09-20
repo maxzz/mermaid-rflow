@@ -80,11 +80,11 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
 
     useLayoutEffect(
         () => {
-            if (autofit && enabled) {
+            if (autofit && enabled && active) {
                 fitMmdToView(scrollRef.current, contentRef.current);
             }
         },
-        [autofit, enabled, svg],
+        [active, autofit, enabled, svg],
     );
 
     const panHandlers = usePanToScroll(scrollRef, panMode);
@@ -145,7 +145,13 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                                         />
                                     </div>
                                     <div className="absolute inset-0 z-5 pointer-events-none">
-                                        <MmdEditOverlay hostRef={boardRef} contentRef={contentRef} enabled={enabled} active={active} />
+                                        <MmdEditOverlay
+                                            hostRef={boardRef}
+                                            contentRef={contentRef}
+                                            enabled={enabled}
+                                            active={active}
+                                            layoutKey={`${natural.w}x${natural.h}:${zoom}`}
+                                        />
                                     </div>
                                 </div>
                             )}

@@ -32,6 +32,7 @@ export type MmdEditOverlayProps = {
     contentRef: RefObject<HTMLElement | null>;
     enabled: boolean;
     active?: boolean;
+    layoutKey?: string;
 };
 
 type DragLine = { x1: number; y1: number; x2: number; y2: number; };
@@ -43,7 +44,7 @@ const HANDLES: { side: 'top' | 'right' | 'bottom' | 'left'; }[] = [
     { side: 'left' },
 ];
 
-export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: MmdEditOverlayProps) {
+export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, layoutKey = '' }: MmdEditOverlayProps) {
     const { source } = useSnapshot(mermaidSettings);
     const { svg, diagramType } = useSnapshot(mmdDiagram);
     const { autofit } = useSnapshot(mmdSettings);
@@ -66,69 +67,78 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
 
     useLayoutEffect(
         () => {
-            const host = hostRef.current;
-            const root = contentRef.current;
-            if (!host || !root || !enabled || !flowchart || !active) {
+            if (!enabled || !flowchart || !active) {
                 return;
             }
-            applyMmdLayout(root, mmdLayout.nodes);
-            setBoxes(measureMmdNodeBoxes(root, host).map(padHitBox));
-            setEdges(measureMmdEdges(root, host));
-        },
-        [active, autofit, contentRef, enabled, flowchart, hostRef, layout.nodes, svg, zoom],
-    );
 
-    useLayoutEffect(
-        () => {
-            const host = hostRef.current;
-            const root = contentRef.current;
-            if (!host || !root || !enabled || !flowchart || !active) {
-                return;
-            }
-            const pane = host;
-            const live = root;
             let cancelled = false;
+            let raf = 0;
             let attempts = 0;
-            function syncBoxes() {
-                if (cancelled || !pane.getClientRects().length) {
-                    return;
+            let ro: ResizeObserver | undefined;
+
+            function syncBoxes(): boolean {
+                const pane = hostRef.current;
+                const live = contentRef.current;
+                if (cancelled || !pane || !live || !pane.getClientRects().length) {
+                    return false;
                 }
                 applyMmdLayout(live, mmdLayout.nodes);
-                setBoxes(measureMmdNodeBoxes(live, pane).map(padHitBox));
-                setEdges(measureMmdEdges(live, pane));
+                const nextBoxes = measureMmdNodeBoxes(live, pane).map(padHitBox);
+                const nextEdges = measureMmdEdges(live, pane);
+                setBoxes(nextBoxes);
+                setEdges(nextEdges);
+                return nextBoxes.length > 0;
             }
+
+            function observe() {
+                const pane = hostRef.current;
+                const live = contentRef.current;
+                if (!pane || !live || ro) {
+                    return;
+                }
+                ro = new ResizeObserver(() => {
+                    syncBoxes();
+                });
+                ro.observe(pane);
+                ro.observe(live);
+                const svgEl = live.querySelector('svg');
+                if (svgEl) {
+                    ro.observe(svgEl);
+                }
+                if (pane.parentElement) {
+                    ro.observe(pane.parentElement);
+                }
+            }
+
             function pump() {
                 if (cancelled) {
                     return;
                 }
-                syncBoxes();
-                attempts += 1;
-                if (attempts < 12 && measureMmdNodeBoxes(live, pane).length === 0) {
-                    requestAnimationFrame(pump);
+                observe();
+                if (syncBoxes() || attempts >= 60) {
+                    return;
                 }
+                attempts += 1;
+                raf = requestAnimationFrame(pump);
             }
-            const svgEl = live.querySelector('svg');
-            const ro = new ResizeObserver(syncBoxes);
-            ro.observe(pane);
-            ro.observe(live);
-            if (svgEl) {
-                ro.observe(svgEl);
-            }
-            for (const node of live.querySelectorAll('g.node')) {
-                ro.observe(node);
-            }
-            for (const path of live.querySelectorAll('path.flowchart-link')) {
-                ro.observe(path);
-            }
+
             pump();
-            const timeout = window.setTimeout(syncBoxes, 250);
+            const timeout = window.setTimeout(pump, 400);
+            void document.fonts?.ready.then(() => {
+                if (!cancelled) {
+                    observe();
+                    syncBoxes();
+                }
+            });
+
             return () => {
                 cancelled = true;
-                ro.disconnect();
+                cancelAnimationFrame(raf);
+                ro?.disconnect();
                 window.clearTimeout(timeout);
             };
         },
-        [active, contentRef, enabled, flowchart, hostRef, svg],
+        [active, autofit, contentRef, enabled, flowchart, hostRef, layout.nodes, layoutKey, svg, zoom],
     );
 
     useEffect(

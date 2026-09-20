@@ -2,7 +2,7 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  * React Flow canvas bound to Valtio graph state and Jotai chrome.
  */
-import { useCallback, useEffect, useMemo, useRef, type MouseEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { toast } from 'sonner';
@@ -86,7 +86,7 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 
 /** reactflow@11 checks type keys inside useMemo; React Strict Mode runs that callback twice and false-positives error 002. */
 function onReactFlowError(id: string, message: string) {
-    if (id === '002') {
+    if (id === '002' || id === '004') {
         return;
     }
     console.warn(`[React Flow]: ${message} Help: https://reactflow.dev/error#${id}`);
@@ -106,6 +106,24 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const isDark = isThemeDark(theme);
     const reactFlowInstance = useReactFlow();
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
+    const [hasBox, setHasBox] = useState(false);
+
+    useLayoutEffect(
+        () => {
+            const el = reactFlowWrapper.current;
+            if (!el) {
+                return;
+            }
+            const update = () => {
+                setHasBox(el.clientWidth > 0 && el.clientHeight > 0);
+            };
+            update();
+            const ro = new ResizeObserver(update);
+            ro.observe(el);
+            return () => ro.disconnect();
+        },
+        [],
+    );
 
     const [selectedNodes, setSelectedNodes] = useAtom(rflowSelectedNodesAtom);
     const [selectedEdges, setSelectedEdges] = useAtom(rflowSelectedEdgesAtom);
@@ -408,7 +426,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
 
             <div
                 ref={reactFlowWrapper}
-                className={classNames('relative h-full flex flex-col', isDragging && 'dragging', isDark && 'dark')}
+                className={classNames('relative w-full h-full flex flex-col', isDragging && 'dragging', isDark && 'dark')}
             >
                 <div className="px-2 py-1.5 border-b border-border bg-muted/20 shrink-0 flex flex-col gap-1.5">
                     <EditingToolbar
@@ -426,7 +444,9 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                     <PaletteToolbar />
                 </div>
 
-                <div className="flex-1 min-h-0">
+                <div className="flex-1 min-h-0 w-full">
+                    {hasBox
+                        ? (
                     <ReactFlow
                         minZoom={0.05}
                         nodes={nodesWithLink}
@@ -525,6 +545,8 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                         <Controls />
                         <MiniMap />
                     </ReactFlow>
+                        )
+                        : null}
                 </div>
             </div>
 
