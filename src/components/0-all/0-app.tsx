@@ -2,7 +2,7 @@ import { ViewTransition } from 'react';
 import { useAtomValue } from 'jotai';
 import { Toaster } from '@/ui/shadcn/sonner';
 import { AllDialogs } from './1-globals';
-import { pageAtom, TRANSITION_TYPE_TO_MAIN, TRANSITION_TYPE_TO_WELCOME } from '@/store/4-ui-atoms';
+import { AppPage, pageAtom, TRANSITION_TYPE_TO_MAIN, TRANSITION_TYPE_TO_WELCOME } from '@/store/4-ui-atoms';
 import { WelcomePage, EditorPage } from '../2-main';
 import './2-view-transitions.css';
 
@@ -13,14 +13,14 @@ export function App() {
         <Toaster />
         <AllDialogs />
 
-        {page === 'welcome'
+        {page === AppPage.welcome
             ? (
-                <ViewTransition key="welcome" enter={welcomeEnter} exit={welcomeExit}>
+                <ViewTransition key={AppPage.welcome} enter={welcomeEnter} exit={welcomeExit}>
                     <WelcomePage />
                 </ViewTransition>
             )
             : (
-                <ViewTransition key="main" enter={mainEnter} exit={mainExit}>
+                <ViewTransition key={AppPage.main} enter={mainEnter} exit={mainExit}>
                     <EditorPage />
                 </ViewTransition>
             )

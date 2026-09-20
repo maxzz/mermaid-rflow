@@ -1,6 +1,6 @@
 import { useSetAtom } from "jotai";
 import { SlidersHorizontalIcon } from "lucide-react";
-import { useNavigateToPage } from "@/store/4-ui-atoms";
+import { AppPage, useNavigateToPage } from "@/store/4-ui-atoms";
 import { isOpenOptionsDialogAtom } from "@/components/4-dialogs/1-options/a-types-options";
 import { Button } from "@/ui/shadcn/button";
 import { AppLogo, APP_NAME } from "@/components/2-main/1-welcome-page/0-app-logo";
@@ -15,7 +15,7 @@ export function Header() {
 
             <button
                 className="px-1 py-0.5 text-sm font-heading font-semibold text-foreground hover:bg-muted rounded flex items-center gap-2 cursor-pointer"
-                onClick={() => navigate('welcome')}
+                onClick={() => navigate(AppPage.welcome)}
                 title="Back to the welcome page"
                 type="button"
             >

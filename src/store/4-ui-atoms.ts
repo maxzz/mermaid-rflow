@@ -9,12 +9,14 @@ import { mermaidSettings } from './2-mermaid-settings';
  * would not animate with <ViewTransition>. Jotai hooks are transition-compatible.
  */
 
-export type AppPage = 'welcome' | 'main';
+export const AppPage = {
+    welcome: 'welcome',
+    main: 'main',
+} as const;
 
-export const pageAtom = atom<AppPage>(mermaidSettings.showWelcome ? 'welcome' : 'main');
+export type AppPage = typeof AppPage[keyof typeof AppPage];
 
-export const TRANSITION_TYPE_TO_MAIN = 'nav-to-main';
-export const TRANSITION_TYPE_TO_WELCOME = 'nav-to-welcome';
+export const pageAtom = atom<AppPage>(mermaidSettings.showWelcome ? AppPage.welcome : AppPage.main);
 
 /** Navigate between pages inside a transition so <ViewTransition> boundaries animate. */
 export function useNavigateToPage() {
@@ -24,10 +26,13 @@ export function useNavigateToPage() {
         (page: AppPage) => {
             startTransition(
                 () => {
-                    addTransitionType(page === 'main' ? TRANSITION_TYPE_TO_MAIN : TRANSITION_TYPE_TO_WELCOME);
+                    addTransitionType(page === AppPage.main ? TRANSITION_TYPE_TO_MAIN : TRANSITION_TYPE_TO_WELCOME);
                     setPage(page);
                 }
             );
         },
         [setPage]);
 }
+
+export const TRANSITION_TYPE_TO_MAIN = 'nav-to-main';
+export const TRANSITION_TYPE_TO_WELCOME = 'nav-to-welcome';
