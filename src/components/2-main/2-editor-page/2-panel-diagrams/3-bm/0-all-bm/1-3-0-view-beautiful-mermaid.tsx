@@ -5,9 +5,9 @@ import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { ScrollArea2 } from "@/ui/shadcn/scroll-area";
-import { RenderView } from "./1-3-1-render-view";
-import { ZoomControls } from "./1-3-2-zoom-controls";
-import { PanelMessage, useViewportOverflow } from "./1-4-view-shared";
+import { RenderView } from "../../1-3-1-render-view";
+import { ZoomControls } from "../../1-3-2-zoom-controls";
+import { PanelMessage, useViewportOverflow } from "../../1-4-view-shared";
 
 export function Preview_BeautifullMarmaid() {
     const scrollRef = useRef<HTMLDivElement>(null);
