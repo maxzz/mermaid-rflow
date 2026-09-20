@@ -4,6 +4,7 @@ import {
     defaultLabelFor,
     escapeLabel,
     extractHeader,
+    findFlowEdge,
     findNodeDefinition,
     formatShapeInner,
     nextMermaidId,
@@ -12,10 +13,23 @@ import {
     rebuildSource,
     wrapShape,
     type FlowDirection,
+    type FlowEdgeSpan,
     type NodeDefSpan,
     type NodeShape,
     type WrapShapeExtra,
 } from './1-flowchart-source';
+import {
+    applyStrokePatch,
+    readEdgeStyleDecls,
+    readLinkStyleMap,
+    readNodeStyleDecls,
+    removeNodeStyleLine,
+    restyleLinksByIdentity,
+    strokeFromDecls,
+    upsertNodeStyleLine,
+    writeLinkStyleMap,
+    type ElementStroke,
+} from './6-mmd-style';
 
 export type PatchOk = { ok: true; source: string; changed: boolean; };
 export type PatchFail = { ok: false; reason: 'not-flowchart' | 'not-found' | 'noop'; };
@@ -132,7 +146,118 @@ export function deleteNode(source: string, id: string): PatchResult {
     if (!changed) {
         return { ok: false, reason: 'not-found' };
     }
-    return { ok: true, source: next.join('\n'), changed: true };
+    let patched = restyleLinksByIdentity(source, next.join('\n'));
+    patched = removeNodeStyleLine(patched, id);
+    return { ok: true, source: patched, changed: true };
+}
+
+export function deleteEdge(source: string, from: string, to: string, label?: string): PatchResult {
+    if (classifyMermaidSource(source) !== 'flowchart') {
+        return notFlowchart();
+    }
+    const edge = findFlowEdge(source, from, to, label);
+    if (!edge) {
+        return { ok: false, reason: 'not-found' };
+    }
+    const lines = source.replace(/\r\n/g, '\n').split('\n');
+    const kept = keptEndpointLines(edge);
+    lines.splice(edge.line, 1, ...kept);
+    const patched = restyleLinksByIdentity(source, lines.join('\n'));
+    return { ok: true, source: patched, changed: true };
+}
+
+export function reconnectEdge(source: string, from: string, to: string, nextFrom: string, nextTo: string, label?: string): PatchResult {
+    if (classifyMermaidSource(source) !== 'flowchart') {
+        return notFlowchart();
+    }
+    if (!nextFrom || !nextTo || nextFrom === nextTo) {
+        return { ok: false, reason: 'noop' };
+    }
+    const edge = findFlowEdge(source, from, to, label);
+    const arrow = edge?.stmt.arrow;
+    const right = edge?.stmt.right;
+    if (!edge || !arrow || !right) {
+        return { ok: false, reason: 'not-found' };
+    }
+    if (edge.from === nextFrom && edge.to === nextTo) {
+        return unchanged(source);
+    }
+    const stmt = edge.stmt;
+    const extras: string[] = [];
+    let leftRaw = stmt.left.raw;
+    let rightRaw = right.raw;
+    if (nextFrom !== from) {
+        if (isShapeToken(stmt.left)) {
+            extras.push(`${stmt.indent}${stmt.left.raw}`);
+        }
+        leftRaw = nextFrom;
+    }
+    if (nextTo !== to) {
+        if (isShapeToken(right)) {
+            extras.push(`${stmt.indent}${right.raw}`);
+        }
+        rightRaw = nextTo;
+    }
+    const between = edge.lineText.slice(stmt.left.end, arrow.start);
+    const arrowPart = edge.lineText.slice(arrow.start, arrow.end);
+    const afterArrow = edge.lineText.slice(arrow.end, right.start);
+    const tail = edge.lineText.slice(right.end);
+    const nextLine = `${stmt.indent}${leftRaw}${between}${arrowPart}${afterArrow}${rightRaw}${tail}`;
+    const lines = source.replace(/\r\n/g, '\n').split('\n');
+    lines.splice(edge.line, 1, nextLine, ...extras);
+    const decls = readLinkStyleMap(source).get(edge.index);
+    let patched = restyleLinksByIdentity(source, lines.join('\n'));
+    if (decls) {
+        const nextEdge = findFlowEdge(patched, nextFrom, nextTo, label);
+        if (nextEdge) {
+            const map = readLinkStyleMap(patched);
+            map.set(nextEdge.index, decls);
+            patched = writeLinkStyleMap(patched, map);
+        }
+    }
+    return { ok: true, source: patched, changed: true };
+}
+
+export function setNodeStroke(source: string, id: string, patch: Partial<ElementStroke>): PatchResult {
+    if (classifyMermaidSource(source) !== 'flowchart') {
+        return notFlowchart();
+    }
+    const next = upsertNodeStyleLine(source, id, applyStrokePatch(readNodeStyleDecls(source, id), patch, 'node'));
+    if (next === source) {
+        return unchanged(source);
+    }
+    return { ok: true, source: next, changed: true };
+}
+
+export function setEdgeStroke(source: string, from: string, to: string, patch: Partial<ElementStroke>, label?: string): PatchResult {
+    if (classifyMermaidSource(source) !== 'flowchart') {
+        return notFlowchart();
+    }
+    const edge = findFlowEdge(source, from, to, label);
+    if (!edge) {
+        return { ok: false, reason: 'not-found' };
+    }
+    const map = readLinkStyleMap(source);
+    const decls = applyStrokePatch(map.get(edge.index) ?? {}, patch, 'edge');
+    if (Object.keys(decls).length) {
+        map.set(edge.index, decls);
+    }
+    else {
+        map.delete(edge.index);
+    }
+    const next = writeLinkStyleMap(source, map);
+    if (next === source) {
+        return unchanged(source);
+    }
+    return { ok: true, source: next, changed: true };
+}
+
+export function readNodeStroke(source: string, id: string): ElementStroke {
+    return strokeFromDecls(readNodeStyleDecls(source, id), 'fill');
+}
+
+export function readEdgeStroke(source: string, from: string, to: string, label?: string): ElementStroke {
+    return strokeFromDecls(readEdgeStyleDecls(source, from, to, label), 'stroke');
 }
 
 export function setNodeShape(source: string, id: string, shape: NodeShape, extra: WrapShapeExtra = {}): PatchResult {
@@ -222,6 +347,22 @@ function keepOtherEndpoint(indent: string, token: { id: string; raw: string; } |
         return `${indent}${token.raw}`;
     }
     return null;
+}
+
+function isShapeToken(token: { id: string; raw: string; }): boolean {
+    return token.raw.length > token.id.length;
+}
+
+function keptEndpointLines(edge: FlowEdgeSpan): string[] {
+    const { stmt } = edge;
+    const lines: string[] = [];
+    if (isShapeToken(stmt.left)) {
+        lines.push(`${stmt.indent}${stmt.left.raw}`);
+    }
+    if (stmt.right && isShapeToken(stmt.right)) {
+        lines.push(`${stmt.indent}${stmt.right.raw}`);
+    }
+    return lines;
 }
 
 function rewriteNodeLabel(def: NodeDefSpan, label: string): string {

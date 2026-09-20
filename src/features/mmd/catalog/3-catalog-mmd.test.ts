@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { edgeEndpointsFromDomId, mermaidIdFromDomId } from './3-catalog-mmd';
+import { catalogEdgeKey, edgeEndpointsFromDomId, mermaidIdFromDomId, parseCatalogEdgeKey } from './3-catalog-mmd';
 
 describe('mermaidIdFromDomId', () => {
     it('strips the flowchart prefix and counter', () => {
@@ -27,5 +27,13 @@ describe('edgeEndpointsFromDomId', () => {
             from: 'us-east',
             to: 'us-west',
         });
+    });
+});
+
+describe('catalogEdgeKey', () => {
+    it('round-trips labeled and unlabeled edges', () => {
+        expect(catalogEdgeKey('A', 'B')).toBe('edge:A>B');
+        expect(parseCatalogEdgeKey('edge:A>B:Yes')).toEqual({ from: 'A', to: 'B', label: 'Yes' });
+        expect(parseCatalogEdgeKey('edge:A>B')).toEqual({ from: 'A', to: 'B', label: undefined });
     });
 });

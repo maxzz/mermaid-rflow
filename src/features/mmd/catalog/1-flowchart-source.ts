@@ -334,6 +334,52 @@ export type FlowStmt = {
 
 const ARROW_RE = /-\.->|==>|-->|---|-\.-/;
 
+export type FlowEdgeSpan = {
+    index: number;
+    line: number;
+    lineText: string;
+    from: string;
+    to: string;
+    label?: string;
+    stmt: FlowStmt;
+};
+
+export function arrowLabel(raw: string): string | undefined {
+    const match = raw.match(/\|([^|]*)\|/);
+    const label = match?.[1]?.trim();
+    return label || undefined;
+}
+
+export function collectFlowEdges(source: string): FlowEdgeSpan[] {
+    const lines = source.replace(/\r\n/g, '\n').split('\n');
+    const edges: FlowEdgeSpan[] = [];
+    for (let i = 0; i < lines.length; i++) {
+        const lineText = lines[i]!;
+        const stmt = parseFlowStmt(lineText);
+        if (!stmt?.arrow || !stmt.right) {
+            continue;
+        }
+        edges.push({
+            index: edges.length,
+            line: i,
+            lineText,
+            from: stmt.left.id,
+            to: stmt.right.id,
+            label: arrowLabel(stmt.arrow.raw),
+            stmt,
+        });
+    }
+    return edges;
+}
+
+export function findFlowEdge(source: string, from: string, to: string, label?: string): FlowEdgeSpan | null {
+    const edges = collectFlowEdges(source);
+    if (label) {
+        return edges.find((edge) => edge.from === from && edge.to === to && edge.label === label) ?? null;
+    }
+    return edges.find((edge) => edge.from === from && edge.to === to) ?? null;
+}
+
 export function parseFlowStmt(line: string): FlowStmt | null {
     const clean = lineWithoutComment(line);
     if (!clean.trim() || clean.trimStart().startsWith('%%')) {

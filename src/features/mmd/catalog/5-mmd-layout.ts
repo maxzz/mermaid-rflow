@@ -1,4 +1,4 @@
-import { SOURCE_LINK_HIT_ATTR } from '@/store/6-source-render-links';
+import { SOURCE_LINK_HIT_ATTR, SOURCE_LINK_KEY_ATTR } from '@/store/6-source-render-links';
 import { edgeEndpointsFromDomId, mermaidIdFromDomId } from './3-catalog-mmd';
 
 export type MmdNodePos = { x: number; y: number; };
@@ -125,6 +125,68 @@ export function measureMmdNodeBoxes(root: Element, host: HTMLElement): MmdHitBox
         });
     }
     return boxes;
+}
+
+export type OverlayPt = { x: number; y: number; };
+
+export type MmdEdgeHit = {
+    from: string;
+    to: string;
+    key: string;
+    points: OverlayPt[];
+};
+
+export function measureMmdEdges(root: Element, host: HTMLElement): MmdEdgeHit[] {
+    const known = collectMmdNodeIds(root);
+    const edges: MmdEdgeHit[] = [];
+    const seen = new Set<string>();
+    for (const el of root.querySelectorAll('path.flowchart-link')) {
+        if (!(el instanceof SVGPathElement) || el.hasAttribute(SOURCE_LINK_HIT_ATTR)) {
+            continue;
+        }
+        const pair = edgeEndpointsFromDomId(el.id || el.parentElement?.id || '', known);
+        if (!pair) {
+            continue;
+        }
+        const points = pathToOverlayPoints(el, host);
+        if (points.length < 2) {
+            continue;
+        }
+        const taggedKey = el.getAttribute(SOURCE_LINK_KEY_ATTR)
+            || el.closest(`[${SOURCE_LINK_KEY_ATTR}]`)?.getAttribute(SOURCE_LINK_KEY_ATTR);
+        const key = taggedKey?.startsWith('edge:') ? taggedKey : `edge:${pair.from}>${pair.to}`;
+        if (seen.has(key)) {
+            continue;
+        }
+        seen.add(key);
+        edges.push({ from: pair.from, to: pair.to, key, points });
+    }
+    return edges;
+}
+
+function pathToOverlayPoints(path: SVGPathElement, host: HTMLElement): OverlayPt[] {
+    const ctm = path.getScreenCTM();
+    if (!ctm) {
+        return [];
+    }
+    let length = 0;
+    try {
+        length = path.getTotalLength();
+    }
+    catch {
+        return [];
+    }
+    if (length < 1) {
+        return [];
+    }
+    const steps = Math.max(8, Math.min(40, Math.ceil(length / 10)));
+    const pts: OverlayPt[] = [];
+    for (let i = 0; i <= steps; i++) {
+        const p = path.getPointAtLength((length * i) / steps);
+        const screen = new DOMPoint(p.x, p.y).matrixTransform(ctm);
+        pts.push(clientPointInOverlay(host, screen.x, screen.y));
+    }
+    return pts;
 }
 
 export function applyMmdLayout(root: Element, nodes: Record<string, MmdNodePos>): void {

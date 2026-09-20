@@ -78,7 +78,12 @@ export function useMmdSourceLink({ contentRef, hostRef, scrollRef, enabled, acti
                     clearSelection();
                     return;
                 }
-                const hit = target.closest('[data-mmd-hit]');
+                const hit = target.closest('[data-mmd-hit], [data-mmd-edge]');
+                const edgeKey = hit?.getAttribute('data-mmd-edge');
+                if (edgeKey) {
+                    selectFromDiagram([edgeKey]);
+                    return;
+                }
                 const hitId = hit?.getAttribute('data-mmd-id');
                 if (hitId) {
                     selectFromDiagram([`node:${hitId}`]);

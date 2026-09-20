@@ -4,15 +4,17 @@ import { useSnapshot } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { selectFromDiagram, sourceLink } from '@/store/6-source-render-links';
 import { classifyMermaidSource, isFlowchartDiagramType, readNodeLabel } from '../catalog/1-flowchart-source';
-import { addNode, connectNodes, deleteNode, renameNode } from '../catalog/2-source-patch';
+import { addNode, connectNodes, deleteEdge, deleteNode, reconnectEdge, renameNode } from '../catalog/2-source-patch';
 import { applyMmdPatchResult } from '../catalog/4-apply-patch';
-import { mermaidIdFromDomId } from '../catalog/3-catalog-mmd';
+import { catalogEdgeKey, mermaidIdFromDomId, parseCatalogEdgeKey } from '../catalog/3-catalog-mmd';
 import {
     applyMmdLayout,
     clientDeltaToSvg,
     clientPointInOverlay,
+    measureMmdEdges,
     measureMmdNodeBoxes,
     originOfNode,
+    type MmdEdgeHit,
     type MmdHitBox,
 } from '../catalog/5-mmd-layout';
 import { mmdDiagram } from '../store/1-mmd-diagram';
@@ -22,6 +24,7 @@ import { mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanMode
 
 const DRAG_SLOP_PX = 4;
 const HANDLE_SIZE = 14;
+const EDGE_HANDLE_SIZE = 14;
 const HIT_PAD = 2;
 
 export type MmdEditOverlayProps = {
@@ -52,10 +55,13 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
     const dragging = useAtomValue(mmdNodeDraggingAtom);
     const [inline, setInline] = useAtom(mmdInlineEditAtom);
     const [boxes, setBoxes] = useState<MmdHitBox[]>([]);
+    const [edges, setEdges] = useState<MmdEdgeHit[]>([]);
     const [connect, setConnect] = useState<DragLine | null>(null);
 
     const flowchart = classifyMermaidSource(source) === 'flowchart' || isFlowchartDiagramType(diagramType);
-    const selectedId = enabled && flowchart ? firstNodeId(link.keys as string[]) : null;
+    const selection = enabled && flowchart ? selectionFromKeys(link.keys as string[]) : { nodeId: null, edge: null };
+    const selectedId = selection.nodeId;
+    const selectedEdgeKey = selection.edge?.key ?? null;
     const interactive = enabled && flowchart && active;
 
     useLayoutEffect(
@@ -67,6 +73,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
             }
             applyMmdLayout(root, mmdLayout.nodes);
             setBoxes(measureMmdNodeBoxes(root, host).map(padHitBox));
+            setEdges(measureMmdEdges(root, host));
         },
         [active, autofit, contentRef, enabled, flowchart, hostRef, layout.nodes, svg, zoom],
     );
@@ -88,6 +95,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
                 }
                 applyMmdLayout(live, mmdLayout.nodes);
                 setBoxes(measureMmdNodeBoxes(live, pane).map(padHitBox));
+                setEdges(measureMmdEdges(live, pane));
             }
             function pump() {
                 if (cancelled) {
@@ -108,6 +116,9 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
             }
             for (const node of live.querySelectorAll('g.node')) {
                 ro.observe(node);
+            }
+            for (const path of live.querySelectorAll('path.flowchart-link')) {
+                ro.observe(path);
             }
             pump();
             const timeout = window.setTimeout(syncBoxes, 250);
@@ -132,6 +143,14 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
                 if (isTypingTarget(e.target) || inline) {
                     return;
                 }
+                if (selectedEdgeKey) {
+                    const edge = parseCatalogEdgeKey(selectedEdgeKey);
+                    if (edge) {
+                        e.preventDefault();
+                        applyMmdPatchResult(deleteEdge(mermaidSettings.source, edge.from, edge.to, edge.label));
+                    }
+                    return;
+                }
                 if (!selectedId) {
                     return;
                 }
@@ -141,7 +160,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
             window.addEventListener('keydown', onKeyDown);
             return () => window.removeEventListener('keydown', onKeyDown);
         },
-        [inline, interactive, selectedId],
+        [inline, interactive, selectedEdgeKey, selectedId],
     );
 
     if (!interactive) {
@@ -151,6 +170,58 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
     }
 
     const selected = selectedId ? boxes.find((box) => box.id === selectedId) : undefined;
+    const selectedEdge = selectedEdgeKey ? edges.find((edge) => edge.key === selectedEdgeKey) : undefined;
+
+    function onEdgePointerDown(e: ReactPointerEvent<SVGPolylineElement>, key: string) {
+        if (e.button !== 0) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        selectFromDiagram([key]);
+    }
+
+    function onEndpointPointerDown(e: ReactPointerEvent<HTMLButtonElement>, edge: MmdEdgeHit, which: 'from' | 'to') {
+        if (e.button !== 0 || panMode) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        const host = hostRef.current;
+        if (!host || edge.points.length < 2) {
+            return;
+        }
+        const anchor = which === 'from' ? edge.points[edge.points.length - 1]! : edge.points[0]!;
+        const parsed = parseCatalogEdgeKey(edge.key);
+        const overlayHost = host;
+        setConnect({ x1: anchor.x, y1: anchor.y, x2: anchor.x, y2: anchor.y });
+        try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+        }
+        catch {
+            // window listeners below still receive the drag
+        }
+
+        function move(ev: PointerEvent | MouseEvent) {
+            const pt = clientPointInOverlay(overlayHost, ev.clientX, ev.clientY);
+            setConnect({ x1: anchor.x, y1: anchor.y, x2: pt.x, y2: pt.y });
+        }
+
+        function up(ev: PointerEvent | MouseEvent) {
+            setConnect(null);
+            const hit = nodeIdFromPoint(ev.clientX, ev.clientY, which === 'from' ? edge.to : edge.from);
+            if (!hit || !parsed) {
+                return;
+            }
+            const nextFrom = which === 'from' ? hit : edge.from;
+            const nextTo = which === 'to' ? hit : edge.to;
+            if (applyMmdPatchResult(reconnectEdge(mermaidSettings.source, edge.from, edge.to, nextFrom, nextTo, parsed.label))) {
+                selectFromDiagram([catalogEdgeKey(nextFrom, nextTo, parsed.label)]);
+            }
+        }
+
+        watchDrag(move, up);
+    }
 
     function onNodePointerDown(e: ReactPointerEvent<HTMLButtonElement>, id: string) {
         if (e.button !== 0) {
@@ -261,6 +332,39 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
 
     return (
         <>
+            <svg className="absolute inset-0 z-4 overflow-visible pointer-events-none" width="100%" height="100%">
+                {edges.map((edge) => {
+                    const selectedLine = edge.key === selectedEdgeKey;
+                    return (
+                        <g key={edge.key}>
+                            <polyline
+                                data-mmd-edge={edge.key}
+                                className="mmd-edge-hit"
+                                points={pointsAttr(edge.points)}
+                                fill="none"
+                                stroke="transparent"
+                                strokeWidth={14}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                pointerEvents="stroke"
+                                onPointerDown={(e) => onEdgePointerDown(e, edge.key)}
+                            />
+                            {selectedLine && (
+                                <polyline
+                                    className="mmd-edge-selected"
+                                    points={pointsAttr(edge.points)}
+                                    fill="none"
+                                    stroke="var(--primary)"
+                                    strokeWidth={3.5}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    pointerEvents="none"
+                                />
+                            )}
+                        </g>
+                    );
+                })}
+            </svg>
             {boxes.map((box) => {
                 const selectedBox = box.id === selectedId;
                 return (
@@ -289,7 +393,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
                     />
                 );
             })}
-            {selected && !dragging && HANDLES.map(({ side }) => {
+            {selected && !dragging && !selectedEdge && HANDLES.map(({ side }) => {
                 const pos = handleStyle(selected, side);
                 return (
                     <button
@@ -304,6 +408,20 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true }: 
                     />
                 );
             })}
+            {selectedEdge && !dragging && (
+                <>
+                    <EndpointHandle
+                        pt={selectedEdge.points[0]!}
+                        label={`Move start of ${selectedEdge.from} → ${selectedEdge.to}`}
+                        onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'from')}
+                    />
+                    <EndpointHandle
+                        pt={selectedEdge.points[selectedEdge.points.length - 1]!}
+                        label={`Move end of ${selectedEdge.from} → ${selectedEdge.to}`}
+                        onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'to')}
+                    />
+                </>
+            )}
             {connect && (
                 <div
                     data-mmd-chrome=""
@@ -372,13 +490,57 @@ function padHitBox(box: MmdHitBox): MmdHitBox {
     };
 }
 
-function firstNodeId(keys: string[]): string | null {
+function selectionFromKeys(keys: string[]): { nodeId: string | null; edge: { from: string; to: string; label?: string; key: string; } | null; } {
+    const preferEdge = keys[0]?.startsWith('edge:');
+    let nodeId: string | null = null;
+    let edge: { from: string; to: string; label?: string; key: string; } | null = null;
     for (const key of keys) {
-        if (key.startsWith('node:')) {
-            return key.slice('node:'.length);
+        if (!nodeId && key.startsWith('node:')) {
+            nodeId = key.slice('node:'.length);
+        }
+        if (!edge && key.startsWith('edge:')) {
+            const parsed = parseCatalogEdgeKey(key);
+            if (parsed) {
+                edge = { ...parsed, key };
+            }
         }
     }
-    return null;
+    if (preferEdge) {
+        return { nodeId: null, edge };
+    }
+    return { nodeId, edge: nodeId ? null : edge };
+}
+
+function pointsAttr(points: { x: number; y: number; }[]): string {
+    return points.map((pt) => `${pt.x},${pt.y}`).join(' ');
+}
+
+function EndpointHandle({
+    pt,
+    label,
+    onPointerDown,
+}: {
+    pt: { x: number; y: number; };
+    label: string;
+    onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => void;
+}) {
+    return (
+        <button
+            type="button"
+            data-mmd-chrome=""
+            className="mmd-edge-handle absolute z-10 rounded-full bg-background pointer-events-auto"
+            style={{
+                left: pt.x - EDGE_HANDLE_SIZE / 2,
+                top: pt.y - EDGE_HANDLE_SIZE / 2,
+                width: EDGE_HANDLE_SIZE,
+                height: EDGE_HANDLE_SIZE,
+            }}
+            title={label}
+            aria-label={label}
+            onPointerDown={onPointerDown}
+            onDoubleClick={(e) => e.stopPropagation()}
+        />
+    );
 }
 
 function handleCenter(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {

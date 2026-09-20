@@ -17,6 +17,12 @@ export function useMonacoSourceLink() {
                 if (e.source === "api") {
                     return;
                 }
+                // Programmatic source patches restore the Monaco view and fire a cursor
+                // event that is not "api". Keep a canvas selection until the user
+                // actually clicks or types in the editor.
+                if (sourceLink.origin === "diagram" && e.source !== "mouse" && e.source !== "keyboard") {
+                    return;
+                }
                 const line = e.position.lineNumber;
                 const keys = sourceLink.index?.lineToKeys.get(line) ?? [];
                 selectFromEditor(keys, e.source === "mouse" ? "click" : "caret", line);

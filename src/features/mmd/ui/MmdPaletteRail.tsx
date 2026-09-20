@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitl
 import { classifyMermaidSource, FLOW_SHAPE_ITEMS, type NodeShape } from '../catalog/1-flowchart-source';
 import { insertMmdPaletteNode, selectedMmdNodeId } from '../catalog/4-apply-patch';
 import { mmdPaletteShapeAtom } from '../store/3-mmd-ui';
+import { MmdStylePopover } from './MmdStylePanel';
 
 const ICONS: { icon: string; label: string; }[] = [
     { icon: 'fa:fa-star', label: 'Star' },
@@ -44,6 +45,7 @@ export function MmdPaletteRail() {
             aria-label="Shapes"
         >
             <ShapePopover enabled={enabled} selected={selected} applyTitle={applyTitle} />
+            <MmdStylePopover enabled={enabled} />
             <IconPopover enabled={enabled} />
             <UrlPopover
                 enabled={enabled}

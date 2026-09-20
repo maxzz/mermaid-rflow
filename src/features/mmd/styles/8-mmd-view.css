@@ -68,6 +68,38 @@
     box-shadow: 0 0 0 2px var(--background);
 }
 
+.mmd-host path.flowchart-link.is-source-link-caret,
+.mmd-host g.edgePath.is-source-link-caret > path.flowchart-link {
+    stroke: var(--primary);
+    stroke-width: 2;
+}
+
+.mmd-host path.flowchart-link.is-source-link-click,
+.mmd-host g.edgePath.is-source-link-click > path.flowchart-link {
+    stroke: var(--primary);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--primary) 45%, transparent));
+}
+
+.mmd-edge-hit {
+    cursor: pointer;
+    pointer-events: stroke;
+}
+
+.mmd-edge-hit:hover {
+    stroke: color-mix(in oklab, var(--primary) 45%, transparent);
+}
+
+.mmd-edge-handle {
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 0 1px var(--background);
+    cursor: grab;
+}
+
+.mmd-edge-handle:active {
+    cursor: grabbing;
+}
+
 .mmd-connect-line {
     transform-origin: 0 50%;
     pointer-events: none;

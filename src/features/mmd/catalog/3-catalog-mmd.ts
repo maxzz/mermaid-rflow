@@ -155,6 +155,30 @@ function entryFromGroup(el: Element): CatalogEntry | null {
     return { key: `node:${id}`, kind: 'node', ids: [id], label: textLabel(el) };
 }
 
+export function catalogEdgeKey(from: string, to: string, label?: string): string {
+    return label ? `edge:${from}>${to}:${label}` : `edge:${from}>${to}`;
+}
+
+export function parseCatalogEdgeKey(key: string): { from: string; to: string; label?: string; } | null {
+    if (!key.startsWith('edge:')) {
+        return null;
+    }
+    const rest = key.slice('edge:'.length);
+    const colon = rest.indexOf(':');
+    const pair = colon === -1 ? rest : rest.slice(0, colon);
+    const label = colon === -1 ? undefined : rest.slice(colon + 1) || undefined;
+    const gt = pair.indexOf('>');
+    if (gt < 1) {
+        return null;
+    }
+    const from = pair.slice(0, gt);
+    const to = pair.slice(gt + 1);
+    if (!from || !to) {
+        return null;
+    }
+    return { from, to, label };
+}
+
 function entryFromEdge(el: Element, knownIds: string[]): CatalogEntry | null {
     const pair = edgeEndpointsFromDomId(el.id || el.querySelector('[id]')?.id || '', knownIds);
     if (!pair) {
@@ -162,7 +186,7 @@ function entryFromEdge(el: Element, knownIds: string[]): CatalogEntry | null {
     }
     const label = textLabel(el.closest('g.edgePath') ?? el);
     return {
-        key: label ? `edge:${pair.from}>${pair.to}:${label}` : `edge:${pair.from}>${pair.to}`,
+        key: catalogEdgeKey(pair.from, pair.to, label),
         kind: 'edge',
         ids: [pair.from, pair.to],
         label: label || undefined,

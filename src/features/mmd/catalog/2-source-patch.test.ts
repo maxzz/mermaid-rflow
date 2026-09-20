@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { classifyMermaidSource, extractHeader, findNodeDefinition, readDirection } from './1-flowchart-source';
-import { addNode, connectNodes, deleteNode, renameNode, setDirection, setNodeShape } from './2-source-patch';
+import { addNode, connectNodes, deleteEdge, deleteNode, readEdgeStroke, readNodeStroke, reconnectEdge, renameNode, setDirection, setEdgeStroke, setNodeShape, setNodeStroke } from './2-source-patch';
 
 const FLOW = `\
 %% keep this comment
@@ -179,6 +179,115 @@ describe('setNodeShape', () => {
         }
         expect(result.source).toContain('C["Ship it"]');
         expect(result.source).toContain('C@{ shape: text }');
+    });
+});
+
+describe('reconnectEdge / deleteEdge', () => {
+    it('rewrites the target of a labeled edge and keeps the source shape', () => {
+        const result = reconnectEdge(FLOW, 'B', 'C', 'B', 'E', 'Yes');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).toContain('B -->|Yes| E');
+        expect(result.source).toContain('C[Ship it]');
+        expect(result.source).toContain('%% keep this comment');
+    });
+
+    it('keeps a source node definition when reconnecting the start', () => {
+        const result = reconnectEdge(FLOW, 'A', 'B', 'E', 'B');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).toContain('E --> B{Is it working?}');
+        expect(result.source).toContain('A[Start]');
+    });
+
+    it('moves linkStyle with the reconnected edge identity', () => {
+        const styled = setEdgeStroke(FLOW, 'A', 'B', { color: '#dc2626', dash: 'dashed' });
+        expect(styled.ok).toBe(true);
+        if (!styled.ok) {
+            return;
+        }
+        const result = reconnectEdge(styled.source, 'A', 'B', 'A', 'E');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).toContain('A[Start] --> E');
+        expect(readEdgeStroke(result.source, 'A', 'E')).toEqual({
+            color: '#dc2626',
+            width: null,
+            dash: 'dashed',
+        });
+        expect(readEdgeStroke(result.source, 'A', 'B')).toEqual({
+            color: null,
+            width: null,
+            dash: 'solid',
+        });
+    });
+
+    it('removes an edge and keeps both endpoint shapes', () => {
+        const result = deleteEdge(FLOW, 'A', 'B');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).not.toContain('A[Start] --> B');
+        expect(result.source).toContain('A[Start]');
+        expect(result.source).toContain('B{Is it working?}');
+    });
+});
+
+describe('setNodeStroke / setEdgeStroke', () => {
+    it('appends a node style line and merges later edits', () => {
+        const colored = setNodeStroke(FLOW, 'A', { color: '#2563eb' });
+        expect(colored.ok).toBe(true);
+        if (!colored.ok) {
+            return;
+        }
+        expect(colored.source).toContain('style A fill:#2563eb,stroke:#2563eb');
+        const dashed = setNodeStroke(colored.source, 'A', { dash: 'dashed', width: 3 });
+        expect(dashed.ok).toBe(true);
+        if (!dashed.ok) {
+            return;
+        }
+        expect(dashed.source).toContain('stroke-width:3px');
+        expect(dashed.source).toContain('stroke-dasharray:8 4');
+        expect(readNodeStroke(dashed.source, 'A')).toEqual({
+            color: '#2563eb',
+            width: 3,
+            dash: 'dashed',
+        });
+    });
+
+    it('writes linkStyle for the matching mermaid edge index', () => {
+        const result = setEdgeStroke(FLOW, 'B', 'D', { color: '#dc2626', width: 4, dash: 'dotted' }, 'No');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).toContain('linkStyle 2 stroke:#dc2626,stroke-width:4px,stroke-dasharray:2 3');
+        expect(readEdgeStroke(result.source, 'B', 'D', 'No')).toEqual({
+            color: '#dc2626',
+            width: 4,
+            dash: 'dotted',
+        });
+    });
+
+    it('drops a node style line when the node is deleted', () => {
+        const styled = setNodeStroke(FLOW, 'A', { color: '#111111' });
+        expect(styled.ok).toBe(true);
+        if (!styled.ok) {
+            return;
+        }
+        const result = deleteNode(styled.source, 'A');
+        expect(result.ok).toBe(true);
+        if (!result.ok) {
+            return;
+        }
+        expect(result.source).not.toMatch(/style A\b/);
     });
 });
 
