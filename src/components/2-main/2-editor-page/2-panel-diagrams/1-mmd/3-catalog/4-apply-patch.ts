@@ -2,7 +2,7 @@ import { toast } from 'sonner';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { selectFromDiagram, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { captureMonacoView } from '../../3-bm/5-1-source-diagram-link-monaco/2-monaco-editor-handle';
-import { mmdDiagram } from '../store/1-mmd-diagram';
+import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { parseCatalogEdgeKey } from './3-catalog-mmd';
 import { addNode, readEdgeStroke, readNodeStroke, setEdgeStroke, setNodeShape, setNodeStroke, type AddNodeOpts, type PatchResult } from './2-source-patch';
 import { type ElementStroke } from './6-mmd-style';

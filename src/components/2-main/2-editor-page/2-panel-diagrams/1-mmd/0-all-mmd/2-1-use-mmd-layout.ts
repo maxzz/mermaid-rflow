@@ -1,7 +1,7 @@
 import { type RefObject, useLayoutEffect } from 'react';
 import { subscribe } from 'valtio';
-import { applyMmdLayout, collectMmdNodeIds } from '../catalog/5-mmd-layout';
-import { mmdLayout, pruneMmdLayout } from '../store/4-mmd-layout';
+import { applyMmdLayout, collectMmdNodeIds } from '../3-catalog/5-mmd-layout';
+import { mmdLayout, pruneMmdLayout } from '../8-store/4-mmd-layout';
 
 export type MmdLayoutArgs = {
     contentRef: RefObject<HTMLElement | null>;

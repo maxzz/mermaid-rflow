@@ -1,23 +1,11 @@
 import mermaid, { type MermaidConfig } from 'mermaid';
 import { type MmdLook, type MmdTheme } from './1-themes';
 
-export type OfficialRenderResult = {
+type OfficialRenderResult = {
     svg: string;
     diagramType: string | null;
     bindFunctions?: (element: Element) => void;
 };
-
-let renderSeq = 0;
-let elkWarned = false;
-let lastBindFunctions: ((element: Element) => void) | undefined;
-
-export function bindLastMermaidFunctions(element: Element) {
-    lastBindFunctions?.(element);
-}
-
-export function officialConfigSig(theme: MmdTheme, look: MmdLook): string {
-    return `${theme}|${look}`;
-}
 
 export async function renderOfficialMermaid(source: string, theme: MmdTheme, look: MmdLook): Promise<OfficialRenderResult> {
     const text = source.trim();
@@ -74,4 +62,16 @@ export function formatMermaidError(err: unknown): string {
         return err.message;
     }
     return String(err);
+}
+
+let renderSeq = 0;
+let elkWarned = false;
+let lastBindFunctions: ((element: Element) => void) | undefined;
+
+export function bindLastMermaidFunctions(element: Element) {
+    lastBindFunctions?.(element);
+}
+
+export function officialConfigSig(theme: MmdTheme, look: MmdLook): string {
+    return `${theme}|${look}`;
 }

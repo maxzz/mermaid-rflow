@@ -2,7 +2,7 @@ import { type RefObject, useLayoutEffect } from 'react';
 import { getDefaultStore } from 'jotai';
 import { subscribe } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { mmdPanAtom } from '../store/3-mmd-ui';
+import { mmdPanAtom } from '../8-store/3-mmd-ui';
 import {
     buildSourceIndex,
     clearSelection,
@@ -13,7 +13,7 @@ import {
     sourceLink,
     type LinkIntensity,
 } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
-import { catalogMmdSvg, closestMmdTagged } from '../catalog/3-catalog-mmd';
+import { catalogMmdSvg, closestMmdTagged } from '../3-catalog/3-catalog-mmd';
 import '../../3-bm/5-2-source-diagram-link-diagram/8-highlight-diagram.css';
 
 const CARET_CLASS = 'is-source-link-caret';

@@ -5,8 +5,8 @@ import { HandIcon, MaximizeIcon, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
 import { classNames } from '@/utils';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@/store/2-mermaid-settings';
 import { Button } from '@/ui/shadcn/button';
-import { mmdSettings } from '../store/2-mmd-settings';
-import { mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
+import { mmdSettings } from '../8-store/2-mmd-settings';
+import { mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
 import { fitMmdToView, setMmdZoom } from './8-3-mmd-zoom';
 
 export function MmdViewControls({

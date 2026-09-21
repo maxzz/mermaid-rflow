@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { type NodeShape } from '../catalog/1-flowchart-source';
+import { type NodeShape } from '../3-catalog/1-flowchart-source';
 
 export type MmdInlineEdit = {
     id: string;

@@ -9,11 +9,11 @@ import { Switch } from '@/ui/shadcn/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/shadcn/tooltip';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 
-import { classifyMermaidSource, readDirection, type FlowDirection } from '../catalog/1-flowchart-source';
-import { setDirection } from '../catalog/2-source-patch';
-import { applyMmdPatchResult } from '../catalog/4-apply-patch';
-import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../render/1-themes';
-import { mmdSettings } from '../store/2-mmd-settings';
+import { classifyMermaidSource, readDirection, type FlowDirection } from '../3-catalog/1-flowchart-source';
+import { setDirection } from '../3-catalog/2-source-patch';
+import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
+import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../1-render/1-themes';
+import { mmdSettings } from '../8-store/2-mmd-settings';
 
 export function MmdOptionsPopover() {
     return (

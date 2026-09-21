@@ -1,6 +1,6 @@
 import { proxy, subscribe } from 'valtio';
 import { debounceDevTools } from '@/utils/debounce';
-import { type MmdNodePos } from '../catalog/5-mmd-layout';
+import { type MmdNodePos } from '../3-catalog/5-mmd-layout';
 
 const STORE_KEY = 'tm-mermaid-rflow-mmd-layout';
 const STORE_VER = 'v1.1';

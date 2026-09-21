@@ -7,10 +7,10 @@ import { isThemeDark } from '@/utils/theme-utils';
 import { appSettings } from '@/store/1-ui-settings';
 
 import { ZOOM_STEP } from '@/store/2-mermaid-settings';
-import { bindLastMermaidFunctions } from '../render/2-render-official';
-import { mmdDiagram } from '../store/1-mmd-diagram';
-import { mmdSettings } from '../store/2-mmd-settings';
-import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
+import { bindLastMermaidFunctions } from '../1-render/2-render-official';
+import { mmdDiagram } from '../8-store/1-mmd-diagram';
+import { mmdSettings } from '../8-store/2-mmd-settings';
+import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
 import { MmdPaletteRail } from './8-1-2-0-mmd-palette-rail';
 import { MmdViewControls } from './8-1-3-mmd-view-controls';
 import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from './8-3-mmd-zoom';

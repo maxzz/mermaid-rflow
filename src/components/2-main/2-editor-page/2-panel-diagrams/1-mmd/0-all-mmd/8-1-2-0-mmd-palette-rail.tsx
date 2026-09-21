@@ -9,9 +9,9 @@ import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { Label } from '@/ui/shadcn/label';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { classifyMermaidSource, FLOW_SHAPE_ITEMS, type NodeShape } from '../catalog/1-flowchart-source';
-import { insertMmdPaletteNode, selectedMmdNodeId } from '../catalog/4-apply-patch';
-import { mmdPaletteShapeAtom } from '../store/3-mmd-ui';
+import { classifyMermaidSource, FLOW_SHAPE_ITEMS, type NodeShape } from '../3-catalog/1-flowchart-source';
+import { insertMmdPaletteNode, selectedMmdNodeId } from '../3-catalog/4-apply-patch';
+import { mmdPaletteShapeAtom } from '../8-store/3-mmd-ui';
 import { MmdStylePopover } from './8-1-2-1-mmd-style-panel';
 
 export function MmdPaletteRail() {

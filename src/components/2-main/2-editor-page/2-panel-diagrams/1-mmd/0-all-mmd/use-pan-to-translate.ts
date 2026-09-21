@@ -1,7 +1,7 @@
 import { type PointerEvent, type RefObject, useRef } from 'react';
 import { getDefaultStore } from 'jotai';
-import { mmdSettings } from '../store/2-mmd-settings';
-import { mmdPanAtom } from '../store/3-mmd-ui';
+import { mmdSettings } from '../8-store/2-mmd-settings';
+import { mmdPanAtom } from '../8-store/3-mmd-ui';
 import { setMmdPan } from './8-3-mmd-zoom';
 
 export function usePanToTranslate(boardRef: RefObject<HTMLDivElement | null>, panMode: boolean) {

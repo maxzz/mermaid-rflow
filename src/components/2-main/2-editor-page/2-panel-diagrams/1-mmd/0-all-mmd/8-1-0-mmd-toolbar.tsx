@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { copyText, downloadText } from '@/components/4-dialogs/2-export/8-export-utils';
 import { Button } from '@/ui/shadcn/button';
-import { mmdDiagram } from '../store/1-mmd-diagram';
+import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { MmdOptionsPopover } from './8-1-1-mmd-options-popover';
 
 export function PreviewToolbar_Mmd() {

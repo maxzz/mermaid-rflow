@@ -4,10 +4,10 @@ import { subscribe, useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { selectFromDiagram, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
-import { classifyMermaidSource, isFlowchartDiagramType, readNodeLabel } from '../catalog/1-flowchart-source';
-import { addNode, connectNodes, deleteEdge, deleteNode, reconnectEdge, renameNode } from '../catalog/2-source-patch';
-import { applyMmdPatchResult } from '../catalog/4-apply-patch';
-import { catalogEdgeKey, mermaidIdFromDomId, parseCatalogEdgeKey } from '../catalog/3-catalog-mmd';
+import { classifyMermaidSource, isFlowchartDiagramType, readNodeLabel } from '../3-catalog/1-flowchart-source';
+import { addNode, connectNodes, deleteEdge, deleteNode, reconnectEdge, renameNode } from '../3-catalog/2-source-patch';
+import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
+import { catalogEdgeKey, mermaidIdFromDomId, parseCatalogEdgeKey } from '../3-catalog/3-catalog-mmd';
 import {
     applyMmdLayout,
     applyMmdNodeDrag,
@@ -20,11 +20,11 @@ import {
     type MmdEdgeHit,
     type MmdHitBox,
     type MmdNodePos,
-} from '../catalog/5-mmd-layout';
-import { mmdDiagram } from '../store/1-mmd-diagram';
-import { mmdLayout, setMmdNodePos } from '../store/4-mmd-layout';
-import { mmdSettings } from '../store/2-mmd-settings';
-import { mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
+} from '../3-catalog/5-mmd-layout';
+import { mmdDiagram } from '../8-store/1-mmd-diagram';
+import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
+import { mmdSettings } from '../8-store/2-mmd-settings';
+import { mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
 
 const DRAG_SLOP_PX = 4;
 const HANDLE_SIZE = 14;
