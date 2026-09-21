@@ -13,6 +13,10 @@ export function setMonacoEditorInstance(editor: MonacoEditor | null) {
     }
 }
 
+export function getMonacoCursorLine(): number | null {
+    return editorInstance?.getPosition()?.lineNumber ?? null;
+}
+
 export function captureMonacoView() {
     preservedView = editorInstance?.saveViewState() ?? null;
 }

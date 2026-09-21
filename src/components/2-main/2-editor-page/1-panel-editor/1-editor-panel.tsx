@@ -5,6 +5,7 @@ import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { ScrollArea } from "@/ui/shadcn/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
 import { SvgLayoutEnginePopover } from "@/components/2-main/2-editor-page/2-panel-diagrams/0-all-panels/8-svg-layout-popover";
+import { LineStylePopover } from "./4-line-style-popover";
 
 export function EditorPanel() {
     return (
@@ -32,6 +33,7 @@ function EditorToolbar() {
             </span>
 
             <div className="flex items-center gap-1">
+                <LineStylePopover />
                 <SvgLayoutEnginePopover />
 
                 <Select value="" onValueChange={(name) => loadSample(name)}>
