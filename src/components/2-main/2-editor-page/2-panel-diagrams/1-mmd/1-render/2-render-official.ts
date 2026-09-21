@@ -33,9 +33,15 @@ export async function renderOfficialMermaid(
         theme,
         look,
         layout,
+        // mermaid.ai `layout: fixed` is ELK's modelOrder preset: break the
+        // Debug↔decision cycle at the later-declared back-edge so Start stays
+        // on the first layer. GREEDY (ELK default) ranks the diamond first.
         elk: {
-            keepEntryNodeOnTop: true,
+            cycleBreakingStrategy: 'GREEDY_MODEL_ORDER',
             considerModelOrder: 'NODES_AND_EDGES',
+            nodePlacementStrategy: 'NETWORK_SIMPLEX',
+            nodePlacementAlignment: 'NONE',
+            keepEntryNodeOnTop: true,
         },
         flowchart: {
             htmlLabels: true,
@@ -99,5 +105,5 @@ export function bindLastMermaidFunctions(element: Element) {
 }
 
 export function officialConfigSig(theme: MmdTheme, look: MmdLook, layout: MmdLayout): string {
-    return `${theme}|${look}|${layout}|src-layout`;
+    return `${theme}|${look}|${layout}|src-layout|model-order`;
 }
