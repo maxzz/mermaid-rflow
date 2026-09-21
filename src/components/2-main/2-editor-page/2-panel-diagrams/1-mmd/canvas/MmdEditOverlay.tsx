@@ -378,7 +378,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                         <g key={edge.key}>
                             <polyline
                                 data-mmd-edge={edge.key}
-                                className="mmd-edge-hit"
+                                className="hover:stroke-primary/45 cursor-pointer [pointer-events:stroke]"
                                 points={pointsAttr(edge.points)}
                                 fill="none"
                                 stroke="transparent"
@@ -416,7 +416,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                         aria-pressed={selectedBox}
                         title="Drag to move. Double-click to rename."
                         className={classNames(
-                            'mmd-hit absolute z-5 rounded-sm bg-transparent cursor-grab active:cursor-grabbing',
+                            'absolute z-5 rounded-sm bg-transparent hover:shadow-[0_0_0_2px_color-mix(in_oklab,var(--primary)_50%,transparent)] touch-none cursor-grab active:cursor-grabbing',
                             panMode ? 'pointer-events-none' : 'pointer-events-auto',
                         )}
                         style={{
@@ -442,7 +442,8 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                         key={side}
                         type="button"
                         data-mmd-chrome=""
-                        className="mmd-add-handle absolute z-10 rounded-full bg-primary pointer-events-auto"
+                        data-mmd-add-handle=""
+                        className="absolute z-10 rounded-full bg-primary shadow-[0_0_0_2px_var(--background)] pointer-events-auto"
                         style={{ left: pos.x, top: pos.y, width: HANDLE_SIZE, height: HANDLE_SIZE }}
                         title="Drag to another block to connect, or click to add a block"
                         onPointerDown={(e) => onHandlePointerDown(e, selected.id, selected, side)}
@@ -467,7 +468,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
             {connect && (
                 <div
                     data-mmd-chrome=""
-                    className="mmd-connect-line absolute z-10 h-0.5 bg-primary"
+                    className="absolute z-10 h-0.5 origin-[0_50%] bg-primary pointer-events-none"
                     style={{
                         left: connect.x1,
                         top: connect.y1,
@@ -570,7 +571,8 @@ function EndpointHandle({
         <button
             type="button"
             data-mmd-chrome=""
-            className="mmd-edge-handle absolute z-10 rounded-full bg-background pointer-events-auto"
+            data-mmd-edge-handle=""
+            className="absolute z-10 rounded-full bg-background border-2 border-primary shadow-[0_0_0_1px_var(--background)] cursor-grab active:cursor-grabbing pointer-events-auto"
             style={{
                 left: pt.x - EDGE_HANDLE_SIZE / 2,
                 top: pt.y - EDGE_HANDLE_SIZE / 2,

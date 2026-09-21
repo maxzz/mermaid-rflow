@@ -211,6 +211,11 @@
     html {
         @apply font-sans;
     }
+
+    /* mermaid.render() injects this into document.body; pin it so it cannot grow the page. */
+    .mermaidTooltip {
+        @apply absolute top-0 left-0 pointer-events-none;
+    }
 }
 
 /* Monaco fades scrollbars with class "invisible"; Tailwind's .invisible is visibility:hidden. */
