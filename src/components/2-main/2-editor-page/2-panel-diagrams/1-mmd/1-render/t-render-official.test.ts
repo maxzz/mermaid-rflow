@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sourceWithResolvedLayout } from './2-render-layout';
+import { sourceWithResolvedLayout } from './3-render-layout';
 
 describe('sourceWithResolvedLayout', () => {
     it('rewrites mermaid.ai layout: fixed to the chosen engine', () => {

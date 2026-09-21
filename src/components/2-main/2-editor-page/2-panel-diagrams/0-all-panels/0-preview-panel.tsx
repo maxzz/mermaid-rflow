@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 
 import { Preview_Mmd } from "../1-mmd/0-all-mmd/1-view-mmd";
-import { MmdConverter } from "../1-mmd/0-all-mmd/2-4-mmd-converter";
+import { MmdConverter } from "../1-mmd/1-render/1-mmd-converter";
 import { Preview_Rflow } from "../2-rflow/0-all-rflow/1-view-rflow";
 import { Preview_Bm } from "../3-bm/0-all-bm/1-view-bm";
 

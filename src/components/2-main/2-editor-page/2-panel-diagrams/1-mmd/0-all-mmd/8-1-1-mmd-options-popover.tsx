@@ -12,8 +12,8 @@ import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { classifyMermaidSource, readDirection, type FlowDirection } from '../3-catalog/1-flowchart-source';
 import { setDirection } from '../3-catalog/2-source-patch';
 import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
-import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../1-render/1-themes';
-import { type MmdLayout } from '../1-render/2-render-layout';
+import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../1-render/8-themes';
+import { type MmdLayout } from '../1-render/3-render-layout';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 
 export function MmdOptionsPopover() {
@@ -71,7 +71,7 @@ function MmdViewOptions() {
                 </Select>
             </Row>
 
-            <Row label="Adaptive" hint="Follow the app light or dark theme when choosing a paired Mermaid palette.">
+            <Row label="Adaptive to app theme" hint="Follow the app light or dark theme when choosing a paired Mermaid palette.">
                 <Switch className="-mr-1 scale-65" checked={adaptive} onCheckedChange={(v) => { mmdSettings.adaptive = v; }} />
             </Row>
 
