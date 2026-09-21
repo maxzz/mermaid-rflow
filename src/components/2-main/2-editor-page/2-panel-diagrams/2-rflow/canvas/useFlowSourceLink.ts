@@ -13,9 +13,6 @@ import {
 } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKeys } from './catalog-flow';
 
-const CARET_CLASS = 'is-source-link-caret';
-const CLICK_CLASS = 'is-source-link-click';
-
 export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: ReactFlowInstance, enabled = true) {
     const { source } = useSnapshot(mermaidSettings);
     const link = useSnapshot(sourceLink);
@@ -28,8 +25,7 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
                 nodes.map((n) => `${n.id}:${catalogKeyForNode(n)}:${n.data?.label ?? ''}`).join('|'),
                 edges.map((e) => `${e.id}:${catalogKeyForEdge(e)}`).join('|'),
             ].join('\0'),
-        [edges, nodes, source],
-    );
+        [edges, nodes, source]);
 
     useLayoutEffect(
         () => {
@@ -38,8 +34,7 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
             }
             setSourceIndex(buildSourceIndex(source, catalogFlowGraph(nodes, edges)));
         },
-        [enabled, topologyKey],
-    );
+        [enabled, topologyKey]);
 
     useLayoutEffect(
         () => {
@@ -47,8 +42,7 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
                 clearSourceLink();
             };
         },
-        [],
-    );
+        []);
 
     const keys = link.keys as string[];
     const intensity = link.intensity;
@@ -70,39 +64,33 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
             }
             reactFlow.fitView({ nodes: ids.map((id) => ({ id })), duration: 400, padding: 0.3 });
         },
-        [enabled, intensity, keys, link.origin, nodes, reactFlow],
-    );
+        [enabled, intensity, keys, link.origin, nodes, reactFlow]);
 
     const classForNode = useCallback(
-        (node: Node) => classForKey(catalogKeyForNode(node), keys, intensity),
-        [intensity, keys],
-    );
+        (node: Node) => classForKey(catalogKeyForNode(node), keys, intensity, caretNodeClasses, clickNodeClasses),
+        [intensity, keys]);
 
     const classForEdge = useCallback(
-        (edge: Edge) => classForKey(catalogKeyForEdge(edge), keys, intensity),
-        [intensity, keys],
-    );
+        (edge: Edge) => classForKey(catalogKeyForEdge(edge), keys, intensity, caretEdgeClasses, clickEdgeClasses),
+        [intensity, keys]);
 
     const onNodeClick = useCallback(
         (_event: MouseEvent, node: Node) => {
             selectFromDiagram([catalogKeyForNode(node)]);
         },
-        [],
-    );
+        []);
 
     const onEdgeClick = useCallback(
         (_event: MouseEvent, edge: Edge) => {
             selectFromDiagram([catalogKeyForEdge(edge)]);
         },
-        [],
-    );
+        []);
 
     const onPaneClick = useCallback(
         () => {
             clearSelection();
         },
-        [],
-    );
+        []);
 
     return {
         classForNode,
@@ -115,9 +103,14 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
     };
 }
 
-function classForKey(key: string, keys: string[], intensity: LinkIntensity): string | undefined {
+function classForKey(key: string, keys: string[], intensity: LinkIntensity, caretClass: string, clickClass: string): string | undefined {
     if (!keys.includes(key)) {
         return undefined;
     }
-    return intensity === 'click' ? CLICK_CLASS : CARET_CLASS;
+    return intensity === 'click' ? clickClass : caretClass;
 }
+
+const caretNodeClasses = 'outline-2 outline-solid outline-primary outline-offset-2';
+const clickNodeClasses = 'outline-[3px] outline-solid outline-primary outline-offset-2 shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_40%,transparent)]!';
+const caretEdgeClasses = '[&_path]:stroke-primary!';
+const clickEdgeClasses = '[&_path]:stroke-primary! [&_path]:stroke-[3px]! [&_path]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)]';

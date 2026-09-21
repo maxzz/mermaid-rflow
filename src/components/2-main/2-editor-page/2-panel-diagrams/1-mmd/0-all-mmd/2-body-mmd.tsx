@@ -2,8 +2,10 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { getDefaultStore, useAtomValue } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
+
 import { isThemeDark } from '@/utils/theme-utils';
 import { appSettings } from '@/store/1-ui-settings';
+
 import { ZOOM_STEP } from '@/store/2-mermaid-settings';
 import { bindLastMermaidFunctions } from '../render/2-render-official';
 import { mmdDiagram } from '../store/1-mmd-diagram';
@@ -131,10 +133,10 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
                 ref={viewportRef}
                 className={classNames(
                     'absolute inset-0 overflow-hidden touch-none',
-                    '[background-size:22px_22px]',
+                    'bg-size-[22px_22px]',
                     dark
-                        ? '[background-image:radial-gradient(circle,color-mix(in_oklab,var(--foreground)_18%,transparent)_1.15px,transparent_1.15px)]'
-                        : '[background-image:radial-gradient(circle,color-mix(in_oklab,var(--foreground)_12%,transparent)_1.15px,transparent_1.15px)]',
+                        ? 'bg-[radial-gradient(circle,color-mix(in_oklab,var(--foreground)_18%,transparent)_1.15px,transparent_1.15px)]'
+                        : 'bg-[radial-gradient(circle,color-mix(in_oklab,var(--foreground)_12%,transparent)_1.15px,transparent_1.15px)]',
                     panMode && 'cursor-grab select-none',
                 )}
                 {...panHandlers}
@@ -156,7 +158,7 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
                         : (
                             <div
                                 ref={boardRef}
-                                className="absolute top-0 left-0 [&.is-mmd-dragging]:cursor-grabbing [&.is-mmd-dragging_g.node]:cursor-grabbing [&.is-mmd-dragging_[data-mmd-hit]]:cursor-grabbing [&.is-mmd-dragging_[data-mmd-add-handle]]:hidden [&.is-mmd-dragging_[data-mmd-edge-handle]]:hidden"
+                                className={boardClasses}
                                 style={natural.w > 0 && natural.h > 0
                                     ? {
                                         width: natural.w * zoom,
@@ -168,32 +170,9 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
                                 <div
                                     ref={hostRef}
                                     className="relative origin-top-left"
-                                    style={natural.w > 0 && natural.h > 0
-                                        ? { width: natural.w, height: natural.h, transform: `scale(${zoom})` }
-                                        : undefined}
+                                    style={natural.w > 0 && natural.h > 0 ? { width: natural.w, height: natural.h, transform: `scale(${zoom})` } : undefined}
                                 >
-                                    <div
-                                        ref={contentRef}
-                                        className={classNames(
-                                            '[&_svg]:max-w-none [&_svg]:block [&_svg]:overflow-visible',
-                                            '[&.source-link-interactive_g.node]:cursor-grab',
-                                            '[&.source-link-interactive_g.cluster]:cursor-pointer',
-                                            '[&.source-link-interactive_g.actor]:cursor-pointer',
-                                            '[&.source-link-interactive_g.classGroup]:cursor-pointer',
-                                            '[&.source-link-interactive_path.flowchart-link]:cursor-pointer',
-                                            '[&.source-link-interactive_g.edgePath]:cursor-pointer',
-                                            '[&_g.is-source-link-caret>*:first-child]:stroke-primary [&_g.is-source-link-caret>*:first-child]:stroke-[1.75]',
-                                            '[&_g.is-mmd-selected>*:first-child]:stroke-primary [&_g.is-mmd-selected>*:first-child]:stroke-[1.75]',
-                                            '[&_g.is-source-link-click>*:first-child]:stroke-primary [&_g.is-source-link-click>*:first-child]:stroke-[2.5]',
-                                            '[&_g.is-source-link-click]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)]',
-                                            '[&_g.is-mmd-selected]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)]',
-                                            '[&_path.flowchart-link.is-source-link-caret]:stroke-primary [&_path.flowchart-link.is-source-link-caret]:stroke-2',
-                                            '[&_g.edgePath.is-source-link-caret>path.flowchart-link]:stroke-primary [&_g.edgePath.is-source-link-caret>path.flowchart-link]:stroke-2',
-                                            '[&_path.flowchart-link.is-source-link-click]:stroke-primary [&_path.flowchart-link.is-source-link-click]:stroke-[3] [&_path.flowchart-link.is-source-link-click]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)]',
-                                            '[&_g.edgePath.is-source-link-click>path.flowchart-link]:stroke-primary [&_g.edgePath.is-source-link-click>path.flowchart-link]:stroke-[3] [&_g.edgePath.is-source-link-click>path.flowchart-link]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)]',
-                                        )}
-                                        dangerouslySetInnerHTML={{ __html: svg }}
-                                    />
+                                    <div ref={contentRef} className={containerClasses} dangerouslySetInnerHTML={{ __html: svg }} />
                                 </div>
                                 <div className="absolute inset-0 z-5 pointer-events-none">
                                     <MmdEditOverlay
@@ -214,3 +193,42 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
         </div>
     );
 }
+
+const boardClasses = "\
+absolute \
+top-0 \
+left-0 \
+[&.is-mmd-dragging]:cursor-grabbing \
+[&.is-mmd-dragging_g.node]:cursor-grabbing \
+[&.is-mmd-dragging_[data-mmd-hit]]:cursor-grabbing \
+[&.is-mmd-dragging_[data-mmd-add-handle]]:hidden \
+[&.is-mmd-dragging_[data-mmd-edge-handle]]:hidden \
+"
+
+const containerClasses = "\
+[&_svg]:max-w-none [&_svg]:block \
+[&_svg]:overflow-visible \
+[&.source-link-interactive_g.node]:cursor-grab \
+[&.source-link-interactive_g.cluster]:cursor-pointer \
+[&.source-link-interactive_g.actor]:cursor-pointer \
+[&.source-link-interactive_g.classGroup]:cursor-pointer \
+[&.source-link-interactive_path.flowchart-link]:cursor-pointer \
+[&.source-link-interactive_g.edgePath]:cursor-pointer \
+[&_g.is-source-link-caret>*:first-child]:stroke-primary \
+[&_g.is-source-link-caret>*:first-child]:stroke-[1.75] \
+[&_g.is-mmd-selected>*:first-child]:stroke-primary \
+[&_g.is-mmd-selected>*:first-child]:stroke-[1.75] \
+[&_g.is-source-link-click>*:first-child]:stroke-primary \
+[&_g.is-source-link-click>*:first-child]:stroke-[2.5] \
+[&_g.is-source-link-click]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)] \
+[&_g.is-mmd-selected]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)] \
+[&_path.flowchart-link.is-source-link-caret]:stroke-primary [&_path.flowchart-link.is-source-link-caret]:stroke-2 \
+[&_g.edgePath.is-source-link-caret>path.flowchart-link]:stroke-primary \
+[&_g.edgePath.is-source-link-caret>path.flowchart-link]:stroke-2 \
+[&_path.flowchart-link.is-source-link-click]:stroke-primary \
+[&_path.flowchart-link.is-source-link-click]:stroke-3 \
+[&_path.flowchart-link.is-source-link-click]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)] \
+[&_g.edgePath.is-source-link-click>path.flowchart-link]:stroke-primary \
+[&_g.edgePath.is-source-link-click>path.flowchart-link]:stroke-3 \
+[&_g.edgePath.is-source-link-click>path.flowchart-link]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)] \
+";

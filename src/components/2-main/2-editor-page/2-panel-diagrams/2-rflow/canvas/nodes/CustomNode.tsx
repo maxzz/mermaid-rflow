@@ -1,14 +1,15 @@
 /**
  * Adapted from mermaid-reactflow-editor (MIT).
  */
-import { memo, useMemo, type CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 import { Handle, Position, NodeResizer, type NodeProps } from 'reactflow';
+import { classNames } from '@/utils';
 
 type CustomNodeData = {
     label: string;
     description?: string;
     imageUrl?: string;
-    shape?: 'rect' | 'circle' | 'diamond';
+    shape?: 'rect' | 'circle' | 'diamond' | 'stadium' | 'round';
     style?: CSSProperties;
     isDragging?: boolean;
     locked?: boolean;
@@ -31,6 +32,8 @@ const RESIZER_STYLES = {
     },
 };
 
+export const CustomNode = memo(CustomNodeInner);
+
 function CustomNodeInner(props: NodeProps<CustomNodeData>) {
     const { data, isConnectable, selected } = props;
     const isImageNode = Boolean(data.imageUrl?.trim());
@@ -38,26 +41,6 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
         ? (data.label.length > 20 ? `${data.label.slice(0, 20)}...` : data.label)
         : '';
     const hasLongCaption = (data.label?.length || 0) > 20;
-
-    const nodeClassName = useMemo(
-        () => {
-            const classes = ['custom-node', `shape-${data.shape || 'rect'}`];
-            if (data.imageUrl) {
-                classes.push('has-image');
-            }
-            if (data.shape === 'diamond') {
-                classes.push('diamond-node');
-            }
-            if (data.locked) {
-                classes.push('locked');
-            }
-            if (selected) {
-                classes.push('selected');
-            }
-            return classes.join(' ');
-        },
-        [data.shape, data.imageUrl, data.locked, selected],
-    );
 
     const mergedStyle: CSSProperties = {
         width: '100%',
@@ -82,7 +65,10 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
                 position={position}
                 isConnectable={isConnectable}
                 id={id}
-                className={`handle-${position.toLowerCase()}`}
+                className={classNames(
+                    `handle-${position.toLowerCase()}`,
+                    'absolute! z-12 bg-[#555] border-2 border-white shadow-[0_0_4px_rgba(0,0,0,0.3)]',
+                )}
                 style={{
                     left: position === Position.Left ? 0 : position === Position.Right ? undefined : '50%',
                     right: position === Position.Right ? 0 : undefined,
@@ -99,7 +85,19 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
     }
 
     return (
-        <div className={nodeClassName} onDoubleClick={data.onEdit} style={mergedStyle}>
+        <div
+            className={classNames(
+                containerClasses,
+                selected && !isImageNode && 'border-[#2563eb]! shadow-[0_0_0_2px_rgba(37,99,235,0.2)]!',
+                data.shape === 'circle' && 'aspect-square rounded-full',
+                data.shape === 'stadium' && 'rounded-[30px]',
+                data.shape === 'round' && 'rounded-[15px]',
+                isImageNode && 'p-0 min-w-10 min-h-10 overflow-visible bg-transparent border-none',
+                data.locked && 'locked',
+            )}
+            onDoubleClick={data.onEdit}
+            style={mergedStyle}
+        >
             {!data.isDragging && (
                 <NodeResizer
                     isVisible={selected}
@@ -126,44 +124,62 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
                 </>
             )}
 
-            <div className="node-content" style={{ position: 'relative' }}>
+            <div className={classNames('relative z-2 box-border p-3.5 w-full h-full overflow-hidden flex flex-col items-center justify-center', isImageNode && 'p-0 overflow-visible')}>
                 {isImageNode
-                    ? (
-                        <>
-                            <div className="node-image-container" style={{ color: (data?.style as CSSProperties | undefined)?.color }}>
-                                <img
-                                    src={data.imageUrl}
-                                    alt={data.label || 'Node image'}
-                                    className="node-image"
-                                    style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: 'transparent' }}
-                                />
+                    ? (<>
+                        <div className="absolute inset-0" style={{ color: (data?.style as CSSProperties | undefined)?.color }}>
+                            <img
+                                src={data.imageUrl}
+                                alt={data.label || 'Node image'}
+                                className={classNames(
+                                    'w-full h-full object-contain block bg-transparent',
+                                    selected && 'outline-2 outline-[#1976d2] outline-offset-2',
+                                )}
+                            />
+                        </div>
+                        
+                        {data.label?.trim() && (
+                            <div
+                                className="absolute top-[calc(100%+8px)] left-1/2 z-1000 px-2 py-1 max-w-30 text-[10px] font-medium text-[#333] bg-white/90 rounded truncate -translate-x-1/2"
+                                title={hasLongCaption ? data.label : data.label}
+                                data-full-text={data.label}
+                            >
+                                {displayCaption}
                             </div>
-                            {data.label?.trim() && (
-                                <div
-                                    className="image-caption"
-                                    title={hasLongCaption ? data.label : data.label}
-                                    data-full-text={data.label}
-                                >
-                                    {displayCaption}
-                                </div>
-                            )}
-                        </>
-                    )
-                    : (
-                        <>
-                            <div className="node-label">
-                                {renderLabel(data.label)}
+                        )}
+                    </>)
+                    : (<>
+                        <div className="mb-1 max-w-50 text-[clamp(10px,2vw,13px)] font-semibold leading-[1.4] text-[#2d3748] text-center wrap-break-word">
+                            {renderLabel(data.label)}
+                        </div>
+
+                        {data.description && (
+                            <div className="mt-1 max-w-50 text-[clamp(9px,1.5vw,12px)] leading-[1.3] text-[#718096] text-center overflow-hidden text-ellipsis" title={data.description}>
+                                {data.description}
                             </div>
-                            {data.description && (
-                                <div className="node-description" title={data.description}>
-                                    {data.description}
-                                </div>
-                            )}
-                        </>
-                    )}
+                        )}
+                    </>)}
             </div>
         </div>
     );
 }
 
-export const CustomNode = memo(CustomNodeInner);
+const containerClasses = "relative \
+box-border \
+p-2.5 \
+w-full \
+h-full \
+overflow-hidden \
+text-center \
+text-[#1f2937] \
+bg-white \
+wrap-break-word \
+border-2 \
+border-[#e5e7eb] \
+rounded-lg \
+flex \
+items-center \
+justify-center \
+cursor-pointer transition-[border-color,box-shadow] duration-200 \
+hover:border-[#d1d5db] \
+";
