@@ -1,7 +1,7 @@
 import { useSnapshot } from "valtio";
 import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
-import { Body_Rflow } from "./2-body-rflow";
+import { Body_Rflow } from "./2-0-body-rflow";
 import { useMountedOnce } from "@/utils/util-hooks/use-mounted-once";
 import { canvasTabClass, PanelFallbackMessage } from "../../../../../../ui/local-ui/1-4-view-shared";
 

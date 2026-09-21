@@ -44,7 +44,7 @@ import {
     rflowSelectedEdgesAtom,
     rflowSelectedNodesAtom,
 } from '../store/a-rflow-ui';
-import { exportReactFlowImage } from '../canvas/exportImage';
+import { exportReactFlowImage } from '../1-canvas/8-export-image';
 import {
     alignNodes,
     deleteSelected,
@@ -52,8 +52,8 @@ import {
     duplicateNodes,
     lockNodes,
     unlockNodes,
-} from '../canvas/diagramEditingUtils';
-import { CustomNode, DiamondNode, SubgraphNode } from '../canvas/nodes';
+} from '../1-canvas/8-diagram-editing-utils';
+import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
 import { EditingToolbar } from '../ui/2-rflow-toolbar';
 import { PaletteToolbar } from '../ui/PaletteToolbar';
 import { EdgeLabelEditor } from '../ui/5-2-dlg-edge-label-editor';
@@ -61,7 +61,7 @@ import { NodeEditor } from '../ui/5-1-dlg-node-editor';
 import { NodeSearchDialog } from '../ui/NodeSearchDialog';
 import { type AlignmentType, type DistributionType } from '../converter/constants';
 import { nextRfId } from '../converter/mermaid-ids';
-import { useFlowSourceLink } from '../canvas/useFlowSourceLink';
+import { useFlowSourceLink } from './2-1-use-rflow-source-link';
 import { appSettings } from '@/store/1-ui-settings';
 import { isThemeDark } from '@/utils/theme-utils';
 import { classNames } from '@/utils';

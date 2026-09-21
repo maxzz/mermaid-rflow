@@ -1,6 +1,3 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT).
- */
 import * as htmlToImage from 'html-to-image';
 import { type Node, type ReactFlowInstance } from 'reactflow';
 
@@ -29,17 +26,20 @@ export async function exportReactFlowImage({
         if (!nodes.length) {
             throw new Error('No nodes to export');
         }
+
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        nodes.forEach((node) => {
-            const x = node.position.x;
-            const y = node.position.y;
-            const width = node.width || 150;
-            const height = node.height || 50;
-            minX = Math.min(minX, x);
-            minY = Math.min(minY, y);
-            maxX = Math.max(maxX, x + width);
-            maxY = Math.max(maxY, y + height);
-        });
+        nodes.forEach(
+            (node) => {
+                const x = node.position.x;
+                const y = node.position.y;
+                const width = node.width || 150;
+                const height = node.height || 50;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + width);
+                maxY = Math.max(maxY, y + height);
+            }
+        );
         const padding = 20;
         minX -= padding;
         minY -= padding;
@@ -51,6 +51,7 @@ export async function exportReactFlowImage({
         wrapper.style.height = exportHeight + 'px';
         reactFlowInstance.setViewport({ x: -minX, y: -minY, zoom: 1 });
         await new Promise((res) => setTimeout(res, 300));
+
         const dataUrl = await htmlToImage.toPng(wrapper, {
             cacheBust: true,
             pixelRatio,
@@ -62,6 +63,7 @@ export async function exportReactFlowImage({
             width: exportWidth,
             height: exportHeight,
         });
+        
         const link = document.createElement('a');
         link.download = fileName;
         link.href = dataUrl;

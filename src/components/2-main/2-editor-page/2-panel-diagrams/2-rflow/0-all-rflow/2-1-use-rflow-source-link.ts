@@ -11,7 +11,7 @@ import {
     sourceLink,
     type LinkIntensity,
 } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
-import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKeys } from './catalog-flow';
+import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKeys } from '../1-canvas/8-catalog-rflow';
 
 export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: ReactFlowInstance, enabled = true) {
     const { source } = useSnapshot(mermaidSettings);

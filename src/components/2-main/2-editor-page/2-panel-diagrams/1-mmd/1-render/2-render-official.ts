@@ -58,9 +58,11 @@ export function formatMermaidError(err: unknown): string {
             return rec.message;
         }
     }
+
     if (err instanceof Error) {
         return err.message;
     }
+    
     return String(err);
 }
 

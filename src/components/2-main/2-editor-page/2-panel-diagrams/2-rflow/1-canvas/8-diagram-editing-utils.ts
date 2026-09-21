@@ -9,13 +9,17 @@ export function alignNodes(nodes: Node[], selectedNodes: Node[], alignment: Alig
     if (selectedNodes.length < 2) {
         return nodes;
     }
-    const bounds = selectedNodes.map((node) => ({
-        id: node.id,
-        x: node.position.x,
-        y: node.position.y,
-        width: node.width || 150,
-        height: node.height || 50,
-    }));
+
+    const bounds = selectedNodes.map(
+        (node) => ({
+            id: node.id,
+            x: node.position.x,
+            y: node.position.y,
+            width: node.width || 150,
+            height: node.height || 50,
+        })
+    );
+
     const newNodes = [...nodes];
     switch (alignment) {
         case ALIGNMENT_TYPES.LEFT: {
@@ -86,13 +90,17 @@ export function distributeNodes(nodes: Node[], selectedNodes: Node[], direction:
     if (selectedNodes.length < 3) {
         return nodes;
     }
-    const bounds = selectedNodes.map((node) => ({
-        id: node.id,
-        x: node.position.x,
-        y: node.position.y,
-        width: node.width || 150,
-        height: node.height || 50,
-    }));
+
+    const bounds = selectedNodes.map(
+        (node) => ({
+            id: node.id,
+            x: node.position.x,
+            y: node.position.y,
+            width: node.width || 150,
+            height: node.height || 50,
+        })
+    );
+
     const newNodes = [...nodes];
     if (direction === DISTRIBUTION_TYPES.HORIZONTAL) {
         bounds.sort((a, b) => a.x - b.x);
@@ -102,13 +110,15 @@ export function distributeNodes(nodes: Node[], selectedNodes: Node[], direction:
         const available = rightEdge - leftEdge - totalWidths;
         const spacing = Math.max(0, available / (bounds.length - 1));
         let cursor = leftEdge;
-        bounds.forEach((bound) => {
-            const nodeIndex = newNodes.findIndex((n) => n.id === bound.id);
-            if (nodeIndex !== -1) {
-                newNodes[nodeIndex] = { ...newNodes[nodeIndex], position: { ...newNodes[nodeIndex].position, x: cursor } };
-                cursor += bound.width + spacing;
+        bounds.forEach(
+            (bound) => {
+                const nodeIndex = newNodes.findIndex((n) => n.id === bound.id);
+                if (nodeIndex !== -1) {
+                    newNodes[nodeIndex] = { ...newNodes[nodeIndex], position: { ...newNodes[nodeIndex].position, x: cursor } };
+                    cursor += bound.width + spacing;
+                }
             }
-        });
+        );
     } else {
         bounds.sort((a, b) => a.y - b.y);
         const topEdge = bounds[0].y;
@@ -117,45 +127,49 @@ export function distributeNodes(nodes: Node[], selectedNodes: Node[], direction:
         const available = bottomEdge - topEdge - totalHeights;
         const spacing = Math.max(0, available / (bounds.length - 1));
         let cursor = topEdge;
-        bounds.forEach((bound) => {
-            const nodeIndex = newNodes.findIndex((n) => n.id === bound.id);
-            if (nodeIndex !== -1) {
-                newNodes[nodeIndex] = { ...newNodes[nodeIndex], position: { ...newNodes[nodeIndex].position, y: cursor } };
-                cursor += bound.height + spacing;
+        bounds.forEach(
+            (bound) => {
+                const nodeIndex = newNodes.findIndex((n) => n.id === bound.id);
+                if (nodeIndex !== -1) {
+                    newNodes[nodeIndex] = { ...newNodes[nodeIndex], position: { ...newNodes[nodeIndex].position, y: cursor } };
+                    cursor += bound.height + spacing;
+                }
             }
-        });
+        );
     }
     return newNodes;
 }
 
 export function bringToFront(nodes: Node[], selectedNodes: Node[]): Node[] {
     const maxZ = Math.max(...nodes.map((n) => n.zIndex || 0));
-    return nodes.map((node) =>
-        selectedNodes.some((sn) => sn.id === node.id)
-            ? { ...node, zIndex: maxZ + 1 }
-            : node
+    return nodes.map(
+        (node) => (
+            selectedNodes.some((sn) => sn.id === node.id) ? { ...node, zIndex: maxZ + 1 } : node
+        )
     );
 }
 
 export function sendToBack(nodes: Node[], selectedNodes: Node[]): Node[] {
     const minZ = Math.min(...nodes.map((n) => n.zIndex || 0));
-    return nodes.map((node) =>
-        selectedNodes.some((sn) => sn.id === node.id)
-            ? { ...node, zIndex: minZ - 1 }
-            : node
+    return nodes.map(
+        (node) => (
+            selectedNodes.some((sn) => sn.id === node.id) ? { ...node, zIndex: minZ - 1 } : node
+        )
     );
 }
 
 export function duplicateNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
     const newNodes = [...nodes];
-    selectedNodes.forEach((node) => {
-        newNodes.push({
-            ...node,
-            id: nextRfId(newNodes, prefixForNode(node)),
-            position: { x: node.position.x + 50, y: node.position.y + 50 },
-            selected: false,
-        });
-    });
+    selectedNodes.forEach(
+        (node) => {
+            newNodes.push({
+                ...node,
+                id: nextRfId(newNodes, prefixForNode(node)),
+                position: { x: node.position.x + 50, y: node.position.y + 50 },
+                selected: false,
+            });
+        }
+    );
     return newNodes;
 }
 
@@ -163,26 +177,28 @@ export function deleteSelected(nodes: Node[], edges: Edge[], selectedNodes: Node
     const nodeIdsToDelete = selectedNodes.map((n) => n.id);
     const edgeIdsToDelete = selectedEdges.map((e) => e.id);
     const newNodes = nodes.filter((n) => !nodeIdsToDelete.includes(n.id));
-    const newEdges = edges.filter((e) =>
-        !edgeIdsToDelete.includes(e.id) &&
-        !nodeIdsToDelete.includes(e.source) &&
-        !nodeIdsToDelete.includes(e.target)
+    const newEdges = edges.filter((
+        (e) =>
+            !edgeIdsToDelete.includes(e.id) &&
+            !nodeIdsToDelete.includes(e.source) &&
+            !nodeIdsToDelete.includes(e.target)
+    )
     );
     return { newNodes, newEdges };
 }
 
 export function lockNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
-    return nodes.map((node) =>
-        selectedNodes.some((sn) => sn.id === node.id)
-            ? { ...node, draggable: false, data: { ...node.data, locked: true } }
-            : node
+    return nodes.map(
+        (node) => (
+            selectedNodes.some((sn) => sn.id === node.id) ? { ...node, draggable: false, data: { ...node.data, locked: true } } : node
+        )
     );
 }
 
 export function unlockNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
-    return nodes.map((node) =>
-        selectedNodes.some((sn) => sn.id === node.id)
-            ? { ...node, draggable: true, data: { ...node.data, locked: false } }
-            : node
+    return nodes.map(
+        (node) => (
+            selectedNodes.some((sn) => sn.id === node.id) ? { ...node, draggable: true, data: { ...node.data, locked: false } } : node
+        )
     );
 }
