@@ -2,17 +2,20 @@ import { Suspense, useRef } from "react";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 import { useViewportOverflow } from "@/utils/util-hooks/use-viewport-overflow";
-import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
-import { BarsLoaderIcon } from "@/ui/local-ui";
-import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { ScrollArea2 } from "@/ui/shadcn/scroll-area";
-import { RenderView } from "../1-3-1-render-view";
-import { ZoomControls_Bm } from "../1-3-2-zoom-controls-bm";
+import { BarsLoaderIcon } from "@/ui/local-ui";
+
 import { PanelFallbackMessage } from "../../../../../../ui/local-ui/1-4-view-shared";
+import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
+
+import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
+import { Body_Bm } from "./2-body-bm";
+import { ZoomControls_Bm } from "../1-3-2-zoom-controls-bm";
 
 export function Preview_Bm() {
-    const scrollRef = useRef<HTMLDivElement>(null);
     const { zoom, outputFormat } = useSnapshot(mermaidSettings);
+    
+    const scrollRef = useRef<HTMLDivElement>(null);
     const overflow = useViewportOverflow(scrollRef, [outputFormat, zoom]);
 
     if (outputFormat === OutputFormat.flow || outputFormat === OutputFormat.mmd) {
@@ -32,7 +35,7 @@ export function Preview_Bm() {
         >
             <ErrorBoundary fallback={<PanelFallbackMessage>Failed to load the diagram renderer.</PanelFallbackMessage>}>
                 <Suspense fallback={<PanelFallbackMessage><BarsLoaderIcon /></PanelFallbackMessage>}>
-                    <RenderView scrollRef={scrollRef} />
+                    <Body_Bm scrollRef={scrollRef} />
                 </Suspense>
             </ErrorBoundary>
         </ScrollArea2>

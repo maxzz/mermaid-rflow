@@ -47,7 +47,7 @@ import {
     rflowSelectedEdgesAtom,
     rflowSelectedNodesAtom,
 } from '../store/a-rflow-ui';
-import { exportReactFlowImage } from './exportImage';
+import { exportReactFlowImage } from '../canvas/exportImage';
 import {
     alignNodes,
     deleteSelected,
@@ -55,8 +55,8 @@ import {
     duplicateNodes,
     lockNodes,
     unlockNodes,
-} from './diagramEditingUtils';
-import { CustomNode, DiamondNode, SubgraphNode } from './nodes';
+} from '../canvas/diagramEditingUtils';
+import { CustomNode, DiamondNode, SubgraphNode } from '../canvas/nodes';
 import { EditingToolbar } from '../ui/2-rflow-toolbar';
 import { PaletteToolbar } from '../ui/PaletteToolbar';
 import { EdgeLabelEditor } from '../ui/5-2-dlg-edge-label-editor';
@@ -64,11 +64,21 @@ import { NodeEditor } from '../ui/5-1-dlg-node-editor';
 import { NodeSearchDialog } from '../ui/NodeSearchDialog';
 import { type AlignmentType, type DistributionType } from '../converter/constants';
 import { nextRfId } from '../converter/mermaid-ids';
-import { useFlowSourceLink } from './useFlowSourceLink';
+import { useFlowSourceLink } from '../canvas/useFlowSourceLink';
 import { appSettings } from '@/store/1-ui-settings';
 import { isThemeDark } from '@/utils/theme-utils';
 import { classNames } from '@/utils';
 import { BarsLoaderIcon } from '@/ui/local-ui';
+
+export function Body_Rflow({ active = true }: { active?: boolean; }) {
+    return (
+        <ReactFlowProvider>
+            <ReactFlowErrorGuard>
+                <FlowDiagramInternal active={active} />
+            </ReactFlowErrorGuard>
+        </ReactFlowProvider>
+    );
+}
 
 const nodeTypes: NodeTypes = {
     custom: CustomNode,
@@ -564,15 +574,5 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
 
             <NodeEditor />
         </>
-    );
-}
-
-export function FlowDiagram({ active = true }: { active?: boolean; }) {
-    return (
-        <ReactFlowProvider>
-            <ReactFlowErrorGuard>
-                <FlowDiagramInternal active={active} />
-            </ReactFlowErrorGuard>
-        </ReactFlowProvider>
     );
 }

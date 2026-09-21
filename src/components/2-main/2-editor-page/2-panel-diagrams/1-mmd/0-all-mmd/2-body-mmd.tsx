@@ -1,4 +1,4 @@
-import { type PointerEvent, type RefObject, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { getDefaultStore, useAtomValue } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
@@ -11,13 +11,14 @@ import { mmdSettings } from '../store/2-mmd-settings';
 import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
 import { MmdPaletteRail } from '../ui/MmdPaletteRail';
 import { MmdViewControls } from '../ui/MmdViewControls';
-import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdPan, setMmdZoom } from './mmd-zoom';
-import { MmdEditOverlay } from './MmdEditOverlay';
-import { useMmdLayout } from './useMmdLayout';
-import { useMmdSourceLink } from './useMmdSourceLink';
+import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from '../canvas/mmd-zoom';
+import { MmdEditOverlay } from '../canvas/MmdEditOverlay';
+import { useMmdLayout } from '../canvas/useMmdLayout';
+import { useMmdSourceLink } from '../canvas/useMmdSourceLink';
+import { usePanToTranslate } from './use-pan-to-translate';
 import '../styles/8-mmd-view.css';
 
-export function MermaidView({ active = true }: { active?: boolean; }) {
+export function Body_Mmd({ active = true }: { active?: boolean; }) {
     const viewportRef = useRef<HTMLDivElement>(null);
     const boardRef = useRef<HTMLDivElement>(null);
     const hostRef = useRef<HTMLDivElement>(null);
@@ -40,8 +41,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
             }
             bindLastMermaidFunctions(root);
         },
-        [svg],
-    );
+        [svg]);
 
     useMmdSourceLink({
         contentRef,
@@ -73,8 +73,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
             }
             setNatural(measureMmdNaturalSize(root));
         },
-        [svg],
-    );
+        [svg]);
 
     useLayoutEffect(
         () => {
@@ -82,8 +81,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                 fitMmdToView(viewportRef.current, contentRef.current);
             }
         },
-        [active, autofit, enabled, svg, natural.w, natural.h],
-    );
+        [active, autofit, enabled, svg, natural.w, natural.h]);
 
     useLayoutEffect(
         () => {
@@ -97,10 +95,10 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                 }
             });
             ro.observe(viewport);
+
             return () => ro.disconnect();
         },
-        [autofit, enabled],
-    );
+        [autofit, enabled]);
 
     useLayoutEffect(
         () => {
@@ -121,10 +119,10 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                 store.set(mmdPanAtom, { x: current.x - e.deltaX, y: current.y - e.deltaY });
             }
             viewport.addEventListener('wheel', onWheel, { passive: false });
+
             return () => viewport.removeEventListener('wheel', onWheel);
         },
-        [],
-    );
+        []);
 
     const panHandlers = usePanToTranslate(boardRef, panMode);
 
@@ -132,11 +130,7 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
         <div className="relative h-full">
             <div
                 ref={viewportRef}
-                className={classNames(
-                    'absolute inset-0 overflow-hidden touch-none',
-                    dark ? 'mmd-grid-dark' : 'mmd-grid-light',
-                    panMode && 'cursor-grab select-none',
-                )}
+                className={classNames('absolute inset-0 overflow-hidden touch-none', dark ? 'mmd-grid-dark' : 'mmd-grid-light', panMode && 'cursor-grab select-none')}
                 {...panHandlers}
             >
                 {error
@@ -188,87 +182,12 @@ export function MermaidView({ active = true }: { active?: boolean; }) {
                                     />
                                 </div>
                             </div>
-                        )}
+                        )
+                }
             </div>
+
             <MmdPaletteRail />
             <MmdViewControls viewportRef={viewportRef} contentRef={contentRef} />
         </div>
     );
-}
-
-function usePanToTranslate(boardRef: RefObject<HTMLDivElement | null>, panMode: boolean) {
-    const dragRef = useRef<{
-        x: number;
-        y: number;
-        panX: number;
-        panY: number;
-        pointerId: number;
-        curX: number;
-        curY: number;
-    } | null>(null);
-
-    function onPointerDown(e: PointerEvent<HTMLDivElement>) {
-        const middleButton = e.button === 1;
-        if (e.button !== 0 && !middleButton) {
-            return;
-        }
-        if (!panMode && !middleButton && e.target instanceof Element
-            && e.target.closest('[data-mmd-hit], [data-mmd-chrome], [data-mmd-edge], g.node')) {
-            return;
-        }
-        e.preventDefault();
-        mmdSettings.autofit = false;
-        const pan = getDefaultStore().get(mmdPanAtom);
-        try {
-            e.currentTarget.setPointerCapture(e.pointerId);
-        }
-        catch {
-            // window path below still works if capture is unavailable
-        }
-        dragRef.current = {
-            x: e.clientX,
-            y: e.clientY,
-            panX: pan.x,
-            panY: pan.y,
-            pointerId: e.pointerId,
-            curX: pan.x,
-            curY: pan.y,
-        };
-        e.currentTarget.style.cursor = 'grabbing';
-    }
-
-    function onPointerMove(e: PointerEvent<HTMLDivElement>) {
-        const drag = dragRef.current;
-        const board = boardRef.current;
-        if (!drag || e.pointerId !== drag.pointerId) {
-            return;
-        }
-        const x = drag.panX + (e.clientX - drag.x);
-        const y = drag.panY + (e.clientY - drag.y);
-        drag.curX = x;
-        drag.curY = y;
-        if (board) {
-            board.style.transform = `translate(${x}px, ${y}px)`;
-        }
-    }
-
-    function onPointerUp(e: PointerEvent<HTMLDivElement>) {
-        const drag = dragRef.current;
-        if (!drag || e.pointerId !== drag.pointerId) {
-            return;
-        }
-        setMmdPan({ x: drag.curX, y: drag.curY });
-        try {
-            if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-                e.currentTarget.releasePointerCapture(e.pointerId);
-            }
-        }
-        catch {
-            // ignore
-        }
-        e.currentTarget.style.cursor = '';
-        dragRef.current = null;
-    }
-
-    return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp };
 }
