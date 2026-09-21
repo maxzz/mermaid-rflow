@@ -1,6 +1,7 @@
 import { proxy, subscribe } from 'valtio';
 import { debounceDevTools } from '@/utils/debounce';
 import { type MmdLook, type MmdTheme } from '../1-render/1-themes';
+import { type MmdLayout } from '../1-render/2-render-layout';
 
 const STORE_KEY = 'tm-mermaid-rflow-mmd';
 const STORE_VER = 'v1.0';
@@ -10,13 +11,15 @@ export type MmdViewSettings = {
     theme: MmdTheme;
     adaptive: boolean;
     look: MmdLook;
+    layout: MmdLayout;
     autofit: boolean;
 };
 
 const DEFAULT_SETTINGS: MmdViewSettings = {
     theme: 'redux-color',
     adaptive: true,
-    look: 'classic',
+    look: 'neo',
+    layout: 'elk',
     autofit: true,
 };
 
@@ -25,7 +28,11 @@ function loadSettings(): MmdViewSettings {
         const stored = localStorage.getItem(STORAGE_ID);
         if (stored) {
             const parsed = JSON.parse(stored) as Partial<MmdViewSettings>;
-            return { ...DEFAULT_SETTINGS, ...parsed };
+            return {
+                ...DEFAULT_SETTINGS,
+                ...parsed,
+                layout: parsed.layout === 'dagre' ? 'dagre' : DEFAULT_SETTINGS.layout,
+            };
         }
     } catch (e) {
         console.error('Failed to load official mermaid view settings', e);

@@ -39,7 +39,7 @@ export default defineConfig({
                     groups: [
                         {
                             name: 'beautiful-mermaid', // includes the ~1.6 MB ELK layout engine
-                            test: /[\\/]node_modules[\\/](beautiful-mermaid|elkjs|entities)[\\/]/,
+                            test: /[\\/]node_modules[\\/](beautiful-mermaid|elkjs|entities|@mermaid-js[\\/]layout-elk)[\\/]/,
                             priority: 30,
                         },
                         {

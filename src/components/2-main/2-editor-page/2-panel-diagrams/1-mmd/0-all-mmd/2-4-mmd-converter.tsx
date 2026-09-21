@@ -19,13 +19,13 @@ const RENDER_DEBOUNCE_MS = 300;
 export function MmdConverter() {
     const hostRef = useRef<HTMLDivElement>(null);
     const { source, outputFormat } = useSnapshot(mermaidSettings);
-    const { theme, adaptive, look } = useSnapshot(mmdSettings);
+    const { theme, adaptive, look, layout } = useSnapshot(mmdSettings);
     const { immediate } = useSnapshot(mmdDiagram);
     const { theme: appTheme } = useSnapshot(appSettings);
     const delay = outputFormat === OutputFormat.mmd && immediate ? 0 : RENDER_DEBOUNCE_MS;
     const debounced = useDebouncedValue(source, delay);
     const resolvedTheme = resolveMmdTheme(theme, adaptive, isThemeDark(appTheme));
-    const configSig = officialConfigSig(resolvedTheme, look);
+    const configSig = officialConfigSig(resolvedTheme, look, layout);
 
     useEffect(
         () => {
@@ -63,7 +63,7 @@ export function MmdConverter() {
                 mmdDiagram.error = null;
                 const t0 = performance.now();
                 try {
-                    const result = await renderOfficialMermaid(text, resolvedTheme, look, renderHost);
+                    const result = await renderOfficialMermaid(text, resolvedTheme, look, renderHost, layout);
                     if (cancelled) {
                         return;
                     }
@@ -93,7 +93,7 @@ export function MmdConverter() {
             void run();
             return () => { cancelled = true; };
         },
-        [adaptive, configSig, debounced, immediate, look, outputFormat, resolvedTheme],
+        [adaptive, configSig, debounced, immediate, layout, look, outputFormat, resolvedTheme],
     );
 
     return (
