@@ -1,5 +1,9 @@
 import mermaid, { type MermaidConfig } from 'mermaid';
 import { type MmdLook, type MmdTheme } from './1-themes';
+import { sourceWithResolvedLayout, type MmdLayout } from './2-render-layout';
+
+export type { MmdLayout };
+export { sourceWithResolvedLayout };
 
 type OfficialRenderResult = {
     svg: string;
@@ -7,22 +11,45 @@ type OfficialRenderResult = {
     bindFunctions?: (element: Element) => void;
 };
 
-export async function renderOfficialMermaid(source: string, theme: MmdTheme, look: MmdLook, container: Element): Promise<OfficialRenderResult> {
-    const text = source.trim();
+export async function renderOfficialMermaid(
+    source: string,
+    theme: MmdTheme,
+    look: MmdLook,
+    container: Element,
+    layout: MmdLayout = 'elk',
+): Promise<OfficialRenderResult> {
+    const text = sourceWithResolvedLayout(source.trim(), layout);
     if (!text) {
         return { svg: '', diagramType: null };
     }
+
+    // Register before initialize/parse. mermaid v11 silently falls back to Dagre
+    // (curved edges) when `layout: elk` is requested but ELK is not registered.
+    await ensureElkLayouts();
 
     const config: MermaidConfig = {
         startOnLoad: false,
         securityLevel: 'loose',
         theme,
         look,
-        layout: 'dagre',
+        layout,
+        // mermaid.ai `layout: fixed` is ELK's modelOrder preset: break the
+        // Debug↔decision cycle at the later-declared back-edge so Start stays
+        // on the first layer. GREEDY (ELK default) ranks the diamond first.
+        elk: {
+            cycleBreakingStrategy: 'GREEDY_MODEL_ORDER',
+            considerModelOrder: 'NODES_AND_EDGES',
+            nodePlacementStrategy: 'NETWORK_SIMPLEX',
+            nodePlacementAlignment: 'NONE',
+            keepEntryNodeOnTop: true,
+        },
         flowchart: {
             htmlLabels: true,
             useMaxWidth: false,
             wrappingWidth: 200,
+            // ELK orthogonal routes + rounded corners match mermaid.ai. Dagre's
+            // `basis`/`rounded` interpolations are the bowed S-curves.
+            curve: layout === 'elk' ? 'rounded' : 'linear',
         },
     };
 
@@ -34,11 +61,6 @@ export async function renderOfficialMermaid(source: string, theme: MmdTheme, loo
     }
     const id = `mermaid-mmd-${++renderSeq}`;
     const { svg, bindFunctions } = await mermaid.render(id, text, container);
-
-    if (text.includes('flowchart-elk') && !elkWarned) {
-        elkWarned = true;
-        console.info('Official Mermaid tab: ELK is not bundled with mermaid 11; flowchart-elk falls back to dagre.');
-    }
 
     lastBindFunctions = bindFunctions;
     return {
@@ -62,18 +84,26 @@ export function formatMermaidError(err: unknown): string {
     if (err instanceof Error) {
         return err.message;
     }
-    
+
     return String(err);
 }
 
 let renderSeq = 0;
-let elkWarned = false;
 let lastBindFunctions: ((element: Element) => void) | undefined;
+
+let elkLayoutsPromise: Promise<void> | undefined;
+
+function ensureElkLayouts(): Promise<void> {
+    elkLayoutsPromise ??= import('@mermaid-js/layout-elk').then(({ default: elkLayouts }) => {
+        mermaid.registerLayoutLoaders(elkLayouts);
+    });
+    return elkLayoutsPromise;
+}
 
 export function bindLastMermaidFunctions(element: Element) {
     lastBindFunctions?.(element);
 }
 
-export function officialConfigSig(theme: MmdTheme, look: MmdLook): string {
-    return `${theme}|${look}`;
+export function officialConfigSig(theme: MmdTheme, look: MmdLook, layout: MmdLayout): string {
+    return `${theme}|${look}|${layout}|src-layout|model-order`;
 }

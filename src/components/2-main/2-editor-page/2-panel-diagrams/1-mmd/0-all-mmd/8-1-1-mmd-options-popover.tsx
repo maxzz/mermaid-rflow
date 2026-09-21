@@ -13,6 +13,7 @@ import { classifyMermaidSource, readDirection, type FlowDirection } from '../3-c
 import { setDirection } from '../3-catalog/2-source-patch';
 import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
 import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../1-render/1-themes';
+import { type MmdLayout } from '../1-render/2-render-layout';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 
 export function MmdOptionsPopover() {
@@ -35,7 +36,7 @@ export function MmdOptionsPopover() {
                         Mermaid options
                     </PopoverTitle>
                     <PopoverDescription className="text-[0.65rem] text-muted-foreground sr-only">
-                        Official Mermaid theme, look, flowchart direction, and fit.
+                        Official Mermaid theme, look, layout engine, flowchart direction, and fit.
                     </PopoverDescription>
                 </PopoverHeader>
 
@@ -51,7 +52,7 @@ export function MmdOptionsPopover() {
 
 function MmdViewOptions() {
     const { source } = useSnapshot(mermaidSettings);
-    const { theme, adaptive, look, autofit } = useSnapshot(mmdSettings);
+    const { theme, adaptive, look, layout, autofit } = useSnapshot(mmdSettings);
     const flowchart = classifyMermaidSource(source) === 'flowchart';
     const direction = readDirection(source) ?? 'TD';
 
@@ -87,6 +88,19 @@ function MmdViewOptions() {
                 </Select>
             </Row>
 
+            <Row label="Layout" hint="ELK is what mermaid.ai uses: straighter orthogonal edges. Dagre is the older engine with rounded Bézier links.">
+                <Select value={layout} onValueChange={(v) => { mmdSettings.layout = v as MmdLayout; }}>
+                    <SelectTrigger size="sm" className="w-40">
+                        <SelectValue>{LAYOUTS.find((item) => item.value === layout)?.label ?? layout}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent position="popper" align="end">
+                        {LAYOUTS.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </Row>
+
             <Row label="Direction" hint="Flowchart layout direction. Disabled for non-flowchart diagrams.">
                 <Select
                     value={direction}
@@ -110,6 +124,11 @@ function MmdViewOptions() {
         </>
     );
 }
+
+const LAYOUTS: { value: MmdLayout; label: string; }[] = [
+    { value: 'elk', label: 'ELK' },
+    { value: 'dagre', label: 'Dagre' },
+];
 
 const DIRECTIONS: { value: FlowDirection; label: string; }[] = [
     { value: 'TD', label: 'Top to bottom' },
