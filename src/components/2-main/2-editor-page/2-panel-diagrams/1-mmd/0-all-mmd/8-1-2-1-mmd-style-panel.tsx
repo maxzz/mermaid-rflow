@@ -1,26 +1,21 @@
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
-import { PaintbrushIcon } from 'lucide-react';
-import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { classNames } from '@/utils';
 import { Button } from '@/ui/shadcn/button';
 import { Label } from '@/ui/shadcn/label';
 import { Slider } from '@/ui/shadcn/slider';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { applySelectedStroke, readSelectedStroke, selectedMmdTarget } from '../catalog/4-apply-patch';
-import { type LineDash } from '../catalog/6-mmd-style';
+import { PaintbrushIcon } from 'lucide-react';
 
-const PRESETS = ['#64748b', '#2563eb', '#16a34a', '#dc2626', '#d97706', '#7c3aed', '#0f172a'];
-const DASHES: { value: LineDash; label: string; }[] = [
-    { value: 'solid', label: 'Solid' },
-    { value: 'dashed', label: 'Dashed' },
-    { value: 'dotted', label: 'Dotted' },
-];
+import { type LineDash } from '../catalog/6-mmd-style';
+import { mermaidSettings } from '@/store/2-mermaid-settings';
+import { sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
+import { applySelectedStroke, readSelectedStroke, selectedMmdTarget } from '../catalog/4-apply-patch';
 
 export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
     useSnapshot(mermaidSettings);
     useSnapshot(sourceLink);
+
     const [open, setOpen] = useState(false);
     const selected = selectedMmdTarget();
     const stroke = selected ? readSelectedStroke() : null;
@@ -34,12 +29,13 @@ export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
                     variant="ghost"
                     size="icon-sm"
                     disabled={!enabled || !selected}
-                    title={selected ? `Style ${selected.kind === 'edge' ? 'selected line' : `block ${selected.id}`}` : 'Select a block or line to style'}
                     aria-label="Style"
+                    title={selected ? `Style ${selected.kind === 'edge' ? 'selected line' : `block ${selected.id}`}` : 'Select a block or line to style'}
                 >
                     <PaintbrushIcon />
                 </Button>
             </PopoverTrigger>
+
             <PopoverContent side="right" align="center" className="p-3 w-56">
                 <PopoverHeader>
                     <PopoverTitle>{title}</PopoverTitle>
@@ -51,9 +47,12 @@ export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
                                 : 'Select a block or line first.'}
                     </PopoverDescription>
                 </PopoverHeader>
+
                 <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-1.5">
-                        <Label className="text-[0.65rem] text-muted-foreground">Color</Label>
+                        <Label className="text-[0.65rem] text-muted-foreground">
+                            Color
+                        </Label>
                         <div className="flex items-center gap-2">
                             <input
                                 type="color"
@@ -79,8 +78,11 @@ export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
                             </div>
                         </div>
                     </div>
+
                     <div className="flex flex-col gap-1.5">
-                        <Label className="text-[0.65rem] text-muted-foreground">Width {stroke?.width ?? 2}px</Label>
+                        <Label className="text-[0.65rem] text-muted-foreground">
+                            Width {stroke?.width ?? 2}px
+                        </Label>
                         <Slider
                             min={1}
                             max={8}
@@ -95,7 +97,9 @@ export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
                         />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                        <Label className="text-[0.65rem] text-muted-foreground">Style</Label>
+                        <Label className="text-[0.65rem] text-muted-foreground">
+                            Style
+                        </Label>
                         <div className="grid grid-cols-3 gap-1">
                             {DASHES.map((item) => (
                                 <Button
@@ -115,6 +119,13 @@ export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
         </Popover>
     );
 }
+
+const PRESETS = ['#64748b', '#2563eb', '#16a34a', '#dc2626', '#d97706', '#7c3aed', '#0f172a'];
+const DASHES: { value: LineDash; label: string; }[] = [
+    { value: 'solid', label: 'Solid' },
+    { value: 'dashed', label: 'Dashed' },
+    { value: 'dotted', label: 'Dotted' },
+];
 
 function hexColor(raw: string | null | undefined): string {
     if (raw && /^#([\da-f]{6})$/i.test(raw)) {

@@ -4,7 +4,7 @@ import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { copyText, downloadText } from '@/components/4-dialogs/2-export/8-export-utils';
 import { Button } from '@/ui/shadcn/button';
 import { mmdDiagram } from '../store/1-mmd-diagram';
-import { MmdOptionsPopover } from './MmdOptionsPopover';
+import { MmdOptionsPopover } from './8-1-1-mmd-options-popover';
 
 export function PreviewToolbar_Mmd() {
     const { svg, error } = useSnapshot(mmdDiagram);
@@ -33,6 +33,7 @@ async function copyOfficialSvg(svg: string, error: string | null) {
         toast.message('Nothing to copy: the diagram is empty.');
         return;
     }
+
     await copyText(svg);
     toast.success('SVG copied to clipboard');
 }
@@ -46,6 +47,7 @@ function downloadOfficialSvg(svg: string, error: string | null) {
         toast.message('Nothing to download: the diagram is empty.');
         return;
     }
+    
     downloadText(svg, 'diagram.svg', 'image/svg+xml');
     toast.success('Downloaded SVG');
 }

@@ -7,7 +7,7 @@ import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@/store/2-mermaid-settings';
 import { Button } from '@/ui/shadcn/button';
 import { mmdSettings } from '../store/2-mmd-settings';
 import { mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
-import { fitMmdToView, setMmdZoom } from '../0-all-mmd/mmd-zoom';
+import { fitMmdToView, setMmdZoom } from './8-3-mmd-zoom';
 
 export function MmdViewControls({
     viewportRef,

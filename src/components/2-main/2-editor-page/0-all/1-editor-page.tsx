@@ -6,7 +6,7 @@ import { Header } from "@/components/1-header";
 import { EditorPanel } from "../1-panel-editor/1-editor-panel";
 import { PreviewPanel } from "../2-panel-diagrams/0-all-panels/0-preview-panel";
 import { RflowConverter } from "../2-panel-diagrams/2-rflow/ui/RflowConverter";
-import { MmdConverter } from "../2-panel-diagrams/1-mmd/ui/MmdConverter";
+import { MmdConverter } from "../2-panel-diagrams/1-mmd/0-all-mmd/2-4-mmd-converter";
 
 export function EditorPage() {
     const { panelSizes } = useSnapshot(appSettings);

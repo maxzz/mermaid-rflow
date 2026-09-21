@@ -1,25 +1,19 @@
 import { type ReactNode, useId } from 'react';
 import { useSnapshot } from 'valtio';
 import { Settings2Icon } from 'lucide-react';
-import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { Button } from '@/ui/shadcn/button';
 import { Label } from '@/ui/shadcn/label';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Switch } from '@/ui/shadcn/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/shadcn/tooltip';
+import { mermaidSettings } from '@/store/2-mermaid-settings';
+
 import { classifyMermaidSource, readDirection, type FlowDirection } from '../catalog/1-flowchart-source';
 import { setDirection } from '../catalog/2-source-patch';
 import { applyMmdPatchResult } from '../catalog/4-apply-patch';
 import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../render/1-themes';
 import { mmdSettings } from '../store/2-mmd-settings';
-
-const DIRECTIONS: { value: FlowDirection; label: string; }[] = [
-    { value: 'TD', label: 'Top to bottom' },
-    { value: 'BT', label: 'Bottom to top' },
-    { value: 'LR', label: 'Left to right' },
-    { value: 'RL', label: 'Right to left' },
-];
 
 export function MmdOptionsPopover() {
     return (
@@ -116,6 +110,13 @@ function MmdViewOptions() {
         </>
     );
 }
+
+const DIRECTIONS: { value: FlowDirection; label: string; }[] = [
+    { value: 'TD', label: 'Top to bottom' },
+    { value: 'BT', label: 'Bottom to top' },
+    { value: 'LR', label: 'Left to right' },
+    { value: 'RL', label: 'Right to left' },
+];
 
 const optionRowClasses = "col-span-full grid grid-cols-subgrid items-center min-h-6";
 
