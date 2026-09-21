@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSnapshot } from 'valtio';
 import { appSettings } from '@/store/1-ui-settings';
 import { mermaidSettings, OutputFormat } from '@/store/2-mermaid-settings';
@@ -11,8 +11,13 @@ import { resolveMmdTheme } from '../1-render/1-themes';
 
 const RENDER_DEBOUNCE_MS = 300;
 
-/** Debounced official mermaid.render. Mount once on the editor page. */
+/**
+ * Debounced official mermaid.render.
+ * Renders into an absolute inset-0 host so mermaid cannot append a temp diagram to document.body
+ * and grow the page. Size comes from the relative + absolute inset-0 preview pane.
+ */
 export function MmdConverter() {
+    const hostRef = useRef<HTMLDivElement>(null);
     const { source, outputFormat } = useSnapshot(mermaidSettings);
     const { theme, adaptive, look } = useSnapshot(mmdSettings);
     const { immediate } = useSnapshot(mmdDiagram);
@@ -32,6 +37,11 @@ export function MmdConverter() {
             const text = immediate ? mermaidSettings.source : debounced;
 
             async function run() {
+                const renderHost = hostRef.current;
+                if (!renderHost) {
+                    return;
+                }
+
                 if (text === mmdDiagram.lastRenderedSource && configSig === mmdDiagram.lastConfigSig && !mmdDiagram.error) {
                     mmdDiagram.immediate = false;
                     return;
@@ -53,7 +63,7 @@ export function MmdConverter() {
                 mmdDiagram.error = null;
                 const t0 = performance.now();
                 try {
-                    const result = await renderOfficialMermaid(text, resolvedTheme, look);
+                    const result = await renderOfficialMermaid(text, resolvedTheme, look, renderHost);
                     if (cancelled) {
                         return;
                     }
@@ -86,5 +96,11 @@ export function MmdConverter() {
         [adaptive, configSig, debounced, immediate, look, outputFormat, resolvedTheme],
     );
 
-    return null;
+    return (
+        <div
+            ref={hostRef}
+            className="absolute inset-0 opacity-0 overflow-hidden pointer-events-none"
+            aria-hidden
+        />
+    );
 }

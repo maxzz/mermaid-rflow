@@ -7,7 +7,7 @@ type OfficialRenderResult = {
     bindFunctions?: (element: Element) => void;
 };
 
-export async function renderOfficialMermaid(source: string, theme: MmdTheme, look: MmdLook): Promise<OfficialRenderResult> {
+export async function renderOfficialMermaid(source: string, theme: MmdTheme, look: MmdLook, container: Element): Promise<OfficialRenderResult> {
     const text = source.trim();
     if (!text) {
         return { svg: '', diagramType: null };
@@ -33,7 +33,7 @@ export async function renderOfficialMermaid(source: string, theme: MmdTheme, loo
         throw new Error('Invalid mermaid diagram');
     }
     const id = `mermaid-mmd-${++renderSeq}`;
-    const { svg, bindFunctions } = await mermaid.render(id, text);
+    const { svg, bindFunctions } = await mermaid.render(id, text, container);
 
     if (text.includes('flowchart-elk') && !elkWarned) {
         elkWarned = true;

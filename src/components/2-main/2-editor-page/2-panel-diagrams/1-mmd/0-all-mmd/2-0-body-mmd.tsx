@@ -128,7 +128,7 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
     const panHandlers = usePanToTranslate(boardRef, panMode);
 
     return (
-        <div className="relative h-full">
+        <div className="relative size-full overflow-hidden">
             <div
                 ref={viewportRef}
                 className={classNames(

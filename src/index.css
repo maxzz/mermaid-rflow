@@ -216,6 +216,12 @@
     .mermaidTooltip {
         @apply absolute top-0 left-0 pointer-events-none;
     }
+
+    /* Fallback if a temp mermaid diagram still lands on body instead of the inset-0 host. */
+    body > [id^="dmermaid-mmd-"],
+    body > [id^="imermaid-mmd-"] {
+        @apply absolute inset-0 overflow-hidden pointer-events-none;
+    }
 }
 
 /* Monaco fades scrollbars with class "invisible"; Tailwind's .invisible is visibility:hidden. */
