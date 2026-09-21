@@ -3,7 +3,7 @@ import { useMountedOnce } from "@/utils/util-hooks/use-mounted-once";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 
 import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
-import { Body_Mmd } from "./2-body-mmd";
+import { Body_Mmd } from "./2-0-body-mmd";
 import { canvasTabClass, PanelFallbackMessage } from "../../../../../../ui/local-ui/1-4-view-shared";
 
 export function Preview_Mmd() {

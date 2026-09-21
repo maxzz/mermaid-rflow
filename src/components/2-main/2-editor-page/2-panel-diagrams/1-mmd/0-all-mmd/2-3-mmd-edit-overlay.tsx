@@ -145,8 +145,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                 unsubLayout();
             };
         },
-        [active, autofit, contentRef, enabled, flowchart, hostRef, layoutKey, svg, zoom],
-    );
+        [active, autofit, contentRef, enabled, flowchart, hostRef, layoutKey, svg, zoom]);
 
     useEffect(
         () => {
@@ -177,8 +176,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
             window.addEventListener('keydown', onKeyDown);
             return () => window.removeEventListener('keydown', onKeyDown);
         },
-        [inline, interactive, selectedEdgeKey, selectedId],
-    );
+        [inline, interactive, selectedEdgeKey, selectedId]);
 
     if (!interactive) {
         return inline && enabled
@@ -404,79 +402,81 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                     );
                 })}
             </svg>
-            {boxes.map((box) => {
-                const selectedBox = box.id === selectedId;
-                return (
-                    <button
-                        key={box.id}
-                        type="button"
-                        data-mmd-hit=""
-                        data-mmd-id={box.id}
-                        aria-label={`Select ${box.id}`}
-                        aria-pressed={selectedBox}
-                        title="Drag to move. Double-click to rename."
-                        className={classNames(
-                            'absolute z-5 rounded-sm bg-transparent hover:shadow-[0_0_0_2px_color-mix(in_oklab,var(--primary)_50%,transparent)] touch-none cursor-grab active:cursor-grabbing',
-                            panMode ? 'pointer-events-none' : 'pointer-events-auto',
-                        )}
-                        style={{
-                            left: box.x,
-                            top: box.y,
-                            width: box.w,
-                            height: box.h,
-                            boxShadow: selectedBox ? '0 0 0 2px var(--primary)' : undefined,
-                        }}
-                        onPointerDown={(e) => onNodePointerDown(e, box.id)}
-                        onDoubleClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onDoubleClick(box.id, box);
-                        }}
-                    />
-                );
-            })}
-            {selected && !selectedEdge && !panMode && HANDLES.map(({ side }) => {
-                const pos = handleStyle(selected, side);
-                return (
-                    <button
-                        key={side}
-                        type="button"
-                        data-mmd-chrome=""
-                        data-mmd-add-handle=""
-                        className="absolute z-10 rounded-full bg-primary shadow-[0_0_0_2px_var(--background)] pointer-events-auto"
-                        style={{ left: pos.x, top: pos.y, width: HANDLE_SIZE, height: HANDLE_SIZE }}
-                        title="Drag to another block to connect, or click to add a block"
-                        onPointerDown={(e) => onHandlePointerDown(e, selected.id, selected, side)}
-                        onDoubleClick={(e) => e.stopPropagation()}
-                    />
-                );
-            })}
-            {selectedEdge && !panMode && (
-                <>
-                    <EndpointHandle
-                        pt={selectedEdge.points[0]!}
-                        label={`Move start of ${selectedEdge.from} → ${selectedEdge.to}`}
-                        onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'from')}
-                    />
-                    <EndpointHandle
-                        pt={selectedEdge.points[selectedEdge.points.length - 1]!}
-                        label={`Move end of ${selectedEdge.from} → ${selectedEdge.to}`}
-                        onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'to')}
-                    />
-                </>
+
+            {boxes.map(
+                (box) => {
+                    const selectedBox = box.id === selectedId;
+                    return (
+                        <button
+                            key={box.id}
+                            type="button"
+                            data-mmd-hit=""
+                            data-mmd-id={box.id}
+                            aria-label={`Select ${box.id}`}
+                            aria-pressed={selectedBox}
+                            title="Drag to move. Double-click to rename."
+                            className={classNames(
+                                'absolute z-5 rounded-sm bg-transparent hover:shadow-[0_0_0_2px_color-mix(in_oklab,var(--primary)_50%,transparent)] touch-none cursor-grab active:cursor-grabbing',
+                                panMode ? 'pointer-events-none' : 'pointer-events-auto',
+                            )}
+                            style={{
+                                left: box.x,
+                                top: box.y,
+                                width: box.w,
+                                height: box.h,
+                                boxShadow: selectedBox ? '0 0 0 2px var(--primary)' : undefined,
+                            }}
+                            onPointerDown={(e) => onNodePointerDown(e, box.id)}
+                            onDoubleClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onDoubleClick(box.id, box);
+                            }}
+                        />
+                    );
+                }
             )}
+
+            {selected && !selectedEdge && !panMode && HANDLES.map(
+                ({ side }) => {
+                    const pos = handleStyle(selected, side);
+                    return (
+                        <button
+                            key={side}
+                            type="button"
+                            data-mmd-chrome=""
+                            data-mmd-add-handle=""
+                            className="absolute z-10 rounded-full bg-primary shadow-[0_0_0_2px_var(--background)] pointer-events-auto"
+                            style={{ left: pos.x, top: pos.y, width: HANDLE_SIZE, height: HANDLE_SIZE }}
+                            title="Drag to another block to connect, or click to add a block"
+                            onPointerDown={(e) => onHandlePointerDown(e, selected.id, selected, side)}
+                            onDoubleClick={(e) => e.stopPropagation()}
+                        />
+                    );
+                }
+            )}
+
+            {selectedEdge && !panMode && (<>
+                <EndpointHandle
+                    pt={selectedEdge.points[0]!}
+                    label={`Move start of ${selectedEdge.from} → ${selectedEdge.to}`}
+                    onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'from')}
+                />
+                <EndpointHandle
+                    pt={selectedEdge.points[selectedEdge.points.length - 1]!}
+                    label={`Move end of ${selectedEdge.from} → ${selectedEdge.to}`}
+                    onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'to')}
+                />
+            </>)}
+
             {connect && (
                 <div
-                    data-mmd-chrome=""
                     className="absolute z-10 h-0.5 origin-[0_50%] bg-primary pointer-events-none"
-                    style={{
-                        left: connect.x1,
-                        top: connect.y1,
-                        width: lineLen,
-                        transform: `rotate(${lineAngle}rad)`,
-                    }}
+                    style={{ left: connect.x1, top: connect.y1, width: lineLen, transform: `rotate(${lineAngle}rad)` }}
+                    data-mmd-chrome=""
                 />
             )}
+
             {inline && (
                 <InlineLabelEditor onClose={() => setInline(null)} />
             )}
@@ -537,6 +537,7 @@ function selectionFromKeys(keys: string[]): { nodeId: string | null; edge: { fro
     const preferEdge = keys[0]?.startsWith('edge:');
     let nodeId: string | null = null;
     let edge: { from: string; to: string; label?: string; key: string; } | null = null;
+
     for (const key of keys) {
         if (!nodeId && key.startsWith('node:')) {
             nodeId = key.slice('node:'.length);
@@ -548,25 +549,19 @@ function selectionFromKeys(keys: string[]): { nodeId: string | null; edge: { fro
             }
         }
     }
+
     if (preferEdge) {
         return { nodeId: null, edge };
+    } else {
+        return { nodeId, edge: nodeId ? null : edge };
     }
-    return { nodeId, edge: nodeId ? null : edge };
 }
 
 function pointsAttr(points: { x: number; y: number; }[]): string {
     return points.map((pt) => `${pt.x},${pt.y}`).join(' ');
 }
 
-function EndpointHandle({
-    pt,
-    label,
-    onPointerDown,
-}: {
-    pt: { x: number; y: number; };
-    label: string;
-    onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => void;
-}) {
+function EndpointHandle({ pt, label, onPointerDown, }: { pt: { x: number; y: number; }; label: string; onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => void; }) {
     return (
         <button
             type="button"
@@ -616,6 +611,7 @@ function nodeElementById(root: Element, id: string): Element | null {
 
 function nodeIdFromPoint(clientX: number, clientY: number, fromId: string): string | null {
     const stack = document.elementsFromPoint(clientX, clientY);
+
     for (const el of stack) {
         if (!(el instanceof Element)) {
             continue;
@@ -626,6 +622,7 @@ function nodeIdFromPoint(clientX: number, clientY: number, fromId: string): stri
             return id;
         }
     }
+
     return null;
 }
 
@@ -636,12 +633,10 @@ function isTypingTarget(target: EventTarget | null): boolean {
     return Boolean(target.closest('input, textarea, select, [contenteditable], .monaco-editor'));
 }
 
-function watchDrag(
-    move: (ev: PointerEvent | MouseEvent) => void,
-    up: (ev: PointerEvent | MouseEvent) => void,
-) {
+function watchDrag(move: (ev: PointerEvent | MouseEvent) => void, up: (ev: PointerEvent | MouseEvent) => void) {
     let done = false;
     let sawPointerMove = false;
+
     function onMove(ev: PointerEvent | MouseEvent) {
         if (ev.type === 'pointermove') {
             sawPointerMove = true;
@@ -651,6 +646,7 @@ function watchDrag(
         }
         move(ev);
     }
+
     function onUp(ev: PointerEvent | MouseEvent) {
         if (done) {
             return;
@@ -659,6 +655,7 @@ function watchDrag(
             return;
         }
         done = true;
+        
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
         window.removeEventListener('pointercancel', onUp);
@@ -666,6 +663,7 @@ function watchDrag(
         window.removeEventListener('mouseup', onUp);
         up(ev);
     }
+
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
     window.addEventListener('pointercancel', onUp);

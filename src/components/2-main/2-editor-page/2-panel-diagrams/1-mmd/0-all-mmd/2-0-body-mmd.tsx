@@ -13,10 +13,10 @@ import { mmdSettings } from '../store/2-mmd-settings';
 import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../store/3-mmd-ui';
 import { MmdPaletteRail } from '../ui/MmdPaletteRail';
 import { MmdViewControls } from '../ui/MmdViewControls';
-import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from '../canvas/mmd-zoom';
-import { MmdEditOverlay } from '../canvas/MmdEditOverlay';
-import { useMmdLayout } from '../canvas/useMmdLayout';
-import { useMmdSourceLink } from '../canvas/useMmdSourceLink';
+import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from './mmd-zoom';
+import { MmdEditOverlay } from './2-3-mmd-edit-overlay';
+import { useMmdLayout } from './2-1-use-mmd-layout';
+import { useMmdSourceLink } from './2-2-use-mmd-source-link';
 import { usePanToTranslate } from './use-pan-to-translate';
 
 export function Body_Mmd({ active = true }: { active?: boolean; }) {
