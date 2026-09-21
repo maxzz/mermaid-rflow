@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
-import { DEFAULT_COLORS } from '../converter/constants';
+import { DEFAULT_COLORS } from '../2-converter/constants';
 
 export type EdgeLabelEditorState = {
     edgeId: string;

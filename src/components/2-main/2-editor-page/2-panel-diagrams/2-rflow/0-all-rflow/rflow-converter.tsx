@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { useDebouncedValue } from '@/utils/util-hooks/use-debounced-value';
-import { convertMermaidToReactFlow } from '../converter';
-import { rflowDiagram } from '../store/1-flow-diagram';
+import { convertMermaidToReactFlow } from '../2-converter';
+import { rflowDiagram } from '../8-store/2-flow-diagram';
 
 const CONVERT_DEBOUNCE_MS = 300;
 
@@ -64,8 +64,7 @@ export function RflowConverter() {
             void run();
             return () => { cancelled = true; };
         },
-        [debounced],
-    );
+        [debounced]);
 
     return null;
 }

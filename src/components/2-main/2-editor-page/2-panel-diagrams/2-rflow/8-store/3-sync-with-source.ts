@@ -2,8 +2,8 @@ import { type Edge, type Node } from 'reactflow';
 import { toast } from 'sonner';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { captureMonacoView } from '../../3-bm/5-1-source-diagram-link-monaco/2-monaco-editor-handle';
-import { reactFlowToMermaid } from '../converter/reactFlowToMermaid';
-import { rflowDiagram } from './1-flow-diagram';
+import { reactFlowToMermaid } from '../2-converter/reactFlowToMermaid';
+import { rflowDiagram } from '../8-store/2-flow-diagram';
 
 /** 
  * Write flowchart topology into Monaco without triggering a Dagre reconvert. 

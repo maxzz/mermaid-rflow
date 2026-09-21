@@ -16,7 +16,7 @@ import {
     Trash2Icon,
 } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
-import { type AlignmentType, type DistributionType } from '../converter/constants';
+import { type AlignmentType, type DistributionType } from '../2-converter/constants';
 
 type EditingToolbarProps = {
     selectedNodes: Node[];

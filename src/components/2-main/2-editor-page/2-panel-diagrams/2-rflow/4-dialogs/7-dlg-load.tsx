@@ -11,8 +11,8 @@ import { Button } from '@/ui/shadcn/button';
 import { mermaidSettings, OutputFormat } from '@/store/2-mermaid-settings';
 import { renderDiagram } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render';
 import { loadBeautifulMermaid } from '@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules';
-import { restoreRflow } from '../store/1-flow-diagram';
-import { defaultLoadDialogUi, rflowLoadDialogOpenAtom, rflowLoadPreviewAtom, rflowLoadUiAtom } from '../store/a-rflow-ui';
+import { restoreRflow } from '../8-store/2-flow-diagram';
+import { defaultLoadDialogUi, rflowLoadDialogOpenAtom, rflowLoadPreviewAtom, rflowLoadUiAtom } from '../8-store/a-rflow-ui';
 import { parseSavedDiagram, removeSavedDiagram, rflowSaved, type SavedDiagram } from '../8-store/1-local-storage-saved-diagrams';
 import { classNames } from '@/utils';
 

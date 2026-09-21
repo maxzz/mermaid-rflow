@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { uuid } from "@/utils/uuid";
 import { addSavedDiagram, cloneGraphData } from "../2-rflow/8-store/1-local-storage-saved-diagrams";
-import { rflowDiagram } from "../2-rflow/store/1-flow-diagram";
+import { rflowDiagram } from "../2-rflow/8-store/2-flow-diagram";
 
 export function saveCurrentFlow() {
     const src = mermaidSettings.source.trim();

@@ -2,8 +2,8 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { type Edge, type Node } from 'reactflow';
-import { ALIGNMENT_TYPES, DISTRIBUTION_TYPES, type AlignmentType, type DistributionType } from '../converter/constants';
-import { nextRfId, prefixForNode } from '../converter/mermaid-ids';
+import { ALIGNMENT_TYPES, DISTRIBUTION_TYPES, type AlignmentType, type DistributionType } from '../2-converter/constants';
+import { nextRfId, prefixForNode } from '../2-converter/mermaid-ids';
 
 export function alignNodes(nodes: Node[], selectedNodes: Node[], alignment: AlignmentType): Node[] {
     if (selectedNodes.length < 2) {

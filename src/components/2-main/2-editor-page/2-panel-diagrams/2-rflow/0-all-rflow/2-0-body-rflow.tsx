@@ -30,8 +30,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { rflowDiagram, setRflowEdges, setRflowNodes } from '../store/1-flow-diagram';
-import { syncMermaidFromGraph } from '../store/3-sync-with-source';
+import { rflowDiagram, setRflowEdges, setRflowNodes } from '../8-store/2-flow-diagram';
+import { syncMermaidFromGraph } from '../8-store/3-sync-with-source';
 import {
     draftFromNode,
     rflowCanvasMethodsAtom,
@@ -43,7 +43,7 @@ import {
     rflowSelectedEdgeIdAtom,
     rflowSelectedEdgesAtom,
     rflowSelectedNodesAtom,
-} from '../store/a-rflow-ui';
+} from '../8-store/a-rflow-ui';
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
 import {
     alignNodes,
@@ -54,13 +54,13 @@ import {
     unlockNodes,
 } from '../1-canvas/8-diagram-editing-utils';
 import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
-import { EditingToolbar } from '../ui/2-rflow-toolbar';
-import { PaletteToolbar } from '../ui/PaletteToolbar';
-import { EdgeLabelEditor } from '../ui/5-2-dlg-edge-label-editor';
-import { NodeEditor } from '../ui/5-1-dlg-node-editor';
-import { NodeSearchDialog } from '../ui/NodeSearchDialog';
-import { type AlignmentType, type DistributionType } from '../converter/constants';
-import { nextRfId } from '../converter/mermaid-ids';
+import { EditingToolbar } from './8-1-1-toolbar-rflow';
+import { PaletteToolbar } from './8-1-3-palette-toolbar';
+import { EdgeLabelEditor } from '../4-dialogs/1-2-dlg-edge-label-editor';
+import { NodeEditor } from '../4-dialogs/1-1-dlg-node-editor';
+import { NodeSearchDialog } from '../4-dialogs/2-1-dlg-node-search';
+import { type AlignmentType, type DistributionType } from '../2-converter/constants';
+import { nextRfId } from '../2-converter/mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
 import { appSettings } from '@/store/1-ui-settings';
 import { isThemeDark } from '@/utils/theme-utils';

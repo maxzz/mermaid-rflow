@@ -1,23 +1,21 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT).
- */
-import { useAtom } from 'jotai';
-import { type Node } from 'reactflow';
+import { useAtom, useSetAtom } from 'jotai';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/shadcn/dialog';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { Label } from '@/ui/shadcn/label';
 import { Textarea } from '@/ui/shadcn/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
-import { COLOR_PRESETS } from '../converter/constants';
-import { rflowDiagram } from '../store/1-flow-diagram';
-import { syncMermaidFromGraph } from '../store/3-sync-with-source';
-import { rflowIconSearchAtom, defaultIconSearchState, rflowNodeEditorDraftAtom } from '../store/a-rflow-ui';
-import { IconSearch } from './7-dlg-search';
+
+import { type Node } from 'reactflow';
+import { rflowDiagram } from '../8-store/2-flow-diagram';
+import { syncMermaidFromGraph } from '../8-store/3-sync-with-source';
+import { rflowIconSearchAtom, defaultIconSearchState, rflowNodeEditorDraftAtom } from '../8-store/a-rflow-ui';
+import { IconSearch } from './2-2-1-dlg-search';
+import { COLOR_PRESETS } from '../2-converter/constants';
 
 export function NodeEditor() {
     const [draft, setDraft] = useAtom(rflowNodeEditorDraftAtom);
-    const [, setIconSearch] = useAtom(rflowIconSearchAtom);
+    const setIconSearch = useSetAtom(rflowIconSearchAtom);
 
     if (!draft) {
         return null;
@@ -32,25 +30,28 @@ export function NodeEditor() {
         if (!draft) {
             return;
         }
-        rflowDiagram.nodes = (rflowDiagram.nodes as Node[]).map((n) =>
-            n.id === draft.nodeId
-                ? {
-                    ...n,
-                    data: {
-                        ...n.data,
-                        label: draft.label,
-                        imageUrl: draft.imageUrl,
-                        description: draft.description,
-                        style: {
-                            ...(n.data?.style || {}),
-                            backgroundColor: draft.backgroundColor,
-                            borderColor: draft.borderColor,
-                            iconColor: draft.iconColor,
-                            border: `2px solid ${draft.borderColor}`,
+
+        rflowDiagram.nodes = (rflowDiagram.nodes as Node[]).map(
+            (node) => (
+                node.id === draft.nodeId
+                    ? {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            label: draft.label,
+                            imageUrl: draft.imageUrl,
+                            description: draft.description,
+                            style: {
+                                ...(node.data?.style || {}),
+                                backgroundColor: draft.backgroundColor,
+                                borderColor: draft.borderColor,
+                                iconColor: draft.iconColor,
+                                border: `2px solid ${draft.borderColor}`,
+                            },
                         },
-                    },
-                }
-                : n
+                    }
+                    : node
+            )
         );
         syncMermaidFromGraph();
         close();
@@ -75,11 +76,16 @@ export function NodeEditor() {
 
                         <TabsContent value="content" className="pt-3 flex flex-col gap-3">
                             <div className="flex flex-col gap-1">
-                                <Label>Label</Label>
+                                <Label>
+                                    Label
+                                </Label>
                                 <Input value={draft.label} onChange={(e) => setDraft({ ...draft, label: e.target.value })} placeholder="Node label" />
                             </div>
+
                             <div className="flex flex-col gap-1">
-                                <Label>Description</Label>
+                                <Label>
+                                    Description
+                                </Label>
                                 <Textarea value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Add a description..." className="h-24 resize-none" />
                             </div>
                         </TabsContent>
@@ -87,23 +93,29 @@ export function NodeEditor() {
                         <TabsContent value="image" className="pt-3 flex flex-col gap-3">
                             {draft.nodeType === 'group'
                                 ? (
-                                    <p className="text-xs text-muted-foreground">Images are not available for subgraphs.</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Images are not available for subgraphs.
+                                    </p>
                                 )
-                                : (
-                                    <>
+                                : (<>
+                                    <div className="flex flex-col gap-1">
+                                        <Label>
+                                            Image URL
+                                        </Label>
+                                        <Input value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} placeholder="https://example.com/image.png" />
+                                    </div>
+
+                                    <IconSearch onSelect={(url) => setDraft({ ...draft, imageUrl: url })} />
+
+                                    {draft.imageUrl && (
                                         <div className="flex flex-col gap-1">
-                                            <Label>Image URL</Label>
-                                            <Input value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} placeholder="https://example.com/image.png" />
+                                            <Label>
+                                                Preview
+                                            </Label>
+                                            <img src={draft.imageUrl} alt="" className="max-h-24 object-contain border rounded" />
                                         </div>
-                                        <IconSearch onSelect={(url) => setDraft({ ...draft, imageUrl: url })} />
-                                        {draft.imageUrl && (
-                                            <div className="flex flex-col gap-1">
-                                                <Label>Preview</Label>
-                                                <img src={draft.imageUrl} alt="" className="max-h-24 object-contain border rounded" />
-                                            </div>
-                                        )}
-                                    </>
-                                )}
+                                    )}
+                                </>)}
                         </TabsContent>
 
                         <TabsContent value="style" className="pt-3 flex flex-col gap-4">
@@ -113,6 +125,7 @@ export function NodeEditor() {
                                 presets={COLOR_PRESETS.background}
                                 onChange={(backgroundColor) => setDraft({ ...draft, backgroundColor })}
                             />
+
                             <ColorField
                                 label="Border"
                                 value={draft.borderColor}
@@ -135,22 +148,28 @@ export function NodeEditor() {
 function ColorField({ label, value, presets, onChange }: { label: string; value: string; presets: string[]; onChange: (v: string) => void; }) {
     return (
         <div className="flex flex-col gap-1.5">
-            <Label>{label}</Label>
+            <Label>
+                {label}
+            </Label>
+
             <div className="flex items-center gap-2">
                 <input type="color" value={value === 'transparent' ? '#ffffff' : value} onChange={(e) => onChange(e.target.value)} className="size-8 rounded border cursor-pointer" />
                 <Input value={value} onChange={(e) => onChange(e.target.value)} />
             </div>
+
             <div className="flex flex-wrap gap-1">
-                {presets.map((c) => (
-                    <button
-                        key={c}
-                        type="button"
-                        onClick={() => onChange(c)}
-                        className="size-6 rounded border hover:scale-110 transition-transform"
-                        style={{ background: c === 'transparent' ? undefined : c }}
-                        title={c}
-                    />
-                ))}
+                {presets.map(
+                    (color) => (
+                        <button
+                            className="size-6 rounded border hover:scale-110 transition-transform"
+                            style={{ background: color === 'transparent' ? undefined : color }}
+                            onClick={() => onChange(color)}
+                            title={color}
+                            type="button"
+                            key={color}
+                        />
+                    )
+                )}
             </div>
         </div>
     );
