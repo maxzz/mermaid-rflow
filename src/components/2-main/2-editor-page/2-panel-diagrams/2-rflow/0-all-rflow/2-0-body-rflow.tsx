@@ -60,8 +60,6 @@ export function Body_Rflow({ active = true }: { active?: boolean; }) {
     );
 }
 
-//---------------------------------------------------------------------------
-
 function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const { nodes, edges } = useSnapshot(rf_Diagram);
     const { theme } = useSnapshot(appSettings);

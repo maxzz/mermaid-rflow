@@ -54,33 +54,33 @@ export function DistributeGroup() {
 
 function useCommitSelectedNodes() {
     const setSelectedNodes = useSetAtom(rf_SelectedNodesAtom);
+
     return useCallback(
         (next: Node[]) => {
             setRflowNodes(next);
             setSelectedNodes(next.filter((node) => node.selected));
         },
-        [setSelectedNodes],
-    );
+        [setSelectedNodes]);
 }
 
 function useAlignNodes() {
     const selectedNodes = useAtomValue(rf_SelectedNodesAtom);
     const commit = useCommitSelectedNodes();
+
     return useCallback(
         (alignment: AlignmentType) => {
             commit(alignNodes(rf_Diagram.nodes as Node[], selectedNodes, alignment));
         },
-        [commit, selectedNodes],
-    );
+        [commit, selectedNodes]);
 }
 
 function useDistributeNodes() {
     const selectedNodes = useAtomValue(rf_SelectedNodesAtom);
     const commit = useCommitSelectedNodes();
+    
     return useCallback(
         (direction: DistributionType) => {
             commit(distributeNodes(rf_Diagram.nodes as Node[], selectedNodes, direction));
         },
-        [commit, selectedNodes],
-    );
+        [commit, selectedNodes]);
 }
