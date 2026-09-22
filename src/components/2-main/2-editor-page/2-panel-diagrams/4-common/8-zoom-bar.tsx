@@ -4,19 +4,6 @@ import { classNames } from "@/utils";
 import { ZOOM_MAX, ZOOM_MIN } from "@/store/2-mermaid-settings";
 import { Button } from "@/ui/shadcn/button";
 
-/** Shared overlay slot for every diagram tab. */
-export const zoomBarPositionClass = "absolute left-4 bottom-4 z-20";
-
-const zoomBarFrameClass = "\
-px-1 py-0.5 \
-text-xs \
-bg-background/90 backdrop-blur-sm \
-border border-border \
-rounded-lg \
-shadow-sm \
-flex items-center gap-0.5 \
-";
-
 export type ZoomBarProps = ComponentProps<"div"> & {
     zoom: number;
     min?: number;
@@ -29,27 +16,10 @@ export type ZoomBarProps = ComponentProps<"div"> & {
     fitTitle?: string;
 };
 
-export function ZoomBar({
-    zoom,
-    min = ZOOM_MIN,
-    max = ZOOM_MAX,
-    onZoomOut,
-    onZoomIn,
-    onResetZoom,
-    onFit,
-    fitActive,
-    fitTitle,
-    className,
-    children,
-    ...rest
-}: ZoomBarProps) {
+export function ZoomBar({ zoom, min = ZOOM_MIN, max = ZOOM_MAX, onZoomOut, onZoomIn, onResetZoom, onFit, fitActive, fitTitle, className, children, ...rest }: ZoomBarProps) {
     return (
-        <div
-            className={classNames(zoomBarFrameClass, className)}
-            role="toolbar"
-            aria-label="View controls"
-            {...rest}
-        >
+        <div className={classNames(zoomBarFrameClass, className)} role="toolbar" aria-label="View controls" {...rest}>
+
             <Button variant="ghost" size="icon-xs" onClick={onZoomOut} disabled={zoom <= min} title="Zoom out">
                 <ZoomOutIcon />
             </Button>
@@ -83,17 +53,7 @@ export function ZoomBar({
     );
 }
 
-export function ZoomBarToggle({
-    pressed,
-    title,
-    onClick,
-    children,
-}: {
-    pressed: boolean;
-    title: string;
-    onClick: () => void;
-    children: ReactNode;
-}) {
+export function ZoomBarToggle({ pressed, title, onClick, children }: { pressed: boolean; title: string; onClick: () => void; children: ReactNode; }) {
     return (
         <Button
             className={classNames(pressed && "bg-muted text-foreground")}
@@ -107,3 +67,16 @@ export function ZoomBarToggle({
         </Button>
     );
 }
+
+/** Shared overlay slot for every diagram tab. */
+export const zoomBarPositionClass = "absolute left-4 bottom-4 z-20";
+
+const zoomBarFrameClass = "\
+px-1 py-0.5 \
+text-xs \
+bg-background/90 backdrop-blur-sm \
+border border-border \
+rounded-lg \
+shadow-sm \
+flex items-center gap-0.5 \
+";
