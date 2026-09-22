@@ -2,20 +2,18 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { type Edge, type Node } from 'reactflow';
-import {
-    AlignCenterIcon,
-    AlignLeftIcon,
-    AlignRightIcon,
-    AlignVerticalJustifyCenterIcon,
-    AlignVerticalJustifyEndIcon,
-    AlignVerticalJustifyStartIcon,
-    BoxSelectIcon,
-    CopyIcon,
-    LockIcon,
-    SearchIcon,
-    Trash2Icon,
-} from 'lucide-react';
+import { BoxSelectIcon, CopyIcon, LockIcon, SearchIcon, Trash2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
+import {
+    IconAlignBottom,
+    IconAlignCenterHorizontally,
+    IconAlignCenterVertically,
+    IconAlignLeft,
+    IconAlignRight,
+    IconAlignTop,
+    IconDistributeHorizontally,
+    IconDistributeVertically,
+} from '@/ui/icons/normal/align';
 import { type AlignmentType, type DistributionType } from '../2-converter/constants';
 
 type EditingToolbarProps = {
@@ -74,42 +72,34 @@ export function EditingToolbar({
             <div className="mx-1 w-px h-4 bg-border" />
 
             <Button variant="ghost" size="icon-xs" title="Align left" onClick={() => onAlignNodes('left')}>
-                <AlignLeftIcon />
+                <IconAlignLeft className="size-3.5" />
             </Button>
             <Button variant="ghost" size="icon-xs" title="Align center" onClick={() => onAlignNodes('center-horizontal')}>
-                <AlignCenterIcon />
+                <IconAlignCenterHorizontally className="size-3.5" />
             </Button>
             <Button variant="ghost" size="icon-xs" title="Align right" onClick={() => onAlignNodes('right')}>
-                <AlignRightIcon />
+                <IconAlignRight className="size-3.5" />
             </Button>
 
             <div className="mx-1 w-px h-4 bg-border" />
 
             <Button variant="ghost" size="icon-xs" title="Align top" onClick={() => onAlignNodes('top')}>
-                <AlignVerticalJustifyStartIcon />
+                <IconAlignTop className="size-3.5" />
             </Button>
             <Button variant="ghost" size="icon-xs" title="Align middle" onClick={() => onAlignNodes('center-vertical')}>
-                <AlignVerticalJustifyCenterIcon />
+                <IconAlignCenterVertically className="size-3.5" />
             </Button>
             <Button variant="ghost" size="icon-xs" title="Align bottom" onClick={() => onAlignNodes('bottom')}>
-                <AlignVerticalJustifyEndIcon />
+                <IconAlignBottom className="size-3.5" />
             </Button>
 
             <div className="mx-1 w-px h-4 bg-border" />
 
             <Button variant="ghost" size="icon-xs" title="Distribute horizontally" onClick={() => onDistributeNodes('horizontal')}>
-                <svg className="size-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-                    <rect x="2" y="3" width="2" height="10" rx="0.5" />
-                    <rect x="7" y="1" width="2" height="14" rx="0.5" />
-                    <rect x="12" y="4" width="2" height="8" rx="0.5" />
-                </svg>
+                <IconDistributeHorizontally className="size-3.5" />
             </Button>
             <Button variant="ghost" size="icon-xs" title="Distribute vertically" onClick={() => onDistributeNodes('vertical')}>
-                <svg className="size-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-                    <rect x="2" y="2" width="12" height="2" rx="0.5" />
-                    <rect x="2" y="7" width="12" height="2" rx="0.5" />
-                    <rect x="2" y="12" width="12" height="2" rx="0.5" />
-                </svg>
+                <IconDistributeVertically className="size-3.5" />
             </Button>
 
             <div className="mx-1 w-px h-4 bg-border" />
