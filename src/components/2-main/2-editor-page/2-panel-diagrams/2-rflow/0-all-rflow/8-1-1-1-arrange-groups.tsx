@@ -1,15 +1,10 @@
-import { useCallback } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { Button } from '@/ui/shadcn/button';
 import { IconAlignBottom, IconAlignCenterHorizontally, IconAlignCenterVertically, IconAlignLeft, IconAlignRight, IconAlignTop, IconDistributeHorizontally, IconDistributeVertically } from '@/ui/icons/normal/align';
-import { type Node } from 'reactflow';
-import { type AlignmentType, type DistributionType } from '../2-converter/constants';
-import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
-import { rf_Diagram, setRflowNodes } from '../8-store/2-flow-diagram';
-import { rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_AlignNodesAtom, rf_DistributeNodesAtom } from '../8-store/a-rflow-ui-atoms';
 
 export function AlignHorizontalGroup() {
-    const align = useAlignNodes();
+    const align = useSetAtom(rf_AlignNodesAtom);
     return (<>
         <Button variant="ghost" size="icon-xs" title="Align left" onClick={() => align('left')}>
             <IconAlignLeft className="size-3.5" />
@@ -24,7 +19,7 @@ export function AlignHorizontalGroup() {
 }
 
 export function AlignVerticalGroup() {
-    const align = useAlignNodes();
+    const align = useSetAtom(rf_AlignNodesAtom);
     return (<>
         <Button variant="ghost" size="icon-xs" title="Align top" onClick={() => align('top')}>
             <IconAlignTop className="size-3.5" />
@@ -39,7 +34,7 @@ export function AlignVerticalGroup() {
 }
 
 export function DistributeGroup() {
-    const distribute = useDistributeNodes();
+    const distribute = useSetAtom(rf_DistributeNodesAtom);
     return (<>
         <Button variant="ghost" size="icon-xs" title="Distribute horizontally" onClick={() => distribute('horizontal')}>
             <IconDistributeHorizontally className="size-3.5" />
@@ -48,39 +43,4 @@ export function DistributeGroup() {
             <IconDistributeVertically className="size-3.5" />
         </Button>
     </>);
-}
-
-//---------------------------------------------------------------------------
-
-function useCommitSelectedNodes() {
-    const setSelectedNodes = useSetAtom(rf_SelectedNodesAtom);
-
-    return useCallback(
-        (next: Node[]) => {
-            setRflowNodes(next);
-            setSelectedNodes(next.filter((node) => node.selected));
-        },
-        [setSelectedNodes]);
-}
-
-function useAlignNodes() {
-    const selectedNodes = useAtomValue(rf_SelectedNodesAtom);
-    const commit = useCommitSelectedNodes();
-
-    return useCallback(
-        (alignment: AlignmentType) => {
-            commit(alignNodes(rf_Diagram.nodes as Node[], selectedNodes, alignment));
-        },
-        [commit, selectedNodes]);
-}
-
-function useDistributeNodes() {
-    const selectedNodes = useAtomValue(rf_SelectedNodesAtom);
-    const commit = useCommitSelectedNodes();
-    
-    return useCallback(
-        (direction: DistributionType) => {
-            commit(distributeNodes(rf_Diagram.nodes as Node[], selectedNodes, direction));
-        },
-        [commit, selectedNodes]);
 }
