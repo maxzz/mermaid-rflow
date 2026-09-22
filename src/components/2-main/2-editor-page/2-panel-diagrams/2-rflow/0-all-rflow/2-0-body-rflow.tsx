@@ -1,7 +1,3 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT).
- * React Flow canvas bound to Valtio graph state and Jotai chrome.
- */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
@@ -34,32 +30,23 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { rflowDiagram, setRflowEdges, setRflowNodes } from '../8-store/2-flow-diagram';
+import { draftFromNode, rflowCanvasMethodsAtom, rflowDraggingAtom, rflowEdgeLabelEditorAtom, rflowExportingAtom, rflowNodeEditorDraftAtom, rflowPanModeAtom, rflowSearchOpenAtom, rflowSelectedEdgeIdAtom, rflowSelectedEdgesAtom, rflowSelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
 import { syncMermaidFromGraph } from '../8-store/3-sync-with-source';
-import {
-    draftFromNode,
-    rflowCanvasMethodsAtom,
-    rflowDraggingAtom,
-    rflowEdgeLabelEditorAtom,
-    rflowExportingAtom,
-    rflowNodeEditorDraftAtom,
-    rflowPanModeAtom,
-    rflowSearchOpenAtom,
-    rflowSelectedEdgeIdAtom,
-    rflowSelectedEdgesAtom,
-    rflowSelectedNodesAtom,
-} from '../8-store/a-rflow-ui-atoms';
+
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
-import { alignNodes, deleteSelected, distributeNodes, duplicateNodes, lockNodes, unlockNodes } from '../1-canvas/8-diagram-editing-utils';
+import { deleteSelected, duplicateNodes, lockNodes, unlockNodes } from '../1-canvas/8-diagram-editing-utils';
 import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
-import { EditingToolbar } from './8-1-1-toolbar-rflow';
+
+import { EditingToolbar } from './8-1-1-0-toolbar-rflow';
 import { PaletteToolbar } from './8-1-3-palette-toolbar';
 import { ZoomControls_Rflow } from './8-3-zoom-controls-rflow';
 import { EdgeLabelEditor } from '../4-dialogs/1-2-dlg-edge-label-editor';
 import { NodeEditor } from '../4-dialogs/1-1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/2-1-dlg-node-search';
-import { type AlignmentType, type DistributionType } from '../2-converter/constants';
+
 import { nextRfId } from '../2-converter/mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
+
 import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
 import { isThemeDark } from '@/utils/theme-utils';
 
@@ -74,36 +61,6 @@ export function Body_Rflow({ active = true }: { active?: boolean; }) {
 }
 
 //---------------------------------------------------------------------------
-
-const nodeTypes: NodeTypes = {
-    custom: CustomNode,
-    diamond: DiamondNode,
-    group: SubgraphNode,
-};
-
-const defaultEdgeOptions: DefaultEdgeOptions = {
-    type: 'smoothstep',
-    animated: true,
-    style: { stroke: '#1976D2', strokeWidth: 2.5 },
-    markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#1976D2' },
-    data: { mermaidType: '-->' },
-};
-
-/** reactflow@11 checks type keys inside useMemo; React Strict Mode runs that callback twice and false-positives error 002. */
-function onReactFlowError(id: string, message: string) {
-    if (id === '002' || id === '004') {
-        return;
-    }
-    console.warn(`[React Flow]: ${message} Help: https://reactflow.dev/error#${id}`);
-}
-
-function ReactFlowErrorGuard({ children }: { children: React.ReactNode; }) {
-    const store = useStoreApi();
-    if (store.getState().onError !== onReactFlowError) {
-        store.getState().onError = onReactFlowError;
-    }
-    return children;
-}
 
 function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const { nodes, edges } = useSnapshot(rflowDiagram);
@@ -327,18 +284,6 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         [setSelectedNodes]);
 
-    const onAlignNodes = useCallback(
-        (alignment: AlignmentType) => {
-            commitNodes(alignNodes(rflowDiagram.nodes as Node[], selectedNodes, alignment));
-        },
-        [commitNodes, selectedNodes]);
-
-    const onDistributeNodes = useCallback(
-        (direction: DistributionType) => {
-            commitNodes(distributeNodes(rflowDiagram.nodes as Node[], selectedNodes, direction));
-        },
-        [commitNodes, selectedNodes]);
-
     const onDuplicateNodes = useCallback(
         () => {
             commitNodes(duplicateNodes(rflowDiagram.nodes as Node[], selectedNodes));
@@ -412,8 +357,6 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                 <EditingToolbar
                     selectedNodes={selectedNodes}
                     selectedEdges={selectedEdges}
-                    onAlignNodes={onAlignNodes}
-                    onDistributeNodes={onDistributeNodes}
                     onDuplicateNodes={onDuplicateNodes}
                     onDeleteSelected={onDeleteSelected}
                     onLockNodes={onLockNodes}
@@ -594,3 +537,35 @@ const containerDraggingClasses = " \
 [&_.react-flow__edge.animated_path]:[stroke-dasharray:none] \
 [&_.react-flow__node-resizer]:invisible \
 [&_.react-flow__handle]:invisible";
+
+//---------------------------------------------------------------------------
+
+const nodeTypes: NodeTypes = {
+    custom: CustomNode,
+    diamond: DiamondNode,
+    group: SubgraphNode,
+};
+
+const defaultEdgeOptions: DefaultEdgeOptions = {
+    type: 'smoothstep',
+    animated: true,
+    style: { stroke: '#1976D2', strokeWidth: 2.5 },
+    markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#1976D2' },
+    data: { mermaidType: '-->' },
+};
+
+/** reactflow@11 checks type keys inside useMemo; React Strict Mode runs that callback twice and false-positives error 002. */
+function onReactFlowError(id: string, message: string) {
+    if (id === '002' || id === '004') {
+        return;
+    }
+    console.warn(`[React Flow]: ${message} Help: https://reactflow.dev/error#${id}`);
+}
+
+function ReactFlowErrorGuard({ children }: { children: React.ReactNode; }) {
+    const store = useStoreApi();
+    if (store.getState().onError !== onReactFlowError) {
+        store.getState().onError = onReactFlowError;
+    }
+    return children;
+}

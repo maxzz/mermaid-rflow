@@ -22,6 +22,7 @@ export * from "./28-test-tube";
 export * from "./33-run";
 export * from "./33-run-2";
 
+export * from "./align";
 export * from "./editor-manual-fields";
 export * from "./editor-swap-popup";
 export * from "./logos";
