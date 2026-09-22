@@ -5,32 +5,11 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
-import { searchIconify } from './2-2-2-util-iconify';
-import { resetIconSearchQuery, rf_IconSearchQueryAtom, rf_LoadMoreIconSearchAtom } from '../8-store/a-rflow-ui-atoms';
+import { resetIconSearchQuery, rf_IconSearchQueryAtom, rf_LoadMoreIconSearchAtom, rf_SearchIconsAtom } from '../8-store/a-rflow-ui-atoms';
 
 export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; }) {
     const [searchQuery, setSearchQuery] = useAtom(rf_IconSearchQueryAtom);
-
-    async function handleSearch() {
-        if (!searchQuery.query.trim()) {
-            return;
-        }
-        setSearchQuery({ ...searchQuery, loading: true, error: '', results: [], offset: 0, hasMore: true });
-        try {
-            const icons = await searchIconify(searchQuery.query, ICONS_PER_PAGE, 0);
-            setSearchQuery({
-                ...searchQuery,
-                loading: false,
-                results: icons,
-                isExpanded: true,
-                hasMore: icons.length === ICONS_PER_PAGE,
-                offset: ICONS_PER_PAGE,
-                error: icons.length === 0 ? 'No icons found. Try a different search term.' : '',
-            });
-        } catch {
-            setSearchQuery({ ...searchQuery, loading: false, error: 'Failed to search icons. Please try again.' });
-        }
-    }
+    const searchIcons = useSetAtom(rf_SearchIconsAtom);
 
     return (
         <div className="flex flex-col gap-2">
@@ -41,12 +20,12 @@ export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; 
                         placeholder="Search icons..."
                         value={searchQuery.query}
                         onChange={(e) => setSearchQuery({ ...searchQuery, query: e.target.value })}
-                        onKeyDown={(e) => { if (e.key === 'Enter') void handleSearch(); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') void searchIcons(ICONS_PER_PAGE); }}
                         className="pl-7"
                     />
                 </div>
 
-                <Button type="button" size="xs" onClick={() => void handleSearch()} disabled={searchQuery.loading || !searchQuery.query.trim()}>
+                <Button type="button" size="xs" onClick={() => void searchIcons(ICONS_PER_PAGE)} disabled={searchQuery.loading || !searchQuery.query.trim()}>
                     {searchQuery.loading ? <Loader2Icon className="animate-spin" /> : <SearchIcon />}
                 </Button>
 
