@@ -73,7 +73,7 @@ export function Body_Rflow({ active = true }: { active?: boolean; }) {
     return (
         <ReactFlowProvider>
             <ReactFlowErrorGuard>
-                <FlowDiagramInternal active={active} />
+                <RflowDiagramView active={active} />
             </ReactFlowErrorGuard>
         </ReactFlowProvider>
     );
@@ -111,7 +111,7 @@ function ReactFlowErrorGuard({ children }: { children: React.ReactNode; }) {
     return children;
 }
 
-function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
+function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const { nodes, edges } = useSnapshot(rflowDiagram);
     const { theme } = useSnapshot(appSettings);
     const isDark = isThemeDark(theme);
@@ -537,7 +537,8 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                             <MiniMap />
                         </ReactFlow>
                     )
-                    : null}
+                    : null
+                    }
                 {hasBox && !exporting && <ZoomControls_Rflow />}
             </div>
         </div>
