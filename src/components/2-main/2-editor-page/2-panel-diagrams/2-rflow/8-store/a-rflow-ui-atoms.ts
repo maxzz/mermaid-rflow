@@ -94,7 +94,7 @@ export const rflowIconSearchAtom = atom<IconSearchState>(defaultIconSearchState(
 
 export type LoadDialogUi = {
     selectedId: string | null;
-    imported: import('../8-store/1-local-storage-saved-diagrams').SavedDiagram | null;
+    imported: import('./1-local-storage-saved-diagrams').SavedDiagram | null;
     confirmDeleteId: string | null;
 };
 

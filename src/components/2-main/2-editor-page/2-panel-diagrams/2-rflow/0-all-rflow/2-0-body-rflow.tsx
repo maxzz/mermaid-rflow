@@ -43,7 +43,7 @@ import {
     rflowSelectedEdgeIdAtom,
     rflowSelectedEdgesAtom,
     rflowSelectedNodesAtom,
-} from '../8-store/a-rflow-ui';
+} from '../8-store/a-rflow-ui-atoms';
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
 import {
     alignNodes,

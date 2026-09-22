@@ -6,7 +6,7 @@ import { Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { searchIconify } from './2-2-2-util-iconify';
-import { defaultIconSearchState, rflowIconSearchAtom } from '../8-store/a-rflow-ui';
+import { defaultIconSearchState, rflowIconSearchAtom } from '../8-store/a-rflow-ui-atoms';
 
 const ICONS_PER_PAGE = 48;
 
