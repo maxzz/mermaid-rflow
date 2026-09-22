@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { copyText, downloadText } from '@/components/4-dialogs/2-export/8-export-utils';
 import { DropdownMenuItem } from '@/ui/shadcn/dropdown-menu';
-import { CopyExportMenu } from '../../0-all-panels/8-copy-export-menu';
+import { TabDropdownMenu } from '../../../../../../ui/local-ui/8-tab-dropdown-menu';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { MmdOptionsPopover } from './8-1-1-mmd-options-popover';
 
@@ -14,7 +14,7 @@ export function PreviewToolbar_Mmd() {
         <div className="flex items-center">
             <MmdOptionsPopover />
 
-            <CopyExportMenu>
+            <TabDropdownMenu>
                 <DropdownMenuItem onSelect={() => void copyOfficialSvg(svg, error)}>
                     <CopyIcon />
                     Copy SVG
@@ -23,7 +23,7 @@ export function PreviewToolbar_Mmd() {
                     <DownloadIcon />
                     Download SVG
                 </DropdownMenuItem>
-            </CopyExportMenu>
+            </TabDropdownMenu>
         </div>
     );
 }

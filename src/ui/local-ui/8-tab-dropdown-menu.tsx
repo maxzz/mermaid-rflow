@@ -1,9 +1,9 @@
 import { type ReactNode } from "react";
-import { EllipsisVerticalIcon } from "lucide-react";
 import { Button } from "@/ui/shadcn/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/ui/shadcn/dropdown-menu";
+import { EllipsisVerticalIcon } from "lucide-react";
 
-export function CopyExportMenu({ children }: { children: ReactNode; }) {
+export function TabDropdownMenu({ children }: { children: ReactNode; }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -11,6 +11,7 @@ export function CopyExportMenu({ children }: { children: ReactNode; }) {
                     <EllipsisVerticalIcon />
                 </Button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent align="end" className="w-auto min-w-44">
                 {children}
             </DropdownMenuContent>
