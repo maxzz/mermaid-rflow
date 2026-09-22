@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom, getDefaultStore } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
 import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/constants';
 import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
@@ -83,7 +83,7 @@ export function draftFromNode(node: Node): NodeEditorDraft {
 //---------------------------------------------------------------------------
 // Icon search
 
-export type IconSearchState = {
+export type IconSearchQuery = {
     query: string;
     results: { provider: string; prefix: string; name: string; }[];
     loading: boolean;
@@ -94,7 +94,7 @@ export type IconSearchState = {
     offset: number;
 };
 
-export function defaultIconSearchState(): IconSearchState {
+function defaultIconSearchQuery(): IconSearchQuery {
     return ({
         query: '',
         results: [],
@@ -107,7 +107,12 @@ export function defaultIconSearchState(): IconSearchState {
     });
 }
 
-export const rf_IconSearchAtom = atom<IconSearchState>(defaultIconSearchState());
+export const rf_IconSearchQueryAtom = atom<IconSearchQuery>(defaultIconSearchQuery());
+
+export function resetIconSearchQuery() {
+    const defaultStore = getDefaultStore()
+    defaultStore.set(rf_IconSearchQueryAtom, defaultIconSearchQuery());
+}
 
 //---------------------------------------------------------------------------
 // Load dialog

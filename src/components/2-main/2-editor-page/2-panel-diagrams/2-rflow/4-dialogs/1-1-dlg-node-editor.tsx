@@ -9,13 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 import { type Node } from 'reactflow';
 import { rf_Diagram } from '../8-store/0-flow-diagram';
 import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
-import { rf_IconSearchAtom, defaultIconSearchState, rf_NodeEditorDraftAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_IconSearchQueryAtom, rf_NodeEditorDraftAtom, resetIconSearchQuery } from '../8-store/a-rflow-ui-atoms';
 import { IconSearch } from './2-2-1-dlg-search';
 import { COLOR_PRESETS } from '../2-converter/constants';
 
 export function NodeEditor() {
     const [draft, setDraft] = useAtom(rf_NodeEditorDraftAtom);
-    const setIconSearch = useSetAtom(rf_IconSearchAtom);
+    const setIconSearch = useSetAtom(rf_IconSearchQueryAtom);
 
     if (!draft) {
         return null;
@@ -23,7 +23,7 @@ export function NodeEditor() {
 
     function close() {
         setDraft(null);
-        setIconSearch(defaultIconSearchState());
+        resetIconSearchQuery();
     }
 
     function save() {
