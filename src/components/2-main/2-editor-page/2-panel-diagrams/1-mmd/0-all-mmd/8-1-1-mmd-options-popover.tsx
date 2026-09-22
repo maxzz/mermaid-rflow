@@ -4,9 +4,10 @@ import { Settings2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Label } from '@/ui/shadcn/label';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
+import { Select, SelectContent, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Switch } from '@/ui/shadcn/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/shadcn/tooltip';
+import { PreviewSelectItem, useSelectPreview } from '@/ui/local-ui';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 
 import { classifyMermaidSource, readDirection, type FlowDirection } from '../3-catalog/1-flowchart-source';
@@ -55,20 +56,21 @@ function MmdViewOptions() {
     const { theme, adaptive, look, layout, autofit } = useSnapshot(mmdSettings);
     const flowchart = classifyMermaidSource(source) === 'flowchart';
     const direction = readDirection(source) ?? 'TD';
+    const themeSelect = useSelectPreview(theme, (v) => { mmdSettings.theme = v as MmdTheme; });
+    const lookSelect = useSelectPreview(look, (v) => { mmdSettings.look = v as MmdLook; });
+    const layoutSelect = useSelectPreview(layout, (v) => { mmdSettings.layout = v as MmdLayout; });
+    const directionSelect = useSelectPreview(direction, (v) => applyMmdPatchResult(setDirection(mermaidSettings.source, v as FlowDirection)));
 
     return (
         <>
             <Row label="Theme" hint="Color palette for the official Mermaid renderer. Adaptive pairs follow the app light or dark theme.">
-                <Select value={theme} onValueChange={(v) => { mmdSettings.theme = v as MmdTheme; }}>
-                    <SelectTrigger size="sm" className="w-40">
-                        <SelectValue>{MMD_THEME_LABELS[theme]}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent position="popper" align="end">
-                        {MMD_THEMES.map((name) => (
-                            <SelectItem key={name} value={name}>{MMD_THEME_LABELS[name]}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <PreviewSelect select={themeSelect} liveLabel={MMD_THEME_LABELS[theme]}>
+                    {MMD_THEMES.map((name) => (
+                        <PreviewSelectItem key={name} value={name} onPreview={themeSelect.preview}>
+                            {MMD_THEME_LABELS[name]}
+                        </PreviewSelectItem>
+                    ))}
+                </PreviewSelect>
             </Row>
 
             <Row label="Adaptive to app theme" hint="Follow the app light or dark theme when choosing a paired Mermaid palette.">
@@ -76,46 +78,37 @@ function MmdViewOptions() {
             </Row>
 
             <Row label="Look" hint="Classic, hand-drawn, or neo rendering style.">
-                <Select value={look} onValueChange={(v) => { mmdSettings.look = v as MmdLook; }}>
-                    <SelectTrigger size="sm" className="w-40">
-                        <SelectValue>{MMD_LOOKS.find((item) => item.value === look)?.label ?? look}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent position="popper" align="end">
-                        {MMD_LOOKS.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <PreviewSelect select={lookSelect} liveLabel={MMD_LOOKS.find((item) => item.value === look)?.label ?? look}>
+                    {MMD_LOOKS.map((item) => (
+                        <PreviewSelectItem key={item.value} value={item.value} onPreview={lookSelect.preview}>
+                            {item.label}
+                        </PreviewSelectItem>
+                    ))}
+                </PreviewSelect>
             </Row>
 
             <Row label="Layout" hint="ELK is what mermaid.ai uses: straighter orthogonal edges. Dagre is the older engine with rounded Bézier links.">
-                <Select value={layout} onValueChange={(v) => { mmdSettings.layout = v as MmdLayout; }}>
-                    <SelectTrigger size="sm" className="w-40">
-                        <SelectValue>{LAYOUTS.find((item) => item.value === layout)?.label ?? layout}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent position="popper" align="end">
-                        {LAYOUTS.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <PreviewSelect select={layoutSelect} liveLabel={LAYOUTS.find((item) => item.value === layout)?.label ?? layout}>
+                    {LAYOUTS.map((item) => (
+                        <PreviewSelectItem key={item.value} value={item.value} onPreview={layoutSelect.preview}>
+                            {item.label}
+                        </PreviewSelectItem>
+                    ))}
+                </PreviewSelect>
             </Row>
 
             <Row label="Direction" hint="Flowchart layout direction. Disabled for non-flowchart diagrams.">
-                <Select
-                    value={direction}
-                    onValueChange={(v) => applyMmdPatchResult(setDirection(mermaidSettings.source, v as FlowDirection))}
+                <PreviewSelect
+                    select={directionSelect}
+                    liveLabel={DIRECTIONS.find((item) => item.value === direction)?.label ?? direction}
                     disabled={!flowchart}
                 >
-                    <SelectTrigger size="sm" className="w-40" disabled={!flowchart}>
-                        <SelectValue>{DIRECTIONS.find((item) => item.value === direction)?.label ?? direction}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent position="popper" align="end">
-                        {DIRECTIONS.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    {DIRECTIONS.map((item) => (
+                        <PreviewSelectItem key={item.value} value={item.value} onPreview={directionSelect.preview}>
+                            {item.label}
+                        </PreviewSelectItem>
+                    ))}
+                </PreviewSelect>
             </Row>
 
             <Row label="Autofit" hint="Scale the diagram to the pane. Zooming or panning turns this off.">
@@ -136,6 +129,31 @@ const DIRECTIONS: { value: FlowDirection; label: string; }[] = [
     { value: 'LR', label: 'Left to right' },
     { value: 'RL', label: 'Right to left' },
 ];
+
+type SelectPreview = ReturnType<typeof useSelectPreview>;
+
+function PreviewSelect({
+    select,
+    liveLabel,
+    disabled,
+    children,
+}: {
+    select: SelectPreview;
+    liveLabel: string;
+    disabled?: boolean;
+    children: ReactNode;
+}) {
+    return (
+        <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange} disabled={disabled}>
+            <SelectTrigger size="sm" className="w-40" disabled={disabled}>
+                <SelectValue>{liveLabel}</SelectValue>
+            </SelectTrigger>
+            <SelectContent position="popper" align="end">
+                {children}
+            </SelectContent>
+        </Select>
+    );
+}
 
 const optionRowClasses = "col-span-full grid grid-cols-subgrid items-center min-h-6";
 
