@@ -8,7 +8,7 @@ import { publishPreviewStatus, renderDiagram } from "@/components/2-main/2-edito
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
 import { useDebouncedValue } from "@/utils/util-hooks/use-debounced-value";
 import { usePreviewSourceLink } from "../5-2-source-diagram-link-diagram";
-import { panModeAtom, PREVIEW_CONTENT_ATTR } from "../1-3-2-zoom-controls-bm";
+import { panModeAtom, PREVIEW_CONTENT_ATTR } from "./8-3-zoom-controls-bm";
 import { DiagramText } from "../7-diagram-text";
 import { usePanToScroll } from "./use-pan-to-scroll";
 

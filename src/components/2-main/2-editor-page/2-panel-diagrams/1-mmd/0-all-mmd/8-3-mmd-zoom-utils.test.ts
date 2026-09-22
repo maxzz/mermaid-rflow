@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
-import { computeMmdFit, MMD_FIT_PADDING, mmdFitPan, mmdFitScale } from './8-3-mmd-zoom';
+import { computeMmdFit, MMD_FIT_PADDING, mmdFitPan, mmdFitScale } from './8-3-mmd-zoom-utils';
 
 describe('computeMmdFit', () => {
     it('scales a tall diagram to the viewport height and centers it', () => {

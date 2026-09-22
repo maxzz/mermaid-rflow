@@ -2,7 +2,7 @@ import { type PointerEvent, type RefObject, useRef } from 'react';
 import { getDefaultStore } from 'jotai';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 import { mmdPanAtom } from '../8-store/3-mmd-ui';
-import { setMmdPan } from './8-3-mmd-zoom';
+import { setMmdPan } from './8-3-mmd-zoom-utils';
 
 export function usePanToTranslate(boardRef: RefObject<HTMLDivElement | null>, panMode: boolean) {
     const dragRef = useRef<{

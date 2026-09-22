@@ -10,7 +10,7 @@ import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 
 import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { Body_Bm } from "./2-body-bm";
-import { ZoomControls_Bm } from "../1-3-2-zoom-controls-bm";
+import { ZoomControls_Bm } from "./8-3-zoom-controls-bm";
 
 export function Preview_Bm() {
     const { zoom, outputFormat } = useSnapshot(mermaidSettings);

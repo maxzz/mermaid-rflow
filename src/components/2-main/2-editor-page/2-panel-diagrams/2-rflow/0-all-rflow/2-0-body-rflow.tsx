@@ -392,165 +392,163 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
         },
         [setEdgeLabelEditor]);
 
-    return (
-        <>
-            {exporting && (
-                <div className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center gap-3">
-                    <BarsLoaderIcon />
-                    <div className="text-sm text-muted-foreground">Exporting image...</div>
-                </div>
-            )}
+    return (<>
+        {exporting && (
+            <div className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center gap-3">
+                <BarsLoaderIcon />
+                <div className="text-sm text-muted-foreground">Exporting image...</div>
+            </div>
+        )}
 
-            <NodeSearchDialog
-                open={searchOpen}
-                nodes={plainNodes}
-                onOpenChange={setSearchOpen}
-                onSelectNode={(id) => {
-                    handleFocusNode(id);
-                    setSearchOpen(false);
-                }}
-            />
+        <NodeSearchDialog
+            open={searchOpen}
+            nodes={plainNodes}
+            onOpenChange={setSearchOpen}
+            onSelectNode={(id) => {
+                handleFocusNode(id);
+                setSearchOpen(false);
+            }}
+        />
 
-            <div ref={reactFlowWrapper} className={classNames(containerClasses, isDragging && containerDraggingClasses, isDark && 'dark',)}>
-                <div className="px-2 py-1.5 border-b border-border bg-muted/20 shrink-0 flex flex-col gap-1.5">
-                    <EditingToolbar
-                        selectedNodes={selectedNodes}
-                        selectedEdges={selectedEdges}
-                        onAlignNodes={onAlignNodes}
-                        onDistributeNodes={onDistributeNodes}
-                        onDuplicateNodes={onDuplicateNodes}
-                        onDeleteSelected={onDeleteSelected}
-                        onLockNodes={onLockNodes}
-                        onUnlockNodes={onUnlockNodes}
-                        onSelectSubgraphContents={onSelectSubgraphContents}
-                        onOpenSearch={() => setSearchOpen(true)}
-                    />
-                    <PaletteToolbar />
-                </div>
-
-                <div className="flex-1 min-h-0 w-full">
-                    {hasBox
-                        ? (
-                            <ReactFlow
-                                minZoom={0.05}
-                                nodes={nodesWithLink}
-                                edges={edgesWithSelection}
-                                onlyRenderVisibleElements
-                                onNodeDragStart={() => setIsDragging(true)}
-                                onNodeDragStop={() => setIsDragging(false)}
-                                onNodesChange={onNodesChange}
-                                onEdgesChange={onEdgesChange}
-                                onConnect={onConnect}
-                                onNodeClick={sourceLink.onNodeClick}
-                                onNodeDoubleClick={onNodeDoubleClick}
-                                nodeTypes={nodeTypes}
-                                defaultEdgeOptions={defaultEdgeOptions}
-                                onError={onReactFlowError}
-                                fitView
-                                deleteKeyCode={['Delete', 'Backspace']}
-                                panOnDrag
-                                panOnScroll={false}
-                                zoomOnScroll
-                                zoomOnPinch
-                                connectionLineType={ConnectionLineType.SmoothStep}
-                                onEdgeClick={onEdgeClick}
-                                onPaneClick={() => {
-                                    setSelectedEdgeId(null);
-                                    sourceLink.onPaneClick();
-                                }}
-                                edgesUpdatable
-                                connectionMode={ConnectionMode.Loose}
-                                onEdgeUpdate={(oldEdge, newConnection) => {
-                                    if (!newConnection.source || !newConnection.target) {
-                                        return;
-                                    }
-                                    setRflowEdges(
-                                        (rflowDiagram.edges as Edge[]).map(
-                                            (edge) => (
-                                                edge.id === oldEdge.id
-                                                    ? {
-                                                        ...edge,
-                                                        ...newConnection,
-                                                        source: newConnection.source!,
-                                                        target: newConnection.target!,
-                                                        data: { ...edge.data, mermaidType: edge.data?.mermaidType ?? '-->' },
-                                                    }
-                                                    : edge
-                                            )
-                                        ),
-                                    );
-                                    syncMermaidFromGraph();
-                                }}
-                                onEdgeDoubleClick={onEdgeDoubleClick}
-                                onDragOver={(event) => {
-                                    event.preventDefault();
-                                    event.dataTransfer.dropEffect = 'move';
-                                }}
-                                onDrop={(event) => {
-                                    event.preventDefault();
-                                    const type = event.dataTransfer.getData('application/reactflow');
-                                    if (!type) {
-                                        return;
-                                    }
-                                    const bounds = reactFlowWrapper.current!.getBoundingClientRect();
-                                    const position = reactFlowInstance.project({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
-                                    const current = rflowDiagram.nodes as Node[];
-                                    let newNode: Node | undefined;
-                                    if (type === 'node') {
-                                        newNode = {
-                                            id: nextRfId(current, 'n'),
-                                            type: 'custom',
-                                            position,
-                                            data: { label: 'New Node', shape: 'rect' },
-                                            style: { width: 150, height: 50 },
-                                        };
-                                    } else if (type === 'subgraph') {
-                                        newNode = {
-                                            id: nextRfId(current, 'sg'),
-                                            type: 'group',
-                                            position,
-                                            data: { label: 'New Subgraph', isSubgraph: true },
-                                            style: { width: 220, height: 120, background: '#e3f2fd', border: '2px dashed #1976D2' },
-                                        };
-                                    } else if (type === 'diamond') {
-                                        newNode = {
-                                            id: nextRfId(current, 'd'),
-                                            type: 'diamond',
-                                            position,
-                                            data: { label: 'Conditional', shape: 'diamond' },
-                                            style: { width: 120, height: 120, backgroundColor: '#FFF3E0', borderColor: '#F57C00' },
-                                        };
-                                    }
-                                    if (newNode) {
-                                        setRflowNodes([...current, newNode]);
-                                        syncMermaidFromGraph();
-                                    }
-                                }}
-                            >
-                                <Background variant={BackgroundVariant.Dots} />
-                                <Controls />
-                                <MiniMap />
-                            </ReactFlow>
-                        )
-                        : null}
-                </div>
+        <div ref={reactFlowWrapper} className={classNames(containerClasses, isDragging && containerDraggingClasses, isDark && 'dark',)}>
+            <div className="px-2 py-1.5 border-b border-border bg-muted/20 shrink-0 flex flex-col gap-1.5">
+                <EditingToolbar
+                    selectedNodes={selectedNodes}
+                    selectedEdges={selectedEdges}
+                    onAlignNodes={onAlignNodes}
+                    onDistributeNodes={onDistributeNodes}
+                    onDuplicateNodes={onDuplicateNodes}
+                    onDeleteSelected={onDeleteSelected}
+                    onLockNodes={onLockNodes}
+                    onUnlockNodes={onUnlockNodes}
+                    onSelectSubgraphContents={onSelectSubgraphContents}
+                    onOpenSearch={() => setSearchOpen(true)}
+                />
+                <PaletteToolbar />
             </div>
 
-            {edgeLabelEditor && (
-                <EdgeLabelEditor
-                    open
-                    x={edgeLabelEditor.x}
-                    y={edgeLabelEditor.y}
-                    text={edgeLabelEditor.text}
-                    onChange={(t) => setEdgeLabelEditor({ ...edgeLabelEditor, text: t })}
-                    onSave={() => saveEdgeLabel(edgeLabelEditor.edgeId, edgeLabelEditor.text)}
-                    onCancel={() => setEdgeLabelEditor(null)}
-                />
-            )}
+            <div className="flex-1 min-h-0 w-full">
+                {hasBox
+                    ? (
+                        <ReactFlow
+                            minZoom={0.05}
+                            nodes={nodesWithLink}
+                            edges={edgesWithSelection}
+                            onlyRenderVisibleElements
+                            onNodeDragStart={() => setIsDragging(true)}
+                            onNodeDragStop={() => setIsDragging(false)}
+                            onNodesChange={onNodesChange}
+                            onEdgesChange={onEdgesChange}
+                            onConnect={onConnect}
+                            onNodeClick={sourceLink.onNodeClick}
+                            onNodeDoubleClick={onNodeDoubleClick}
+                            nodeTypes={nodeTypes}
+                            defaultEdgeOptions={defaultEdgeOptions}
+                            onError={onReactFlowError}
+                            fitView
+                            deleteKeyCode={['Delete', 'Backspace']}
+                            panOnDrag
+                            panOnScroll={false}
+                            zoomOnScroll
+                            zoomOnPinch
+                            connectionLineType={ConnectionLineType.SmoothStep}
+                            onEdgeClick={onEdgeClick}
+                            onPaneClick={() => {
+                                setSelectedEdgeId(null);
+                                sourceLink.onPaneClick();
+                            }}
+                            edgesUpdatable
+                            connectionMode={ConnectionMode.Loose}
+                            onEdgeUpdate={(oldEdge, newConnection) => {
+                                if (!newConnection.source || !newConnection.target) {
+                                    return;
+                                }
+                                setRflowEdges(
+                                    (rflowDiagram.edges as Edge[]).map(
+                                        (edge) => (
+                                            edge.id === oldEdge.id
+                                                ? {
+                                                    ...edge,
+                                                    ...newConnection,
+                                                    source: newConnection.source!,
+                                                    target: newConnection.target!,
+                                                    data: { ...edge.data, mermaidType: edge.data?.mermaidType ?? '-->' },
+                                                }
+                                                : edge
+                                        )
+                                    ),
+                                );
+                                syncMermaidFromGraph();
+                            }}
+                            onEdgeDoubleClick={onEdgeDoubleClick}
+                            onDragOver={(event) => {
+                                event.preventDefault();
+                                event.dataTransfer.dropEffect = 'move';
+                            }}
+                            onDrop={(event) => {
+                                event.preventDefault();
+                                const type = event.dataTransfer.getData('application/reactflow');
+                                if (!type) {
+                                    return;
+                                }
+                                const bounds = reactFlowWrapper.current!.getBoundingClientRect();
+                                const position = reactFlowInstance.project({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
+                                const current = rflowDiagram.nodes as Node[];
+                                let newNode: Node | undefined;
+                                if (type === 'node') {
+                                    newNode = {
+                                        id: nextRfId(current, 'n'),
+                                        type: 'custom',
+                                        position,
+                                        data: { label: 'New Node', shape: 'rect' },
+                                        style: { width: 150, height: 50 },
+                                    };
+                                } else if (type === 'subgraph') {
+                                    newNode = {
+                                        id: nextRfId(current, 'sg'),
+                                        type: 'group',
+                                        position,
+                                        data: { label: 'New Subgraph', isSubgraph: true },
+                                        style: { width: 220, height: 120, background: '#e3f2fd', border: '2px dashed #1976D2' },
+                                    };
+                                } else if (type === 'diamond') {
+                                    newNode = {
+                                        id: nextRfId(current, 'd'),
+                                        type: 'diamond',
+                                        position,
+                                        data: { label: 'Conditional', shape: 'diamond' },
+                                        style: { width: 120, height: 120, backgroundColor: '#FFF3E0', borderColor: '#F57C00' },
+                                    };
+                                }
+                                if (newNode) {
+                                    setRflowNodes([...current, newNode]);
+                                    syncMermaidFromGraph();
+                                }
+                            }}
+                        >
+                            <Background variant={BackgroundVariant.Dots} />
+                            <Controls />
+                            <MiniMap />
+                        </ReactFlow>
+                    )
+                    : null}
+            </div>
+        </div>
 
-            <NodeEditor />
-        </>
-    );
+        {edgeLabelEditor && (
+            <EdgeLabelEditor
+                open
+                x={edgeLabelEditor.x}
+                y={edgeLabelEditor.y}
+                text={edgeLabelEditor.text}
+                onChange={(t) => setEdgeLabelEditor({ ...edgeLabelEditor, text: t })}
+                onSave={() => saveEdgeLabel(edgeLabelEditor.edgeId, edgeLabelEditor.text)}
+                onCancel={() => setEdgeLabelEditor(null)}
+            />
+        )}
+
+        <NodeEditor />
+    </>);
 }
 
 const containerClasses = " \
