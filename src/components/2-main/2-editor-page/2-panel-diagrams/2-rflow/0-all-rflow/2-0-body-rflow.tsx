@@ -5,7 +5,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
+import { classNames } from '@/utils';
+import { appSettings } from '@/store/1-ui-settings';
 import { toast } from 'sonner';
+import { BarsLoaderIcon } from '@/ui/local-ui';
+
 import ReactFlow, {
     type Connection,
     type DefaultEdgeOptions,
@@ -45,14 +49,7 @@ import {
     rflowSelectedNodesAtom,
 } from '../8-store/a-rflow-ui-atoms';
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
-import {
-    alignNodes,
-    deleteSelected,
-    distributeNodes,
-    duplicateNodes,
-    lockNodes,
-    unlockNodes,
-} from '../1-canvas/8-diagram-editing-utils';
+import { alignNodes, deleteSelected, distributeNodes, duplicateNodes, lockNodes, unlockNodes } from '../1-canvas/8-diagram-editing-utils';
 import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
 import { EditingToolbar } from './8-1-1-toolbar-rflow';
 import { PaletteToolbar } from './8-1-3-palette-toolbar';
@@ -63,11 +60,8 @@ import { NodeSearchDialog } from '../4-dialogs/2-1-dlg-node-search';
 import { type AlignmentType, type DistributionType } from '../2-converter/constants';
 import { nextRfId } from '../2-converter/mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
-import { appSettings } from '@/store/1-ui-settings';
 import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
 import { isThemeDark } from '@/utils/theme-utils';
-import { classNames } from '@/utils';
-import { BarsLoaderIcon } from '@/ui/local-ui';
 
 export function Body_Rflow({ active = true }: { active?: boolean; }) {
     return (
@@ -538,7 +532,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                         </ReactFlow>
                     )
                     : null
-                    }
+                }
                 {hasBox && !exporting && <ZoomControls_Rflow />}
             </div>
         </div>
