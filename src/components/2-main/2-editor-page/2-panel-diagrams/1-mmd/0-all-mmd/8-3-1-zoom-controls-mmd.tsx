@@ -8,13 +8,7 @@ import { mmdSettings } from '../8-store/2-mmd-settings';
 import { mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
 import { fitMmdToView, setMmdZoom } from './8-3-2-mmd-zoom-utils';
 
-export function MmdViewControls({
-    viewportRef,
-    contentRef,
-}: {
-    viewportRef: RefObject<HTMLDivElement | null>;
-    contentRef: RefObject<HTMLDivElement | null>;
-}) {
+export function MmdViewControls({ viewportRef, contentRef }: { viewportRef: RefObject<HTMLDivElement | null>; contentRef: RefObject<HTMLDivElement | null>; }) {
     const [zoom] = useAtom(mmdZoomAtom);
     const [panMode, setPanMode] = useAtom(mmdPanModeAtom);
     const { autofit } = useSnapshot(mmdSettings);
