@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
 import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/constants';
 import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
-import { rf_Diagram, setRflowNodes } from './2-flow-diagram';
+import { rf_Diagram, setRflowNodes } from './0-flow-diagram';
 
 export type EdgeLabelEditorState = {
     edgeId: string;
@@ -114,7 +114,7 @@ export const rf_IconSearchAtom = atom<IconSearchState>(defaultIconSearchState())
 
 export type LoadDialogUi = {
     selectedId: string | null;
-    imported: import('./1-local-storage-saved-diagrams').SavedDiagram | null;
+    imported: import('./8-local-storage-saved-diagrams').SavedDiagram | null;
     confirmDeleteId: string | null;
 };
 

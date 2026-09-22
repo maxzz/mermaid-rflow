@@ -29,9 +29,9 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/2-flow-diagram';
+import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
 import { draftFromNode, rf_CanvasMethodsAtom, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_ExportingAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SearchOpenAtom, rf_SelectedEdgeIdAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
-import { syncMermaidFromGraph } from '../8-store/3-sync-with-source';
+import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
 
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
 import { deleteSelected, duplicateNodes, lockNodes, unlockNodes } from '../1-canvas/8-diagram-editing-utils';

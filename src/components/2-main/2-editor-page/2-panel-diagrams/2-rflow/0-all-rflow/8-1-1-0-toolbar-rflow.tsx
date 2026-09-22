@@ -41,25 +41,25 @@ export function EditingToolbar({
                 {selectedNodes.length}
             </span>
 
-            <div className="mx-1 w-px h-4 bg-border" />
+            <div className="mx-1 w-0 h-full border-l border-border" />
 
             <Button variant="ghost" size="icon-xs" title="Search (Ctrl+F)" onClick={onOpenSearch}>
                 <SearchIcon />
             </Button>
 
-            <div className="mx-1 w-px h-4 bg-border" />
+            <div className="mx-1 w-0 h-full border-l border-border" />
 
             <AlignHorizontalGroup />
 
-            <div className="mx-1 w-px h-4 bg-border" />
+            <div className="mx-1 w-0 h-full border-l border-border" />
 
             <AlignVerticalGroup />
 
-            <div className="mx-1 w-px h-4 bg-border" />
+            <div className="mx-1 w-0 h-full border-l border-border" />
 
             <DistributeGroup />
 
-            <div className="mx-1 w-px h-4 bg-border" />
+            <div className="mx-1 w-0 h-full border-l border-border" />
 
             <Button variant="ghost" size="icon-xs" title="Duplicate" onClick={onDuplicateNodes} disabled={!hasSelectedNodes}>
                 <CopyIcon />

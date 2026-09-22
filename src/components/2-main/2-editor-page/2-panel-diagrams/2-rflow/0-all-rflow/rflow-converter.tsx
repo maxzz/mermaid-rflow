@@ -3,7 +3,7 @@ import { useSnapshot } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { useDebouncedValue } from '@/utils/util-hooks/use-debounced-value';
 import { convertMermaidToReactFlow } from '../2-converter';
-import { rf_Diagram } from '../8-store/2-flow-diagram';
+import { rf_Diagram } from '../8-store/0-flow-diagram';
 
 const CONVERT_DEBOUNCE_MS = 300;
 

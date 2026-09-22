@@ -7,8 +7,8 @@ import { Textarea } from '@/ui/shadcn/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 
 import { type Node } from 'reactflow';
-import { rf_Diagram } from '../8-store/2-flow-diagram';
-import { syncMermaidFromGraph } from '../8-store/3-sync-with-source';
+import { rf_Diagram } from '../8-store/0-flow-diagram';
+import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
 import { rf_IconSearchAtom, defaultIconSearchState, rf_NodeEditorDraftAtom } from '../8-store/a-rflow-ui-atoms';
 import { IconSearch } from './2-2-1-dlg-search';
 import { COLOR_PRESETS } from '../2-converter/constants';

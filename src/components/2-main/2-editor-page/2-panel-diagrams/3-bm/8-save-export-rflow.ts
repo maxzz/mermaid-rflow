@@ -2,8 +2,8 @@ import { toast } from "sonner";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { uuid } from "@/utils/uuid";
 import { copyText } from "@/components/4-dialogs/2-export/8-export-utils";
-import { addSavedDiagram, cloneGraphData } from "../2-rflow/8-store/1-local-storage-saved-diagrams";
-import { rf_Diagram } from "../2-rflow/8-store/2-flow-diagram";
+import { addSavedDiagram, cloneGraphData } from "../2-rflow/8-store/8-local-storage-saved-diagrams";
+import { rf_Diagram } from "../2-rflow/8-store/0-flow-diagram";
 
 export function saveCurrentFlow() {
     const src = mermaidSettings.source.trim();

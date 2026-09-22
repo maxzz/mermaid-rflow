@@ -1,7 +1,7 @@
 import { proxy } from 'valtio';
 import { type Edge, type Node } from 'reactflow';
 import { type ReactFlowData } from '../2-converter';
-import { cloneGraphData } from './1-local-storage-saved-diagrams';
+import { cloneGraphData } from './8-local-storage-saved-diagrams';
 
 //---------------------------------------------------------------------------
 // Flow diagram
