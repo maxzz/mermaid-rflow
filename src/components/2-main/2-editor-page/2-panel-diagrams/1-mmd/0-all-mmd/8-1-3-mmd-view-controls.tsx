@@ -1,10 +1,9 @@
 import { type RefObject } from 'react';
 import { useAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
-import { HandIcon, MaximizeIcon, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
-import { classNames } from '@/utils';
+import { HandIcon } from 'lucide-react';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@/store/2-mermaid-settings';
-import { Button } from '@/ui/shadcn/button';
+import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from '../../4-common/8-zoom-bar';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 import { mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
 import { fitMmdToView, setMmdZoom } from './8-3-mmd-zoom-utils';
@@ -20,72 +19,34 @@ export function MmdViewControls({
     const [panMode, setPanMode] = useAtom(mmdPanModeAtom);
     const { autofit } = useSnapshot(mmdSettings);
 
+    function applyZoom(next: number) {
+        mmdSettings.autofit = false;
+        setMmdZoom(next, viewportRef.current);
+    }
+
     return (
-        <div
+        <ZoomBar
+            className={zoomBarPositionClass}
             data-mmd-chrome=""
-            className="absolute right-3 top-1/2 z-20 -translate-y-1/2 p-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl shadow-md flex flex-col gap-0.5"
-            role="toolbar"
-            aria-label="View controls"
+            zoom={zoom}
+            min={ZOOM_MIN}
+            max={ZOOM_MAX}
+            onZoomOut={() => applyZoom(zoom / ZOOM_STEP)}
+            onZoomIn={() => applyZoom(zoom * ZOOM_STEP)}
+            onResetZoom={() => applyZoom(1)}
+            onFit={() => {
+                mmdSettings.autofit = true;
+                fitMmdToView(viewportRef.current, contentRef.current);
+            }}
+            fitActive={autofit}
         >
-            <Button
-                className={classNames(panMode && 'bg-muted text-foreground')}
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => setPanMode((v) => !v)}
+            <ZoomBarToggle
+                pressed={panMode}
                 title={panMode ? 'Pan tool on — click again to select, move, and connect blocks' : 'Pan the canvas. Leave this off to select and move blocks.'}
-                aria-pressed={panMode}
+                onClick={() => setPanMode((v) => !v)}
             >
                 <HandIcon />
-            </Button>
-            <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => {
-                    mmdSettings.autofit = false;
-                    setMmdZoom(zoom * ZOOM_STEP, viewportRef.current);
-                }}
-                disabled={zoom >= ZOOM_MAX}
-                title="Zoom in"
-            >
-                <ZoomInIcon />
-            </Button>
-            <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => {
-                    mmdSettings.autofit = false;
-                    setMmdZoom(zoom / ZOOM_STEP, viewportRef.current);
-                }}
-                disabled={zoom <= ZOOM_MIN}
-                title="Zoom out"
-            >
-                <ZoomOutIcon />
-            </Button>
-            <Button
-                variant="ghost"
-                size="icon-sm"
-                className="text-[0.6rem] font-medium"
-                onClick={() => {
-                    mmdSettings.autofit = false;
-                    setMmdZoom(1, viewportRef.current);
-                }}
-                title="Reset zoom to 100%"
-            >
-                1:1
-            </Button>
-            <Button
-                className={classNames(autofit && 'bg-muted text-foreground')}
-                variant="ghost"
-                size="icon-sm"
-                title={autofit ? 'Fit (autofit on)' : 'Fit to view'}
-                aria-pressed={autofit}
-                onClick={() => {
-                    mmdSettings.autofit = true;
-                    fitMmdToView(viewportRef.current, contentRef.current);
-                }}
-            >
-                <MaximizeIcon />
-            </Button>
-        </div>
+            </ZoomBarToggle>
+        </ZoomBar>
     );
 }

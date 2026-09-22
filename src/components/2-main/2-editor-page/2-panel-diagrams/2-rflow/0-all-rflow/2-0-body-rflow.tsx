@@ -21,7 +21,6 @@ import ReactFlow, {
     BackgroundVariant,
     ConnectionLineType,
     ConnectionMode,
-    Controls,
     MarkerType,
     MiniMap,
     ReactFlowProvider,
@@ -39,6 +38,7 @@ import {
     rflowEdgeLabelEditorAtom,
     rflowExportingAtom,
     rflowNodeEditorDraftAtom,
+    rflowPanModeAtom,
     rflowSearchOpenAtom,
     rflowSelectedEdgeIdAtom,
     rflowSelectedEdgesAtom,
@@ -56,6 +56,7 @@ import {
 import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
 import { EditingToolbar } from './8-1-1-toolbar-rflow';
 import { PaletteToolbar } from './8-1-3-palette-toolbar';
+import { ZoomControls_Rflow } from './8-3-zoom-controls-rflow';
 import { EdgeLabelEditor } from '../4-dialogs/1-2-dlg-edge-label-editor';
 import { NodeEditor } from '../4-dialogs/1-1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/2-1-dlg-node-search';
@@ -63,6 +64,7 @@ import { type AlignmentType, type DistributionType } from '../2-converter/consta
 import { nextRfId } from '../2-converter/mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
 import { appSettings } from '@/store/1-ui-settings';
+import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
 import { isThemeDark } from '@/utils/theme-utils';
 import { classNames } from '@/utils';
 import { BarsLoaderIcon } from '@/ui/local-ui';
@@ -141,6 +143,7 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
     const setNodeEditorDraft = useSetAtom(rflowNodeEditorDraftAtom);
     const [exporting, setExporting] = useAtom(rflowExportingAtom);
     const [isDragging, setIsDragging] = useAtom(rflowDraggingAtom);
+    const [panMode] = useAtom(rflowPanModeAtom);
     const setCanvasMethods = useSetAtom(rflowCanvasMethodsAtom);
 
     const plainNodes = nodes as Node[];
@@ -427,13 +430,17 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                 <PaletteToolbar />
             </div>
 
-            <div className="flex-1 min-h-0 w-full">
+            <div className="relative flex-1 min-h-0 w-full">
                 {hasBox
                     ? (
                         <ReactFlow
-                            minZoom={0.05}
+                            minZoom={ZOOM_MIN}
+                            maxZoom={ZOOM_MAX}
                             nodes={nodesWithLink}
                             edges={edgesWithSelection}
+                            nodesDraggable={!panMode}
+                            nodesConnectable={!panMode}
+                            elementsSelectable={!panMode}
                             onlyRenderVisibleElements
                             onNodeDragStart={() => setIsDragging(true)}
                             onNodeDragStop={() => setIsDragging(false)}
@@ -527,11 +534,11 @@ function FlowDiagramInternal({ active = true }: { active?: boolean; }) {
                             }}
                         >
                             <Background variant={BackgroundVariant.Dots} />
-                            <Controls />
                             <MiniMap />
                         </ReactFlow>
                     )
                     : null}
+                {hasBox && !exporting && <ZoomControls_Rflow />}
             </div>
         </div>
 
@@ -580,8 +587,6 @@ relative w-full h-full flex flex-col \
 [&_.react-flow__resize-control]:pointer-events-auto! \
 [&_.react-flow__panel]:z-60! \
 [&_.react-flow__panel]:pointer-events-auto! \
-[&_.react-flow__controls]:z-60! \
-[&_.react-flow__controls]:pointer-events-auto! \
 [&_.react-flow__edge.selected_path]:stroke-[var(--edge-selected,#ff9800)!important] \
 [&_.react-flow__edge.selected_path]:[stroke-width:2px!important] \
 [&_.react-flow__edge.selected_path]:drop-shadow-[0_0_2px_var(--edge-selected-shadow,#ff9800aa)] \

@@ -40,6 +40,6 @@ export function Preview_Bm() {
             </ErrorBoundary>
         </ScrollArea2>
 
-        <ZoomControls_Bm scrollRef={scrollRef} className="absolute left-4 bottom-4" />
+        <ZoomControls_Bm scrollRef={scrollRef} />
     </>);
 }

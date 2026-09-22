@@ -2,10 +2,10 @@ import { type ComponentProps, type RefObject } from "react";
 import { atom, useAtom } from "jotai";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
-import { HandIcon, MaximizeIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { Button } from "@/ui/shadcn/button";
+import { HandIcon } from "lucide-react";
 
 import { mermaidSettings, setZoom, zoomIn, zoomOut, ZOOM_MAX, ZOOM_MIN } from "@/store/2-mermaid-settings";
+import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from "../../4-common/8-zoom-bar";
 
 export function ZoomControls_Bm({ scrollRef, className, ...rest }: ComponentProps<'div'> & { scrollRef: RefObject<HTMLDivElement | null> }) {
     const { zoom } = useSnapshot(mermaidSettings);
@@ -34,39 +34,25 @@ export function ZoomControls_Bm({ scrollRef, className, ...rest }: ComponentProp
     }
 
     return (
-        <div className={classNames("px-1 py-0.5 text-xs bg-background/90 backdrop-blur-sm border border-border rounded-lg shadow-sm flex items-center gap-0.5", className)} {...rest}>
-            <Button variant="ghost" size="icon-xs" onClick={zoomOut} disabled={zoom <= ZOOM_MIN} title="Zoom out">
-                <ZoomOutIcon />
-            </Button>
-
-            <button
-                className="min-w-10 font-mono tabular-nums text-[.7rem] text-muted-foreground hover:text-foreground cursor-pointer"
-                onClick={() => setZoom(1)}
-                title="Reset zoom to 100%"
-                type="button"
-            >
-                {Math.round(zoom * 100)}%
-            </button>
-
-            <Button variant="ghost" size="icon-xs" onClick={zoomIn} disabled={zoom >= ZOOM_MAX} title="Zoom in">
-                <ZoomInIcon />
-            </Button>
-
-            <Button variant="ghost" size="icon-xs" onClick={fitToView} title="Fit to view">
-                <MaximizeIcon />
-            </Button>
-
-            <Button
-                className={classNames(panMode && "bg-muted text-foreground")}
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setPanMode((v) => !v)}
+        <ZoomBar
+            className={classNames(zoomBarPositionClass, className)}
+            zoom={zoom}
+            min={ZOOM_MIN}
+            max={ZOOM_MAX}
+            onZoomOut={zoomOut}
+            onZoomIn={zoomIn}
+            onResetZoom={() => setZoom(1)}
+            onFit={fitToView}
+            {...rest}
+        >
+            <ZoomBarToggle
+                pressed={panMode}
                 title={panMode ? "Pan mode on: drag to scroll" : "Pan mode: drag to scroll"}
-                aria-pressed={panMode}
+                onClick={() => setPanMode((v) => !v)}
             >
                 <HandIcon />
-            </Button>
-        </div>
+            </ZoomBarToggle>
+        </ZoomBar>
     );
 }
 

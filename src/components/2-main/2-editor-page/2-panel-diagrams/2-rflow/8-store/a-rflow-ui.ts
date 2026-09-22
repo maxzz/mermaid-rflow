@@ -24,6 +24,7 @@ export type NodeEditorDraft = {
 export const rflowSelectedNodesAtom = atom<Node[]>([]);
 export const rflowSelectedEdgesAtom = atom<Edge[]>([]);
 export const rflowSelectedEdgeIdAtom = atom<string | null>(null);
+export const rflowPanModeAtom = atom(false);
 export const rflowSearchOpenAtom = atom(false);
 export const rflowLoadDialogOpenAtom = atom(false);
 export const rflowExportingAtom = atom(false);
