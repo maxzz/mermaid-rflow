@@ -2,7 +2,8 @@ import { useSnapshot } from 'valtio';
 import { toast } from 'sonner';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { copyText, downloadText } from '@/components/4-dialogs/2-export/8-export-utils';
-import { Button } from '@/ui/shadcn/button';
+import { DropdownMenuItem } from '@/ui/shadcn/dropdown-menu';
+import { CopyExportMenu } from '../../0-all-panels/8-copy-export-menu';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { MmdOptionsPopover } from './8-1-1-mmd-options-popover';
 
@@ -11,15 +12,18 @@ export function PreviewToolbar_Mmd() {
 
     return (
         <div className="flex items-center">
-            <Button variant="ghost" size="xs" onClick={() => void copyOfficialSvg(svg, error)} title="Copy official Mermaid SVG">
-                <CopyIcon />
-            </Button>
-
             <MmdOptionsPopover />
 
-            <Button variant="ghost" size="xs" onClick={() => downloadOfficialSvg(svg, error)} title="Download official Mermaid SVG">
-                <DownloadIcon />
-            </Button>
+            <CopyExportMenu>
+                <DropdownMenuItem onSelect={() => void copyOfficialSvg(svg, error)}>
+                    <CopyIcon />
+                    Copy SVG
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => downloadOfficialSvg(svg, error)}>
+                    <DownloadIcon />
+                    Download SVG
+                </DropdownMenuItem>
+            </CopyExportMenu>
         </div>
     );
 }
@@ -47,7 +51,7 @@ function downloadOfficialSvg(svg: string, error: string | null) {
         toast.message('Nothing to download: the diagram is empty.');
         return;
     }
-    
+
     downloadText(svg, 'diagram.svg', 'image/svg+xml');
     toast.success('Downloaded SVG');
 }

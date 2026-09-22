@@ -7,23 +7,28 @@ import { renderDiagram } from "@/components/2-main/2-editor-page/2-panel-diagram
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
 import { copyText } from "@/components/4-dialogs/2-export/8-export-utils";
 import { isOpenExportDialogAtom } from "@/components/4-dialogs/2-export/a-types-export";
-import { Button } from "@/ui/shadcn/button";
+import { DropdownMenuItem } from "@/ui/shadcn/dropdown-menu";
+import { CopyExportMenu } from "../../0-all-panels/8-copy-export-menu";
 import { RenderOptionsPopover } from "../../0-all-panels/6-render-options-popover";
 
 export function PreviewToolbar_Bm() {
     const { outputFormat } = useSnapshot(mermaidSettings);
     const setOpenExport = useSetAtom(isOpenExportDialogAtom);
+    const copyLabel = outputFormat === OutputFormat.svg ? "Copy SVG" : "Copy text";
 
     return (<>
-        <Button variant="ghost" size="xs" onClick={() => copyCurrentOutput()} title={`Copy ${outputFormat === OutputFormat.svg ? "SVG markup" : "text"} to clipboard`}>
-            <CopyIcon />
-        </Button>
-
         <RenderOptionsPopover />
 
-        <Button variant="ghost" size="xs" onClick={() => setOpenExport(true)} title="Export as SVG, text or PNG">
-            <DownloadIcon />
-        </Button>
+        <CopyExportMenu>
+            <DropdownMenuItem onSelect={() => void copyCurrentOutput()}>
+                <CopyIcon />
+                {copyLabel}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setOpenExport(true)}>
+                <DownloadIcon />
+                Export…
+            </DropdownMenuItem>
+        </CopyExportMenu>
     </>);
 }
 
