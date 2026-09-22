@@ -12,14 +12,14 @@ import { mermaidSettings, OutputFormat } from '@/store/2-mermaid-settings';
 import { renderDiagram } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render';
 import { loadBeautifulMermaid } from '@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules';
 import { restoreRflow } from '../8-store/2-flow-diagram';
-import { defaultLoadDialogUi, rflowLoadDialogOpenAtom, rflowLoadPreviewAtom, rflowLoadUiAtom } from '../8-store/a-rflow-ui-atoms';
-import { parseSavedDiagram, removeSavedDiagram, rflowSaved, type SavedDiagram } from '../8-store/1-local-storage-saved-diagrams';
+import { defaultLoadDialogUi, rf_LoadDialogOpenAtom, rf_LoadPreviewAtom, rf_LoadUiAtom } from '../8-store/a-rflow-ui-atoms';
+import { parseSavedDiagram, removeSavedDiagram, rf_Saved, type SavedDiagram } from '../8-store/1-local-storage-saved-diagrams';
 import { classNames } from '@/utils';
 
 export function LoadDialog() {
-    const [open, setOpen] = useAtom(rflowLoadDialogOpenAtom);
-    const [ui, setUi] = useAtom(rflowLoadUiAtom);
-    const { diagrams } = useSnapshot(rflowSaved);
+    const [open, setOpen] = useAtom(rf_LoadDialogOpenAtom);
+    const [ui, setUi] = useAtom(rf_LoadUiAtom);
+    const { diagrams } = useSnapshot(rf_Saved);
     const saved = diagrams as SavedDiagram[];
 
     useEffect(
@@ -175,7 +175,7 @@ export function LoadDialog() {
 
 function SavedSvgPreview({ source }: { source: string; }) {
     const { diagramTheme, ascii, svg } = useSnapshot(mermaidSettings);
-    const [markup, setMarkup] = useAtom(rflowLoadPreviewAtom);
+    const [markup, setMarkup] = useAtom(rf_LoadPreviewAtom);
 
     useEffect(
         () => {

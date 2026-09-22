@@ -29,8 +29,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { rflowDiagram, setRflowEdges, setRflowNodes } from '../8-store/2-flow-diagram';
-import { draftFromNode, rflowCanvasMethodsAtom, rflowDraggingAtom, rflowEdgeLabelEditorAtom, rflowExportingAtom, rflowNodeEditorDraftAtom, rflowPanModeAtom, rflowSearchOpenAtom, rflowSelectedEdgeIdAtom, rflowSelectedEdgesAtom, rflowSelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/2-flow-diagram';
+import { draftFromNode, rf_CanvasMethodsAtom, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_ExportingAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SearchOpenAtom, rf_SelectedEdgeIdAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
 import { syncMermaidFromGraph } from '../8-store/3-sync-with-source';
 
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
@@ -63,7 +63,7 @@ export function Body_Rflow({ active = true }: { active?: boolean; }) {
 //---------------------------------------------------------------------------
 
 function RflowDiagramView({ active = true }: { active?: boolean; }) {
-    const { nodes, edges } = useSnapshot(rflowDiagram);
+    const { nodes, edges } = useSnapshot(rf_Diagram);
     const { theme } = useSnapshot(appSettings);
     const isDark = isThemeDark(theme);
     const reactFlowInstance = useReactFlow();
@@ -86,16 +86,16 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         []);
 
-    const [selectedNodes, setSelectedNodes] = useAtom(rflowSelectedNodesAtom);
-    const [selectedEdges, setSelectedEdges] = useAtom(rflowSelectedEdgesAtom);
-    const [selectedEdgeId, setSelectedEdgeId] = useAtom(rflowSelectedEdgeIdAtom);
-    const [searchOpen, setSearchOpen] = useAtom(rflowSearchOpenAtom);
-    const [edgeLabelEditor, setEdgeLabelEditor] = useAtom(rflowEdgeLabelEditorAtom);
-    const setNodeEditorDraft = useSetAtom(rflowNodeEditorDraftAtom);
-    const [exporting, setExporting] = useAtom(rflowExportingAtom);
-    const [isDragging, setIsDragging] = useAtom(rflowDraggingAtom);
-    const [panMode] = useAtom(rflowPanModeAtom);
-    const setCanvasMethods = useSetAtom(rflowCanvasMethodsAtom);
+    const [selectedNodes, setSelectedNodes] = useAtom(rf_SelectedNodesAtom);
+    const [selectedEdges, setSelectedEdges] = useAtom(rf_SelectedEdgesAtom);
+    const [selectedEdgeId, setSelectedEdgeId] = useAtom(rf_SelectedEdgeIdAtom);
+    const [searchOpen, setSearchOpen] = useAtom(rf_SearchOpenAtom);
+    const [edgeLabelEditor, setEdgeLabelEditor] = useAtom(rf_EdgeLabelEditorAtom);
+    const setNodeEditorDraft = useSetAtom(rf_NodeEditorDraftAtom);
+    const [exporting, setExporting] = useAtom(rf_ExportingAtom);
+    const [isDragging, setIsDragging] = useAtom(rf_DraggingAtom);
+    const [panMode] = useAtom(rf_PanModeAtom);
+    const setCanvasMethods = useSetAtom(rf_CanvasMethodsAtom);
 
     const plainNodes = nodes as Node[];
     const plainEdges = edges as Edge[];
@@ -108,7 +108,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
             }
             await exportReactFlowImage({
                 wrapper: reactFlowWrapper.current,
-                nodes: rflowDiagram.nodes as Node[],
+                nodes: rf_Diagram.nodes as Node[],
                 reactFlowInstance,
                 setExporting,
                 onError: (err) => toast.error(err instanceof Error ? err.message : String(err)),
@@ -123,9 +123,9 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
             if (!subgraphNodeId) {
                 return;
             }
-            const updatedNodes = (rflowDiagram.nodes as Node[]).map((n) => ({ ...n, selected: n.parentNode === subgraphNodeId }));
+            const updatedNodes = (rf_Diagram.nodes as Node[]).map((n) => ({ ...n, selected: n.parentNode === subgraphNodeId }));
             const nodeIds = new Set(updatedNodes.filter((n) => n.parentNode === subgraphNodeId).map((n) => n.id));
-            const updatedEdges = (rflowDiagram.edges as Edge[]).map((e) => ({ ...e, selected: nodeIds.has(e.source) && nodeIds.has(e.target) }));
+            const updatedEdges = (rf_Diagram.edges as Edge[]).map((e) => ({ ...e, selected: nodeIds.has(e.source) && nodeIds.has(e.target) }));
             setRflowNodes(updatedNodes);
             setRflowEdges(updatedEdges);
             setSelectedNodes(updatedNodes.filter((n) => n.selected));
@@ -147,7 +147,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => {
-            const updated = applyNodeChanges(changes, rflowDiagram.nodes as Node[]);
+            const updated = applyNodeChanges(changes, rf_Diagram.nodes as Node[]);
             setRflowNodes(updated);
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedNodes(updated.filter((n) => n.selected));
@@ -155,8 +155,8 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
             if (changes.some((c) => c.type === 'remove' || c.type === 'add')) {
                 if (changes.some((c) => c.type === 'remove')) {
                     const ids = new Set(updated.map((n) => n.id));
-                    const nextEdges = (rflowDiagram.edges as Edge[]).filter((e) => ids.has(e.source) && ids.has(e.target));
-                    if (nextEdges.length !== rflowDiagram.edges.length) {
+                    const nextEdges = (rf_Diagram.edges as Edge[]).filter((e) => ids.has(e.source) && ids.has(e.target));
+                    if (nextEdges.length !== rf_Diagram.edges.length) {
                         setRflowEdges(nextEdges);
                     }
                 }
@@ -167,7 +167,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const onEdgesChange = useCallback(
         (changes: EdgeChange[]) => {
-            const updated = applyEdgeChanges(changes, rflowDiagram.edges as Edge[]);
+            const updated = applyEdgeChanges(changes, rf_Diagram.edges as Edge[]);
             setRflowEdges(updated);
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedEdges(updated.filter((e) => e.selected));
@@ -187,7 +187,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                         ...connection,
                         data: { ...defaultEdgeOptions.data, mermaidType: '-->' },
                     },
-                    rflowDiagram.edges as Edge[],
+                    rf_Diagram.edges as Edge[],
                 ),
             );
             syncMermaidFromGraph();
@@ -197,7 +197,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const onEdgeClick = useCallback(
         (event: MouseEvent, edge: Edge) => {
             setSelectedEdgeId(edge.id);
-            const updated = (rflowDiagram.edges as Edge[]).map((e) => ({ ...e, selected: e.id === edge.id }));
+            const updated = (rf_Diagram.edges as Edge[]).map((e) => ({ ...e, selected: e.id === edge.id }));
             setRflowEdges(updated);
             setSelectedEdges(updated.filter((e) => e.selected));
             sourceLink.onEdgeClick(event, edge);
@@ -207,14 +207,14 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const handleFocusNode = useCallback(
         (nodeId: string) => {
             reactFlowInstance.fitView({ nodes: [{ id: nodeId }], duration: 600, padding: 0.3 });
-            const highlighted = (rflowDiagram.nodes as Node[]).map((n) =>
+            const highlighted = (rf_Diagram.nodes as Node[]).map((n) =>
                 n.id === nodeId ? { ...n, style: { ...n.style, outline: '3px solid #ff6b6b' } } : n
             );
             setRflowNodes(highlighted);
             window.setTimeout(
                 () => {
                     setRflowNodes(
-                        (rflowDiagram.nodes as Node[]).map((n) =>
+                        (rf_Diagram.nodes as Node[]).map((n) =>
                             n.id === nodeId ? { ...n, style: { ...n.style, outline: undefined } } : n
                         ),
                     );
@@ -286,14 +286,14 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const onDuplicateNodes = useCallback(
         () => {
-            commitNodes(duplicateNodes(rflowDiagram.nodes as Node[], selectedNodes));
+            commitNodes(duplicateNodes(rf_Diagram.nodes as Node[], selectedNodes));
             syncMermaidFromGraph();
         },
         [commitNodes, selectedNodes]);
 
     const onDeleteSelected = useCallback(
         () => {
-            const { newNodes, newEdges } = deleteSelected(rflowDiagram.nodes as Node[], rflowDiagram.edges as Edge[], selectedNodes, selectedEdges);
+            const { newNodes, newEdges } = deleteSelected(rf_Diagram.nodes as Node[], rf_Diagram.edges as Edge[], selectedNodes, selectedEdges);
             setRflowNodes(newNodes);
             setRflowEdges(newEdges);
             setSelectedNodes([]);
@@ -304,7 +304,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const onLockNodes = useCallback(
         () => {
-            const next = lockNodes(rflowDiagram.nodes as Node[], selectedNodes);
+            const next = lockNodes(rf_Diagram.nodes as Node[], selectedNodes);
             setRflowNodes(next);
             setSelectedNodes(
                 selectedNodes
@@ -316,7 +316,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const onUnlockNodes = useCallback(
         () => {
-            const next = unlockNodes(rflowDiagram.nodes as Node[], selectedNodes);
+            const next = unlockNodes(rf_Diagram.nodes as Node[], selectedNodes);
             setRflowNodes(next);
             setSelectedNodes(
                 selectedNodes
@@ -328,7 +328,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const saveEdgeLabel = useCallback(
         (edgeId: string, text: string) => {
-            setRflowEdges((rflowDiagram.edges as Edge[]).map((e) => (e.id === edgeId ? { ...e, label: text } : e)));
+            setRflowEdges((rf_Diagram.edges as Edge[]).map((e) => (e.id === edgeId ? { ...e, label: text } : e)));
             setEdgeLabelEditor(null);
             syncMermaidFromGraph();
         },
@@ -408,7 +408,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                                     return;
                                 }
                                 setRflowEdges(
-                                    (rflowDiagram.edges as Edge[]).map(
+                                    (rf_Diagram.edges as Edge[]).map(
                                         (edge) => (
                                             edge.id === oldEdge.id
                                                 ? {
@@ -437,7 +437,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                                 }
                                 const bounds = reactFlowWrapper.current!.getBoundingClientRect();
                                 const position = reactFlowInstance.project({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
-                                const current = rflowDiagram.nodes as Node[];
+                                const current = rf_Diagram.nodes as Node[];
                                 let newNode: Node | undefined;
                                 if (type === 'node') {
                                     newNode = {

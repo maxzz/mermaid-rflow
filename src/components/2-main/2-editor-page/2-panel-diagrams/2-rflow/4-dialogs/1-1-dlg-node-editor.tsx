@@ -7,15 +7,15 @@ import { Textarea } from '@/ui/shadcn/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 
 import { type Node } from 'reactflow';
-import { rflowDiagram } from '../8-store/2-flow-diagram';
+import { rf_Diagram } from '../8-store/2-flow-diagram';
 import { syncMermaidFromGraph } from '../8-store/3-sync-with-source';
-import { rflowIconSearchAtom, defaultIconSearchState, rflowNodeEditorDraftAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_IconSearchAtom, defaultIconSearchState, rf_NodeEditorDraftAtom } from '../8-store/a-rflow-ui-atoms';
 import { IconSearch } from './2-2-1-dlg-search';
 import { COLOR_PRESETS } from '../2-converter/constants';
 
 export function NodeEditor() {
-    const [draft, setDraft] = useAtom(rflowNodeEditorDraftAtom);
-    const setIconSearch = useSetAtom(rflowIconSearchAtom);
+    const [draft, setDraft] = useAtom(rf_NodeEditorDraftAtom);
+    const setIconSearch = useSetAtom(rf_IconSearchAtom);
 
     if (!draft) {
         return null;
@@ -31,7 +31,7 @@ export function NodeEditor() {
             return;
         }
 
-        rflowDiagram.nodes = (rflowDiagram.nodes as Node[]).map(
+        rf_Diagram.nodes = (rf_Diagram.nodes as Node[]).map(
             (node) => (
                 node.id === draft.nodeId
                     ? {

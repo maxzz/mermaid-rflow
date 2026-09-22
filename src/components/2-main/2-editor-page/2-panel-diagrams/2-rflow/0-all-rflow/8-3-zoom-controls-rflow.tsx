@@ -3,12 +3,12 @@ import { useReactFlow, useStore } from 'reactflow';
 import { HandIcon } from 'lucide-react';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@/store/2-mermaid-settings';
 import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from '../../4-common/8-zoom-bar';
-import { rflowPanModeAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_PanModeAtom } from '../8-store/a-rflow-ui-atoms';
 
 export function ZoomControls_Rflow() {
     const zoom = useStore((s) => s.transform[2]);
     const { zoomTo, fitView } = useReactFlow();
-    const [panMode, setPanMode] = useAtom(rflowPanModeAtom);
+    const [panMode, setPanMode] = useAtom(rf_PanModeAtom);
 
     return (
         <ZoomBar

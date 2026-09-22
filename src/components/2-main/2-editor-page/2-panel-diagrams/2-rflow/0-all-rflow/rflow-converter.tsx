@@ -3,7 +3,7 @@ import { useSnapshot } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { useDebouncedValue } from '@/utils/util-hooks/use-debounced-value';
 import { convertMermaidToReactFlow } from '../2-converter';
-import { rflowDiagram } from '../8-store/2-flow-diagram';
+import { rf_Diagram } from '../8-store/2-flow-diagram';
 
 const CONVERT_DEBOUNCE_MS = 300;
 
@@ -18,45 +18,45 @@ export function RflowConverter() {
 
             async function run() {
                 const text = debounced;
-                if (text === rflowDiagram.lastAppliedSource) {
+                if (text === rf_Diagram.lastAppliedSource) {
                     return;
                 }
 
                 if (!text.trim()) {
-                    rflowDiagram.nodes = [];
-                    rflowDiagram.edges = [];
-                    rflowDiagram.error = null;
-                    rflowDiagram.ms = 0;
-                    rflowDiagram.lastAppliedSource = text;
-                    rflowDiagram.converting = false;
+                    rf_Diagram.nodes = [];
+                    rf_Diagram.edges = [];
+                    rf_Diagram.error = null;
+                    rf_Diagram.ms = 0;
+                    rf_Diagram.lastAppliedSource = text;
+                    rf_Diagram.converting = false;
                     return;
                 }
 
-                rflowDiagram.converting = true;
-                rflowDiagram.error = null;
+                rf_Diagram.converting = true;
+                rf_Diagram.error = null;
                 const t0 = performance.now();
                 try {
                     const data = await convertMermaidToReactFlow(text);
                     if (cancelled || text !== mermaidSettings.source) {
                         return;
                     }
-                    rflowDiagram.nodes = data.nodes;
-                    rflowDiagram.edges = data.edges;
-                    rflowDiagram.ms = performance.now() - t0;
-                    rflowDiagram.lastAppliedSource = text;
-                    rflowDiagram.error = data.nodes.length
+                    rf_Diagram.nodes = data.nodes;
+                    rf_Diagram.edges = data.edges;
+                    rf_Diagram.ms = performance.now() - t0;
+                    rf_Diagram.lastAppliedSource = text;
+                    rf_Diagram.error = data.nodes.length
                         ? null
                         : 'No flowchart nodes found. The React Flow converter supports graph/flowchart diagrams.';
                 } catch (err) {
                     if (cancelled || text !== mermaidSettings.source) {
                         return;
                     }
-                    rflowDiagram.error = err instanceof Error ? err.message : String(err);
-                    rflowDiagram.ms = performance.now() - t0;
-                    rflowDiagram.lastAppliedSource = text;
+                    rf_Diagram.error = err instanceof Error ? err.message : String(err);
+                    rf_Diagram.ms = performance.now() - t0;
+                    rf_Diagram.lastAppliedSource = text;
                 } finally {
                     if (!cancelled) {
-                        rflowDiagram.converting = false;
+                        rf_Diagram.converting = false;
                     }
                 }
             }

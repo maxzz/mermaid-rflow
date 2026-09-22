@@ -21,16 +21,16 @@ export type NodeEditorDraft = {
     imageValid: boolean | null;
 };
 
-export const rflowSelectedNodesAtom = atom<Node[]>([]);
-export const rflowSelectedEdgesAtom = atom<Edge[]>([]);
-export const rflowSelectedEdgeIdAtom = atom<string | null>(null);
-export const rflowPanModeAtom = atom(false);
-export const rflowSearchOpenAtom = atom(false);
-export const rflowLoadDialogOpenAtom = atom(false);
-export const rflowExportingAtom = atom(false);
-export const rflowDraggingAtom = atom(false);
-export const rflowEdgeLabelEditorAtom = atom<EdgeLabelEditorState | null>(null);
-export const rflowNodeEditorDraftAtom = atom<NodeEditorDraft | null>(null);
+export const rf_SelectedNodesAtom = atom<Node[]>([]);
+export const rf_SelectedEdgesAtom = atom<Edge[]>([]);
+export const rf_SelectedEdgeIdAtom = atom<string | null>(null);
+export const rf_PanModeAtom = atom(false);
+export const rf_SearchOpenAtom = atom(false);
+export const rf_LoadDialogOpenAtom = atom(false);
+export const rf_ExportingAtom = atom(false);
+export const rf_DraggingAtom = atom(false);
+export const rf_EdgeLabelEditorAtom = atom<EdgeLabelEditorState | null>(null);
+export const rf_NodeEditorDraftAtom = atom<NodeEditorDraft | null>(null);
 
 //---------------------------------------------------------------------------
 // Canvas methods
@@ -42,7 +42,7 @@ export type RflowCanvasMethods = {
     fitView?: () => void;
 };
 
-export const rflowCanvasMethodsAtom = atom<RflowCanvasMethods>({});
+export const rf_CanvasMethodsAtom = atom<RflowCanvasMethods>({});
 
 //---------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ export function defaultIconSearchState(): IconSearchState {
     });
 }
 
-export const rflowIconSearchAtom = atom<IconSearchState>(defaultIconSearchState());
+export const rf_IconSearchAtom = atom<IconSearchState>(defaultIconSearchState());
 
 //---------------------------------------------------------------------------
 // Load dialog
@@ -106,5 +106,5 @@ export function defaultLoadDialogUi(): LoadDialogUi {
     });
 }
 
-export const rflowLoadUiAtom = atom<LoadDialogUi>(defaultLoadDialogUi());
-export const rflowLoadPreviewAtom = atom('');
+export const rf_LoadUiAtom = atom<LoadDialogUi>(defaultLoadDialogUi());
+export const rf_LoadPreviewAtom = atom('');

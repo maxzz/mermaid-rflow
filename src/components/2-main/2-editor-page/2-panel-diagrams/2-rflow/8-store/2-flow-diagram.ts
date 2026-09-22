@@ -15,7 +15,7 @@ export type RflowDiagramState = {
     lastAppliedSource: string;
 };
 
-export const rflowDiagram = proxy<RflowDiagramState>({
+export const rf_Diagram = proxy<RflowDiagramState>({
     nodes: [],
     edges: [],
     converting: false,
@@ -28,23 +28,23 @@ export const rflowDiagram = proxy<RflowDiagramState>({
 // Flow diagram methods
 
 export function setRflowData(data: ReactFlowData) {
-    rflowDiagram.nodes = data.nodes;
-    rflowDiagram.edges = data.edges;
+    rf_Diagram.nodes = data.nodes;
+    rf_Diagram.edges = data.edges;
 }
 
 export function setRflowNodes(nodes: Node[]) {
-    rflowDiagram.nodes = nodes;
+    rf_Diagram.nodes = nodes;
 }
 
 export function setRflowEdges(edges: Edge[]) {
-    rflowDiagram.edges = edges;
+    rf_Diagram.edges = edges;
 }
 
 export function restoreRflow(source: string, data: ReactFlowData) {
-    rflowDiagram.lastAppliedSource = source;
-    rflowDiagram.nodes = cloneGraphData(data.nodes);
-    rflowDiagram.edges = cloneGraphData(data.edges);
-    rflowDiagram.error = null;
-    rflowDiagram.ms = 0;
-    rflowDiagram.converting = false;
+    rf_Diagram.lastAppliedSource = source;
+    rf_Diagram.nodes = cloneGraphData(data.nodes);
+    rf_Diagram.edges = cloneGraphData(data.edges);
+    rf_Diagram.error = null;
+    rf_Diagram.ms = 0;
+    rf_Diagram.converting = false;
 }

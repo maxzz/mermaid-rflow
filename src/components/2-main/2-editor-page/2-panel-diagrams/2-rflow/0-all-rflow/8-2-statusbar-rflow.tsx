@@ -1,9 +1,9 @@
 import { useSnapshot } from "valtio";
 import { StatusBarFrame } from "../../4-common/5-status-bar-frame";
-import { rflowDiagram } from "../8-store/2-flow-diagram";
+import { rf_Diagram } from "../8-store/2-flow-diagram";
 
 export function StatusBar_Rflow() {
-    const { error, nodes, ms, converting } = useSnapshot(rflowDiagram);
+    const { error, nodes, ms, converting } = useSnapshot(rf_Diagram);
 
     return (
         <StatusBarFrame

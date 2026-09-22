@@ -39,14 +39,14 @@ function loadSaved(): RflowSavedState {
     return { diagrams: [] };
 }
 
-export const rflowSaved = proxy<RflowSavedState>(loadSaved());
+export const rf_Saved = proxy<RflowSavedState>(loadSaved());
 
 subscribe(
-    rflowSaved,
+    rf_Saved,
     debounceDevTools(
         () => {
             try {
-                localStorage.setItem(STORAGE_ID, JSON.stringify(rflowSaved));
+                localStorage.setItem(STORAGE_ID, JSON.stringify(rf_Saved));
             } catch (e) {
                 console.error('Failed to save React Flow diagrams', e);
             }
@@ -59,11 +59,11 @@ subscribe(
 // Saved diagrams
 
 export function addSavedDiagram(item: SavedDiagram) {
-    rflowSaved.diagrams = [item, ...rflowSaved.diagrams];
+    rf_Saved.diagrams = [item, ...rf_Saved.diagrams];
 }
 
 export function removeSavedDiagram(id: string) {
-    rflowSaved.diagrams = rflowSaved.diagrams.filter((d) => d.id !== id);
+    rf_Saved.diagrams = rf_Saved.diagrams.filter((d) => d.id !== id);
 }
 
 export function cloneGraphData<T>(value: T): T {

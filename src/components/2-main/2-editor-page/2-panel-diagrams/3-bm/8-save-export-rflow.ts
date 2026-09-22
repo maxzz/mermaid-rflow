@@ -3,11 +3,11 @@ import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { uuid } from "@/utils/uuid";
 import { copyText } from "@/components/4-dialogs/2-export/8-export-utils";
 import { addSavedDiagram, cloneGraphData } from "../2-rflow/8-store/1-local-storage-saved-diagrams";
-import { rflowDiagram } from "../2-rflow/8-store/2-flow-diagram";
+import { rf_Diagram } from "../2-rflow/8-store/2-flow-diagram";
 
 export function saveCurrentFlow() {
     const src = mermaidSettings.source.trim();
-    if (!src || rflowDiagram.nodes.length === 0) {
+    if (!src || rf_Diagram.nodes.length === 0) {
         toast.message('Cannot save: provide Mermaid flowchart source and at least one node.');
         return;
     }
@@ -16,8 +16,8 @@ export function saveCurrentFlow() {
         id: uuid(),
         name: new Date(now).toLocaleString(),
         mermaid: mermaidSettings.source,
-        nodes: cloneGraphData(rflowDiagram.nodes),
-        edges: cloneGraphData(rflowDiagram.edges),
+        nodes: cloneGraphData(rf_Diagram.nodes),
+        edges: cloneGraphData(rf_Diagram.edges),
         createdAt: now,
         updatedAt: now,
     });
@@ -52,7 +52,7 @@ export function exportFlowJson() {
 
 function buildFlowExportPayload() {
     const src = mermaidSettings.source.trim();
-    if (!src || rflowDiagram.nodes.length === 0) {
+    if (!src || rf_Diagram.nodes.length === 0) {
         toast.message("Cannot export: provide Mermaid flowchart source and at least one node.");
         return null;
     }
@@ -61,8 +61,8 @@ function buildFlowExportPayload() {
         id: `export-${now}`,
         name: `diagram-${new Date(now).toISOString().slice(0, 19).replace(/:/g, "-")}`,
         mermaid: mermaidSettings.source,
-        nodes: cloneGraphData(rflowDiagram.nodes),
-        edges: cloneGraphData(rflowDiagram.edges),
+        nodes: cloneGraphData(rf_Diagram.nodes),
+        edges: cloneGraphData(rf_Diagram.edges),
         createdAt: now,
         updatedAt: now,
     };

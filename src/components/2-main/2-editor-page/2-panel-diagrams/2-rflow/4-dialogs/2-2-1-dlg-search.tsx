@@ -6,12 +6,12 @@ import { Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { searchIconify } from './2-2-2-util-iconify';
-import { defaultIconSearchState, rflowIconSearchAtom } from '../8-store/a-rflow-ui-atoms';
+import { defaultIconSearchState, rf_IconSearchAtom } from '../8-store/a-rflow-ui-atoms';
 
 const ICONS_PER_PAGE = 48;
 
 export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; }) {
-    const [state, setState] = useAtom(rflowIconSearchAtom);
+    const [state, setState] = useAtom(rf_IconSearchAtom);
 
     async function handleSearch() {
         if (!state.query.trim()) {
