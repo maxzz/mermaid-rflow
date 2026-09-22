@@ -1,9 +1,8 @@
-import { atom, getDefaultStore } from 'jotai';
+import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
 import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/constants';
 import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
 import { rf_Diagram, setRflowNodes } from './0-flow-diagram';
-import { searchIconify } from '../4-dialogs/2-2-2-util-iconify';
 
 export type EdgeLabelEditorState = {
     edgeId: string;
@@ -80,104 +79,6 @@ export function draftFromNode(node: Node): NodeEditorDraft {
         imageValid: null,
     };
 }
-
-//---------------------------------------------------------------------------
-// Icon search
-
-export type IconSearchQuery = {
-    query: string;
-    results: { provider: string; prefix: string; name: string; }[];
-    loading: boolean;
-    loadingMore: boolean;
-    error: string;
-    isExpanded: boolean;
-    hasMore: boolean;
-    offset: number;
-};
-
-function defaultIconSearchQuery(): IconSearchQuery {
-    return ({
-        query: '',
-        results: [],
-        loading: false,
-        loadingMore: false,
-        error: '',
-        isExpanded: false,
-        hasMore: true,
-        offset: 0,
-    });
-}
-
-export const rf_IconSearchQueryAtom = atom<IconSearchQuery>(defaultIconSearchQuery());
-
-export function resetIconSearchQuery() {
-    const defaultStore = getDefaultStore();
-    defaultStore.set(rf_IconSearchQueryAtom, defaultIconSearchQuery());
-}
-
-export const rf_SearchIconsAtom = atom(null,
-    async (get, set, iconsPerPage: number) => {
-        const searchQuery = get(rf_IconSearchQueryAtom);
-        if (!searchQuery.query.trim()) {
-            return;
-        }
-
-        set(rf_IconSearchQueryAtom, { ...searchQuery, loading: true, error: '', results: [], offset: 0, hasMore: true });
-        try {
-            const icons = await searchIconify(searchQuery.query, iconsPerPage, 0);
-            const latest = get(rf_IconSearchQueryAtom);
-            if (latest.query !== searchQuery.query) {
-                return;
-            }
-            set(rf_IconSearchQueryAtom, {
-                ...latest,
-                loading: false,
-                results: icons,
-                isExpanded: true,
-                hasMore: icons.length === iconsPerPage,
-                offset: iconsPerPage,
-                error: icons.length === 0 ? 'No icons found. Try a different search term.' : '',
-            });
-        } catch {
-            const latest = get(rf_IconSearchQueryAtom);
-            if (latest.query !== searchQuery.query) {
-                return;
-            }
-            set(rf_IconSearchQueryAtom, { ...latest, loading: false, error: 'Failed to search icons. Please try again.' });
-        }
-    }
-);
-
-export const rf_LoadMoreIconSearchAtom = atom(null,
-    async (get, set, iconsPerPage: number) => {
-        const searchQuery = get(rf_IconSearchQueryAtom);
-        if (!searchQuery.query || searchQuery.loadingMore || !searchQuery.hasMore) {
-            return;
-        }
-
-        set(rf_IconSearchQueryAtom, { ...searchQuery, loadingMore: true });
-        try {
-            const icons = await searchIconify(searchQuery.query, iconsPerPage, searchQuery.offset);
-            const latest = get(rf_IconSearchQueryAtom);
-            if (latest.query !== searchQuery.query) {
-                return;
-            }
-            set(rf_IconSearchQueryAtom, {
-                ...latest,
-                loadingMore: false,
-                results: icons.length > 0 ? [...latest.results, ...icons] : latest.results,
-                offset: icons.length > 0 ? latest.offset + iconsPerPage : latest.offset,
-                hasMore: icons.length === iconsPerPage,
-            });
-        } catch {
-            const latest = get(rf_IconSearchQueryAtom);
-            if (latest.query !== searchQuery.query) {
-                return;
-            }
-            set(rf_IconSearchQueryAtom, { ...latest, loadingMore: false });
-        }
-    }
-);
 
 //---------------------------------------------------------------------------
 // Load dialog

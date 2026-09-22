@@ -5,11 +5,11 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
-import { resetIconSearchQuery, rf_IconSearchQueryAtom, rf_LoadMoreIconSearchAtom, rf_SearchIconsAtom } from '../8-store/a-rflow-ui-atoms';
+import { resetIconSearchQuery, rf_IconSearchQueryAtom, doLoadMoreIconSearchAtom, doSearchIconsAtom } from '../8-store/a-rflow-icon-search-atoms';
 
 export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; }) {
     const [searchQuery, setSearchQuery] = useAtom(rf_IconSearchQueryAtom);
-    const searchIcons = useSetAtom(rf_SearchIconsAtom);
+    const doSearchIcons = useSetAtom(doSearchIconsAtom);
 
     return (
         <div className="flex flex-col gap-2">
@@ -20,12 +20,12 @@ export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; 
                         placeholder="Search icons..."
                         value={searchQuery.query}
                         onChange={(e) => setSearchQuery({ ...searchQuery, query: e.target.value })}
-                        onKeyDown={(e) => { if (e.key === 'Enter') void searchIcons(ICONS_PER_PAGE); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') void doSearchIcons(ICONS_PER_PAGE); }}
                         className="pl-7"
                     />
                 </div>
 
-                <Button type="button" size="xs" onClick={() => void searchIcons(ICONS_PER_PAGE)} disabled={searchQuery.loading || !searchQuery.query.trim()}>
+                <Button type="button" size="xs" onClick={() => void doSearchIcons(ICONS_PER_PAGE)} disabled={searchQuery.loading || !searchQuery.query.trim()}>
                     {searchQuery.loading ? <Loader2Icon className="animate-spin" /> : <SearchIcon />}
                 </Button>
 
@@ -49,7 +49,7 @@ export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; 
 
 function IconSearchResults({ onSelect }: { onSelect: (iconUrl: string) => void; }) {
     const searchQuery = useAtomValue(rf_IconSearchQueryAtom);
-    const loadMore = useSetAtom(rf_LoadMoreIconSearchAtom);
+    const doLoadMoreIcon = useSetAtom(doLoadMoreIconSearchAtom);
 
     if (searchQuery.results.length === 0) {
         return null;
@@ -70,12 +70,12 @@ function IconSearchResults({ onSelect }: { onSelect: (iconUrl: string) => void; 
                         const isLast = idx === searchQuery.results.length - 1;
                         return (
                             <button
-                                key={`${iconId}-${idx}`}
-                                type="button"
-                                onClick={() => handleSelectIcon(icon.prefix, icon.name)}
-                                onMouseEnter={() => { if (isLast) void loadMore(ICONS_PER_PAGE); }}
                                 className="p-1 aspect-square hover:border-primary border rounded flex items-center justify-center"
+                                onClick={() => handleSelectIcon(icon.prefix, icon.name)}
+                                onMouseEnter={() => { if (isLast) void doLoadMoreIcon(ICONS_PER_PAGE); }}
                                 title={iconId}
+                                type="button"
+                                key={`${iconId}-${idx}`}
                             >
                                 <img src={iconUrl} alt={icon.name} className="size-5 object-contain" loading="lazy" />
                             </button>
@@ -85,7 +85,9 @@ function IconSearchResults({ onSelect }: { onSelect: (iconUrl: string) => void; 
             </div>
 
             {searchQuery.loadingMore && (
-                <div className="pt-2 text-[.65rem] text-muted-foreground text-center">Loading more...</div>
+                <div className="pt-2 text-[.65rem] text-muted-foreground text-center">
+                    Loading more...
+                </div>
             )}
         </div>
     );

@@ -18,6 +18,7 @@ export function applySourceFromCanvas(next: string) {
 }
 
 export function syncMermaidFromGraph() {
+    
     const result = reactFlowToMermaid(
         rf_Diagram.nodes as Node[],
         rf_Diagram.edges as Edge[],
