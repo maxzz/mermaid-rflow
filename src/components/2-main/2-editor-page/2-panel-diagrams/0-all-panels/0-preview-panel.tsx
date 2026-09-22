@@ -21,7 +21,7 @@ export function PreviewPanel() {
         <div className="h-full bg-muted/20 flex flex-col">
             <Diagrams_Toolbar />
 
-            <div className="relative flex-1 min-h-0">
+            <div className="flex-1 relative min-h-0">
                 <div className="absolute inset-0 overflow-hidden">
                     <MmdConverter />
                     <Preview_Mmd />
@@ -39,7 +39,7 @@ function Diagrams_Toolbar() {
     const { outputFormat } = useSnapshot(mermaidSettings);
 
     return (
-        <div className="px-3 h-9 bg-muted/30 border-b border-border flex items-center justify-between gap-2 overflow-x-auto">
+        <div className="px-3 h-9 bg-muted/30 border-b border-border overflow-x-auto flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
                 <Tabs value={outputFormat} onValueChange={(v) => { mermaidSettings.outputFormat = v as OutputFormat; }}>
                     <TabsList className="p-0.5 h-6!">

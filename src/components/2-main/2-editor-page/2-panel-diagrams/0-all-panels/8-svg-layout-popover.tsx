@@ -144,7 +144,7 @@ function Row({ label, hint, children }: { label: string; hint: string; children:
             <HintLabel htmlFor={id} hint={hint}>
                 {label}
             </HintLabel>
-            <div id={id} className="col-span-2 justify-self-end">
+            <div id={id} className="justify-self-end col-span-2">
                 {children}
             </div>
         </div>
@@ -203,7 +203,7 @@ function SliderRow({ label, hint, value, min, max, step, onChange }: SliderRowPr
         <div className={optionRowClasses}>
             <HintLabel hint={hint}>{label}</HintLabel>
             <Slider className="min-w-0" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
-            <span className="min-w-9 text-[.7rem] font-mono tabular-nums text-right text-muted-foreground">{value}</span>
+            <span className="min-w-9 font-mono tabular-nums text-[.7rem] text-right text-muted-foreground">{value}</span>
         </div>
     );
 }
@@ -212,12 +212,12 @@ function HintLabel({ htmlFor, hint, children }: { htmlFor?: string; hint: string
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <Label htmlFor={htmlFor} className="whitespace-nowrap font-normal cursor-help">
+                <Label htmlFor={htmlFor} className="font-normal whitespace-nowrap cursor-help">
                     {children}
                 </Label>
             </TooltipTrigger>
 
-            <TooltipContent side="left" sideOffset={8} className="max-w-56 whitespace-normal text-left z-100">
+            <TooltipContent side="left" sideOffset={8} className="max-w-56 text-left whitespace-normal z-100">
                 {hint}
             </TooltipContent>
         </Tooltip>

@@ -130,7 +130,7 @@ function ColorRow({ label, hint, value, onCommit }: { label: string; hint: strin
     return (
         <div className={optionRowClasses}>
             <HintLabel hint={hint}>{label}</HintLabel>
-            <div className="col-span-2 justify-self-end flex items-center gap-1.5">
+            <div className="justify-self-end col-span-2 flex items-center gap-1.5">
                 <input
                     type="color"
                     aria-label={label}
@@ -162,7 +162,7 @@ function WidthRow({ label, hint, value }: { label: string; hint: string; value: 
                     }
                 }}
             />
-            <span className="min-w-9 text-[.7rem] font-mono tabular-nums text-right text-muted-foreground">
+            <span className="min-w-9 font-mono tabular-nums text-[.7rem] text-right text-muted-foreground">
                 {value ?? 'unset'}
             </span>
         </div>
@@ -175,7 +175,7 @@ function DashRow({ label, hint, value }: { label: string; hint: string; value: s
         <>
             <div className={optionRowClasses}>
                 <HintLabel hint={hint}>{label}</HintLabel>
-                <div className="col-span-2 justify-self-end grid grid-cols-3 gap-1">
+                <div className="justify-self-end col-span-2 grid grid-cols-3 gap-1">
                     {DASHES.map((item) => (
                         <Button
                             key={item.value}
@@ -209,7 +209,7 @@ function InterpolateRow({ value }: { value: string | undefined; }) {
             <HintLabel hint="d3 curve used to draw the link. Combined with CSS on the same linkStyle line.">
                 Interpolate
             </HintLabel>
-            <div className="col-span-2 justify-self-end">
+            <div className="justify-self-end col-span-2">
                 <Select
                     value={current}
                     onValueChange={(next) => patchCurrent((line) => setStyleInterpolate(line, next === NONE ? undefined : next))}
@@ -233,7 +233,7 @@ function TextRow({ label, hint, value, onCommit }: { label: string; hint: string
     return (
         <div className={optionRowClasses}>
             <HintLabel hint={hint}>{label}</HintLabel>
-            <div className="col-span-2 justify-self-end">
+            <div className="justify-self-end col-span-2">
                 <DeclText value={value} placeholder="unset" className="w-36" onCommit={onCommit} />
             </div>
         </div>
@@ -283,11 +283,11 @@ function HintLabel({ hint, children }: { hint: string; children: ReactNode; }) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <Label className="whitespace-nowrap font-normal cursor-help">
+                <Label className="font-normal whitespace-nowrap cursor-help">
                     {children}
                 </Label>
             </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={8} className="max-w-56 whitespace-normal text-left z-100">
+            <TooltipContent side="left" sideOffset={8} className="max-w-56 text-left whitespace-normal z-100">
                 {hint}
             </TooltipContent>
         </Tooltip>

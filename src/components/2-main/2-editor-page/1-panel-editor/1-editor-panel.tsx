@@ -12,7 +12,7 @@ export function EditorPanel() {
         <div className="h-full flex flex-col">
             <EditorToolbar />
 
-            <div className="relative flex-1 min-h-0">
+            <div className="flex-1 relative min-h-0">
                 <div className="absolute inset-0 overflow-hidden">
                     <ScrollArea className="h-full" fullHeight fixedWidth viewportClassName="overflow-hidden!">
                         <ErrorBoundary fallback={<PanelMessage>Failed to load the editor.</PanelMessage>}>
