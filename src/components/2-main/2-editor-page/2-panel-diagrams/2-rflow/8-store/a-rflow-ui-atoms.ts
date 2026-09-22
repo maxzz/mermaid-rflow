@@ -3,6 +3,7 @@ import { type Edge, type Node } from 'reactflow';
 import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/constants';
 import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
 import { rf_Diagram, setRflowNodes } from './0-flow-diagram';
+import { searchIconify } from '../4-dialogs/2-2-2-util-iconify';
 
 export type EdgeLabelEditorState = {
     edgeId: string;
@@ -110,9 +111,40 @@ function defaultIconSearchQuery(): IconSearchQuery {
 export const rf_IconSearchQueryAtom = atom<IconSearchQuery>(defaultIconSearchQuery());
 
 export function resetIconSearchQuery() {
-    const defaultStore = getDefaultStore()
+    const defaultStore = getDefaultStore();
     defaultStore.set(rf_IconSearchQueryAtom, defaultIconSearchQuery());
 }
+
+export const rf_LoadMoreIconSearchAtom = atom(null,
+    async (get, set, iconsPerPage: number) => {
+        const searchQuery = get(rf_IconSearchQueryAtom);
+        if (!searchQuery.query || searchQuery.loadingMore || !searchQuery.hasMore) {
+            return;
+        }
+
+        set(rf_IconSearchQueryAtom, { ...searchQuery, loadingMore: true });
+        try {
+            const icons = await searchIconify(searchQuery.query, iconsPerPage, searchQuery.offset);
+            const latest = get(rf_IconSearchQueryAtom);
+            if (latest.query !== searchQuery.query) {
+                return;
+            }
+            set(rf_IconSearchQueryAtom, {
+                ...latest,
+                loadingMore: false,
+                results: icons.length > 0 ? [...latest.results, ...icons] : latest.results,
+                offset: icons.length > 0 ? latest.offset + iconsPerPage : latest.offset,
+                hasMore: icons.length === iconsPerPage,
+            });
+        } catch {
+            const latest = get(rf_IconSearchQueryAtom);
+            if (latest.query !== searchQuery.query) {
+                return;
+            }
+            set(rf_IconSearchQueryAtom, { ...latest, loadingMore: false });
+        }
+    }
+);
 
 //---------------------------------------------------------------------------
 // Load dialog

@@ -1,14 +1,12 @@
 /**
  * Adapted from mermaid-reactflow-editor (MIT).
  */
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { searchIconify } from './2-2-2-util-iconify';
-import { resetIconSearchQuery, rf_IconSearchQueryAtom } from '../8-store/a-rflow-ui-atoms';
-
-const ICONS_PER_PAGE = 48;
+import { resetIconSearchQuery, rf_IconSearchQueryAtom, rf_LoadMoreIconSearchAtom } from '../8-store/a-rflow-ui-atoms';
 
 export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; }) {
     const [searchQuery, setSearchQuery] = useAtom(rf_IconSearchQueryAtom);
@@ -71,29 +69,11 @@ export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; 
 }
 
 function IconSearchResults({ onSelect }: { onSelect: (iconUrl: string) => void; }) {
-    const [searchQuery, setSearchQuery] = useAtom(rf_IconSearchQueryAtom);
+    const searchQuery = useAtomValue(rf_IconSearchQueryAtom);
+    const loadMore = useSetAtom(rf_LoadMoreIconSearchAtom);
 
     if (searchQuery.results.length === 0) {
         return null;
-    }
-
-    async function loadMore() {
-        if (!searchQuery.query || searchQuery.loadingMore || !searchQuery.hasMore) {
-            return;
-        }
-        setSearchQuery({ ...searchQuery, loadingMore: true });
-        try {
-            const icons = await searchIconify(searchQuery.query, ICONS_PER_PAGE, searchQuery.offset);
-            setSearchQuery({
-                ...searchQuery,
-                loadingMore: false,
-                results: icons.length > 0 ? [...searchQuery.results, ...icons] : searchQuery.results,
-                offset: icons.length > 0 ? searchQuery.offset + ICONS_PER_PAGE : searchQuery.offset,
-                hasMore: icons.length === ICONS_PER_PAGE,
-            });
-        } catch {
-            setSearchQuery({ ...searchQuery, loadingMore: false });
-        }
     }
 
     function handleSelectIcon(prefix: string, name: string) {
@@ -114,7 +94,7 @@ function IconSearchResults({ onSelect }: { onSelect: (iconUrl: string) => void; 
                                 key={`${iconId}-${idx}`}
                                 type="button"
                                 onClick={() => handleSelectIcon(icon.prefix, icon.name)}
-                                onMouseEnter={() => { if (isLast) void loadMore(); }}
+                                onMouseEnter={() => { if (isLast) void loadMore(ICONS_PER_PAGE); }}
                                 className="p-1 aspect-square hover:border-primary border rounded flex items-center justify-center"
                                 title={iconId}
                             >
@@ -131,3 +111,5 @@ function IconSearchResults({ onSelect }: { onSelect: (iconUrl: string) => void; 
         </div>
     );
 }
+
+const ICONS_PER_PAGE = 48;
