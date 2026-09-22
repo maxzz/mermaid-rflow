@@ -1,26 +1,11 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT).
- */
-import { type Edge, type Node } from 'reactflow';
 import { BoxSelectIcon, CopyIcon, LockIcon, SearchIcon, Trash2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
-import {
-    IconAlignBottom,
-    IconAlignCenterHorizontally,
-    IconAlignCenterVertically,
-    IconAlignLeft,
-    IconAlignRight,
-    IconAlignTop,
-    IconDistributeHorizontally,
-    IconDistributeVertically,
-} from '@/ui/icons/normal/align';
-import { type AlignmentType, type DistributionType } from '../2-converter/constants';
+import { type Edge, type Node } from 'reactflow';
+import { AlignHorizontalGroup, AlignVerticalGroup, DistributeGroup } from './8-1-1-1-arrange-groups';
 
 type EditingToolbarProps = {
     selectedNodes: Node[];
     selectedEdges: Edge[];
-    onAlignNodes: (alignment: AlignmentType) => void;
-    onDistributeNodes: (direction: DistributionType) => void;
     onDuplicateNodes: () => void;
     onDeleteSelected: () => void;
     onLockNodes: () => void;
@@ -32,8 +17,6 @@ type EditingToolbarProps = {
 export function EditingToolbar({
     selectedNodes,
     selectedEdges,
-    onAlignNodes,
-    onDistributeNodes,
     onDuplicateNodes,
     onDeleteSelected,
     onLockNodes,
@@ -49,12 +32,7 @@ export function EditingToolbar({
     return (
         <div className="flex items-center gap-0.5 flex-wrap" role="toolbar" aria-label="Editing tools">
             {subgraphSelected && (
-                <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    title="Select contents"
-                    onClick={() => onSelectSubgraphContents?.(selectedNodes[0].id)}
-                >
+                <Button variant="ghost" size="icon-xs" title="Select contents" onClick={() => onSelectSubgraphContents?.(selectedNodes[0].id)}>
                     <BoxSelectIcon />
                 </Button>
             )}
@@ -71,42 +49,22 @@ export function EditingToolbar({
 
             <div className="mx-1 w-px h-4 bg-border" />
 
-            <Button variant="ghost" size="icon-xs" title="Align left" onClick={() => onAlignNodes('left')}>
-                <IconAlignLeft className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="icon-xs" title="Align center" onClick={() => onAlignNodes('center-horizontal')}>
-                <IconAlignCenterHorizontally className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="icon-xs" title="Align right" onClick={() => onAlignNodes('right')}>
-                <IconAlignRight className="size-3.5" />
-            </Button>
+            <AlignHorizontalGroup />
 
             <div className="mx-1 w-px h-4 bg-border" />
 
-            <Button variant="ghost" size="icon-xs" title="Align top" onClick={() => onAlignNodes('top')}>
-                <IconAlignTop className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="icon-xs" title="Align middle" onClick={() => onAlignNodes('center-vertical')}>
-                <IconAlignCenterVertically className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="icon-xs" title="Align bottom" onClick={() => onAlignNodes('bottom')}>
-                <IconAlignBottom className="size-3.5" />
-            </Button>
+            <AlignVerticalGroup />
 
             <div className="mx-1 w-px h-4 bg-border" />
 
-            <Button variant="ghost" size="icon-xs" title="Distribute horizontally" onClick={() => onDistributeNodes('horizontal')}>
-                <IconDistributeHorizontally className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="icon-xs" title="Distribute vertically" onClick={() => onDistributeNodes('vertical')}>
-                <IconDistributeVertically className="size-3.5" />
-            </Button>
+            <DistributeGroup />
 
             <div className="mx-1 w-px h-4 bg-border" />
 
             <Button variant="ghost" size="icon-xs" title="Duplicate" onClick={onDuplicateNodes} disabled={!hasSelectedNodes}>
                 <CopyIcon />
             </Button>
+
             <Button
                 variant={locked ? 'default' : 'ghost'}
                 size="icon-xs"
@@ -116,6 +74,7 @@ export function EditingToolbar({
             >
                 <LockIcon />
             </Button>
+
             <Button variant="ghost" size="icon-xs" className="text-destructive" title="Delete" onClick={onDeleteSelected} disabled={!hasSelectedElements}>
                 <Trash2Icon />
             </Button>
