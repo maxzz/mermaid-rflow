@@ -126,6 +126,7 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
 
             let session: { startX: number; startY: number; dragging: boolean; } | null = null;
             let suppressClick = false;
+            let suppressTimer = 0;
 
             const localPoint = (event: MouseEvent) => {
                 const bounds = surface.getBoundingClientRect();
@@ -167,10 +168,13 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
                 session = null;
                 clearMarkingRect(rect);
                 if (dragged) {
+                    // The click that follows mouseup would clear the pane selection, or keep only the block under the pointer.
+                    // A microtask runs before that click; a timeout runs after it.
                     suppressClick = true;
-                    queueMicrotask(() => {
+                    window.clearTimeout(suppressTimer);
+                    suppressTimer = window.setTimeout(() => {
                         suppressClick = false;
-                    });
+                    }, 0);
                     onCommitRef.current?.(box);
                     return;
                 }
@@ -182,6 +186,7 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
                     return;
                 }
                 suppressClick = false;
+                window.clearTimeout(suppressTimer);
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -204,6 +209,7 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
 
             return () => {
                 controller.abort();
+                window.clearTimeout(suppressTimer);
                 clearMarkingRect(rect);
             };
         },
