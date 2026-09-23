@@ -30,17 +30,20 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
     useEffect(
         () => {
             function down(event: KeyboardEvent) {
-                if (event.code === 'Space') {
-                    spaceDown.current = true;
+                if (event.code !== 'Space' || event.repeat || isEditableTarget(event.target)) {
+                    return;
                 }
+                spaceDown.current = true;
+                surfaceRef.current?.setAttribute('data-space-pan', '');
             }
             function up(event: KeyboardEvent) {
                 if (event.code === 'Space') {
-                    spaceDown.current = false;
+                    clearSpace();
                 }
             }
             function clearSpace() {
                 spaceDown.current = false;
+                surfaceRef.current?.removeAttribute('data-space-pan');
             }
 
             const abortController = new AbortController();
@@ -50,7 +53,7 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
             
             return () => {
                 abortController.abort();
-                spaceDown.current = false;
+                clearSpace();
             };
         },
         []);
@@ -164,6 +167,15 @@ function flowOrigin(surface: HTMLElement) {
 }
 
 //---------------------------------------------------------------------------
+
+function isEditableTarget(target: EventTarget | null) {
+    return target instanceof HTMLElement && (
+        target.isContentEditable ||
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT'
+    );
+}
 
 function isFlowBackgroundTarget(target: EventTarget | null) {
     if (!(target instanceof Element)) {
