@@ -26,12 +26,24 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
 
     useEffect(
         () => {
-            const pane = surfaceRef.current?.querySelector('.react-flow__pane');
-            if (!(pane instanceof HTMLElement)) {
+            const surface = surfaceRef.current;
+            if (!surface || !enabled) {
                 return;
             }
-            pane.classList.toggle('cursor-default!', enabled);
-            return () => pane.classList.remove('cursor-default!');
+            // React Flow replaces the pane className while panning, which drops this class and leaves its grab cursor.
+            const apply = () => {
+                const pane = surface.querySelector('.react-flow__pane');
+                if (pane instanceof HTMLElement && !pane.classList.contains('cursor-default!')) {
+                    pane.classList.add('cursor-default!');
+                }
+            };
+            apply();
+            const observer = new MutationObserver(apply);
+            observer.observe(surface, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+            return () => {
+                observer.disconnect();
+                surface.querySelector('.react-flow__pane')?.classList.remove('cursor-default!');
+            };
         },
         [enabled, surfaceRef]);
 
