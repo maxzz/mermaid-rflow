@@ -71,6 +71,29 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
         () => {
             const surface = surfaceRef.current;
             if (!enabled || !surface) {
+                return;
+            }
+            // A pan rewrites the pane className and drops the pointer, leaving the library grab cursor.
+            const apply = () => {
+                const pane = surface.querySelector('.react-flow__pane');
+                if (pane instanceof HTMLElement && !pane.classList.contains(POINTER_CURSOR)) {
+                    pane.classList.add(POINTER_CURSOR);
+                }
+            };
+            apply();
+            const observer = new MutationObserver(apply);
+            observer.observe(surface, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+            return () => {
+                observer.disconnect();
+                surface.querySelector('.react-flow__pane')?.classList.remove(POINTER_CURSOR);
+            };
+        },
+        [enabled, surfaceRef]);
+
+    useEffect(
+        () => {
+            const surface = surfaceRef.current;
+            if (!enabled || !surface) {
                 clearMarkingRect(rect);
                 return;
             }
@@ -162,6 +185,8 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
 }
 
 const DRAG_THRESHOLD = 4;
+
+const POINTER_CURSOR = 'cursor-default!';
 
 /** Closed hand on the surface and its contents. Buttons and links keep their own cursor. */
 const SPACE_PAN_CURSOR = ['cursor-grabbing!', '[&_:not(button):not(a)]:cursor-grabbing!'] as const;

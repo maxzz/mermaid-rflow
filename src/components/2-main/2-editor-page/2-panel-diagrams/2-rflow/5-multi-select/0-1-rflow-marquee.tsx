@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { type Edge, type Node, useStoreApi } from 'reactflow';
 import { createMarkingRect } from '../../4-common/1-marking-rect/a-store-marking';
@@ -23,29 +23,6 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
     const onBackgroundClickRef = useRef(onBackgroundClick);
 
     onBackgroundClickRef.current = onBackgroundClick;
-
-    useEffect(
-        () => {
-            const surface = surfaceRef.current;
-            if (!surface || !enabled) {
-                return;
-            }
-            // React Flow replaces the pane className while panning, which drops this class and leaves its grab cursor.
-            const apply = () => {
-                const pane = surface.querySelector('.react-flow__pane');
-                if (pane instanceof HTMLElement && !pane.classList.contains('cursor-default!')) {
-                    pane.classList.add('cursor-default!');
-                }
-            };
-            apply();
-            const observer = new MutationObserver(apply);
-            observer.observe(surface, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
-            return () => {
-                observer.disconnect();
-                surface.querySelector('.react-flow__pane')?.classList.remove('cursor-default!');
-            };
-        },
-        [enabled, surfaceRef]);
 
     const onApply = (box: Rect) => {
         const surface = surfaceRef.current;
