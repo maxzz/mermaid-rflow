@@ -21,13 +21,13 @@ export function ZoomControls_Rflow() {
             onResetZoom={() => zoomTo(1)}
             onFit={() => fitView({ padding: 0.2 })}
         >
-            <ZoomBarToggle
+            {/* <ZoomBarToggle
                 pressed={panMode}
                 title={panMode ? 'Pan tool on — click again to select and move blocks' : 'Pan the canvas. Leave this off to select and move blocks.'}
                 onClick={() => setPanMode((v) => !v)}
             >
                 <HandIcon />
-            </ZoomBarToggle>
+            </ZoomBarToggle> */}
         </ZoomBar>
     );
 }
