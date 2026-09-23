@@ -30,7 +30,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
-import { draftFromNode, rf_CanvasMethodsAtom, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_ExportingAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SearchOpenAtom, rf_SelectedEdgeIdAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
+import { draftFromNode, rf_CanvasMethodsAtom, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_ExportingAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom, rf_SelectedEdgeIdAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
 import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
 
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
@@ -40,9 +40,9 @@ import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
 import { EditingToolbar } from './8-1-1-0-toolbar-rflow';
 import { PaletteToolbar } from './8-1-3-palette-toolbar';
 import { ZoomControls_Rflow } from './8-3-zoom-controls-rflow';
-import { EdgeLabelEditorDialog } from '../4-dialogs/1-2-dlg-edge-label-editor';
-import { NodeEditorDialog } from '../4-dialogs/1-1-dlg-node-editor';
-import { NodeSearchDialog } from '../4-dialogs/2-1-dlg-node-search';
+import { EdgeLabelEditorDialog } from '../4-dialogs/2-dlg-edge-label-editor';
+import { NodeEditorDialog } from '../4-dialogs/1-dlg-node-editor';
+import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
 import { nextRfId } from '../2-converter/mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
@@ -51,13 +51,16 @@ import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
 import { isThemeDark } from '@/utils/theme-utils';
 
 export function Body_Rflow({ active = true }: { active?: boolean; }) {
-    return (
+    return (<>
         <ReactFlowProvider>
             <ReactFlowErrorGuard>
                 <RflowDiagramView active={active} />
             </ReactFlowErrorGuard>
         </ReactFlowProvider>
-    );
+
+        <EdgeLabelEditorDialog />
+        <NodeEditorDialog />
+    </>);
 }
 
 function RflowDiagramView({ active = true }: { active?: boolean; }) {
@@ -87,8 +90,8 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const [selectedNodes, setSelectedNodes] = useAtom(rf_SelectedNodesAtom);
     const [selectedEdges, setSelectedEdges] = useAtom(rf_SelectedEdgesAtom);
     const [selectedEdgeId, setSelectedEdgeId] = useAtom(rf_SelectedEdgeIdAtom);
-    const [searchOpen, setSearchOpen] = useAtom(rf_SearchOpenAtom);
-    const [edgeLabelEditor, setEdgeLabelEditor] = useAtom(rf_EdgeLabelEditorAtom);
+    const setSearchOpen = useSetAtom(rf_SearchDialogOpenAtom);
+    const setEdgeLabelEditor = useSetAtom(rf_EdgeLabelEditorAtom);
     const setNodeEditorDraft = useSetAtom(rf_NodeEditorDraftAtom);
     const [exporting, setExporting] = useAtom(rf_ExportingAtom);
     const [isDragging, setIsDragging] = useAtom(rf_DraggingAtom);
@@ -202,26 +205,6 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         [setSelectedEdgeId, setSelectedEdges, sourceLink.onEdgeClick]);
 
-    const handleFocusNode = useCallback(
-        (nodeId: string) => {
-            reactFlowInstance.fitView({ nodes: [{ id: nodeId }], duration: 600, padding: 0.3 });
-            const highlighted = (rf_Diagram.nodes as Node[]).map((n) =>
-                n.id === nodeId ? { ...n, style: { ...n.style, outline: '3px solid #ff6b6b' } } : n
-            );
-            setRflowNodes(highlighted);
-            window.setTimeout(
-                () => {
-                    setRflowNodes(
-                        (rf_Diagram.nodes as Node[]).map((n) =>
-                            n.id === nodeId ? { ...n, style: { ...n.style, outline: undefined } } : n
-                        ),
-                    );
-                },
-                1200,
-            );
-        },
-        [reactFlowInstance]);
-
     const onEdgeDoubleClick = useCallback(
         (event: MouseEvent, edge: Edge) => {
             const rect = reactFlowWrapper.current?.getBoundingClientRect() ?? { left: 0, top: 0 };
@@ -251,28 +234,24 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                     setSearchOpen(false);
                 }
             }
-            window.addEventListener('keydown', handleKeyDown);
-            return () => window.removeEventListener('keydown', handleKeyDown);
+            const abortController = new AbortController();
+            window.addEventListener('keydown', handleKeyDown, { signal: abortController.signal });
+            return () => abortController.abort();
         },
         [setSearchOpen]);
 
     const nodesWithLink = useMemo(
-        () =>
-            plainNodes.map((n) => ({
-                ...n,
-                className: classNames(n.className, sourceLink.classForNode(n)),
-            })),
+        () => (
+            plainNodes.map((n) => ({ ...n, className: classNames(n.className, sourceLink.classForNode(n)) }))
+        ),
         [plainNodes, sourceLink.classForNode, sourceLink.keys, sourceLink.intensity]);
 
     const edgesWithSelection = useMemo(
-        () =>
-            plainEdges.map((edge) => ({
-                ...edge,
-                className: classNames(
-                    edge.id === selectedEdgeId && 'selected',
-                    sourceLink.classForEdge(edge),
-                ),
-            })),
+        () => (
+            plainEdges.map(
+                (edge) => ({ ...edge, className: classNames(edge.id === selectedEdgeId && 'selected', sourceLink.classForEdge(edge)) })
+            )
+        ),
         [plainEdges, selectedEdgeId, sourceLink.classForEdge, sourceLink.keys, sourceLink.intensity]);
 
     const commitNodes = useCallback(
@@ -324,31 +303,17 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         [selectedNodes, setSelectedNodes]);
 
-    const saveEdgeLabel = useCallback(
-        (edgeId: string, text: string) => {
-            setRflowEdges((rf_Diagram.edges as Edge[]).map((e) => (e.id === edgeId ? { ...e, label: text } : e)));
-            setEdgeLabelEditor(null);
-            syncMermaidFromGraph();
-        },
-        [setEdgeLabelEditor]);
-
     return (<>
         {exporting && (
             <div className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center gap-3">
                 <BarsLoaderIcon />
-                <div className="text-sm text-muted-foreground">Exporting image...</div>
+                <div className="text-sm text-muted-foreground">
+                    Exporting image...
+                </div>
             </div>
         )}
 
-        <NodeSearchDialog
-            open={searchOpen}
-            nodes={plainNodes}
-            onOpenChange={setSearchOpen}
-            onSelectNode={(id) => {
-                handleFocusNode(id);
-                setSearchOpen(false);
-            }}
-        />
+        <NodeSearchDialog />
 
         <div ref={reactFlowWrapper} className={classNames(containerClasses, isDragging && containerDraggingClasses, isDark && 'dark',)}>
             <div className="px-2 py-1.5 border-b border-border bg-muted/20 shrink-0 flex flex-col gap-1.5">
@@ -477,20 +442,6 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                 {hasBox && !exporting && <ZoomControls_Rflow />}
             </div>
         </div>
-
-        {edgeLabelEditor && (
-            <EdgeLabelEditorDialog
-                open
-                x={edgeLabelEditor.x}
-                y={edgeLabelEditor.y}
-                text={edgeLabelEditor.text}
-                onChange={(t) => setEdgeLabelEditor({ ...edgeLabelEditor, text: t })}
-                onSave={() => saveEdgeLabel(edgeLabelEditor.edgeId, edgeLabelEditor.text)}
-                onCancel={() => setEdgeLabelEditor(null)}
-            />
-        )}
-
-        <NodeEditorDialog />
     </>);
 }
 

@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 
 import { rf_NodeEditorDraftAtom, doRflowSaveNodeEditorAtom } from '../8-store/a-rflow-ui-atoms';
 import { resetIconSearchQuery } from '../8-store/a-rflow-icon-search-atoms';
-import { IconSearch } from './2-2-1-dlg-search';
+import { IconSearch } from './3-dlg-search';
 import { COLOR_PRESETS } from '../2-converter/constants';
 
 export function NodeEditorDialog() {

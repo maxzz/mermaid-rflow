@@ -16,7 +16,7 @@ export function Tabs({ className, orientation = "horizontal", ...rest }: Compone
 }
 
 export const tabsListVariantsClasses = cva("\
-group/tabs-list p-[3px] w-fit \
+group/tabs-list p-0.75 w-fit \
 \
 text-muted-foreground \
 \

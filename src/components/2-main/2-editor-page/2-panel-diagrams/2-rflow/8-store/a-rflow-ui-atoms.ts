@@ -6,35 +6,12 @@ import { rf_Diagram, setRflowNodes } from './0-flow-diagram';
 import { syncMermaidFromGraph } from './1-sync-with-source';
 import { resetIconSearchQuery } from './a-rflow-icon-search-atoms';
 
-export type EdgeLabelEditorState = {
-    edgeId: string;
-    text: string;
-    x: number;
-    y: number;
-};
-
-export type NodeEditorDraft = {
-    nodeId: string;
-    nodeType: string | undefined;
-    label: string;
-    imageUrl: string;
-    description: string;
-    backgroundColor: string;
-    borderColor: string;
-    iconColor: string;
-    imageValid: boolean | null;
-};
-
 export const rf_SelectedNodesAtom = atom<Node[]>([]);
 export const rf_SelectedEdgesAtom = atom<Edge[]>([]);
 export const rf_SelectedEdgeIdAtom = atom<string | null>(null);
 export const rf_PanModeAtom = atom(false);
-export const rf_SearchOpenAtom = atom(false);
-export const rf_LoadDialogOpenAtom = atom(false);
-export const rf_ExportingAtom = atom(false);
 export const rf_DraggingAtom = atom(false);
-export const rf_EdgeLabelEditorAtom = atom<EdgeLabelEditorState | null>(null);
-export const rf_NodeEditorDraftAtom = atom<NodeEditorDraft | null>(null);
+export const rf_ExportingAtom = atom(false);
 
 //---------------------------------------------------------------------------
 // Canvas methods
@@ -82,6 +59,9 @@ export function draftFromNode(node: Node): NodeEditorDraft {
     };
 }
 
+//---------------------------------------------------------------------------
+// Save node editor dialog
+
 export const doRflowSaveNodeEditorAtom = atom(null,
     (get, set) => {
         const draft = get(rf_NodeEditorDraftAtom);
@@ -123,13 +103,13 @@ export const doRflowSaveNodeEditorAtom = atom(null,
 //---------------------------------------------------------------------------
 // Load dialog
 
-export type LoadDialogUi = {
+export type LoadDialogUiData = {
     selectedId: string | null;
     imported: import('./8-local-storage-saved-diagrams').SavedDiagram | null;
     confirmDeleteId: string | null;
 };
 
-export function defaultLoadDialogUi(): LoadDialogUi {
+export function defaultLoadDialogUiData(): LoadDialogUiData {
     return ({
         selectedId: null,
         imported: null,
@@ -137,5 +117,44 @@ export function defaultLoadDialogUi(): LoadDialogUi {
     });
 }
 
-export const rf_LoadUiAtom = atom<LoadDialogUi>(defaultLoadDialogUi());
-export const rf_LoadPreviewAtom = atom('');
+export const rf_LoadDialogUiDataAtom = atom<LoadDialogUiData>(defaultLoadDialogUiData());
+export const rf_LoadDialogPreviewAtom = atom('');
+
+//---------------------------------------------------------------------------
+// Node editor dialog
+
+export type NodeEditorDraft = {
+    nodeId: string;
+    nodeType: string | undefined;
+    label: string;
+    imageUrl: string;
+    description: string;
+    backgroundColor: string;
+    borderColor: string;
+    iconColor: string;
+    imageValid: boolean | null;
+};
+
+export const rf_NodeEditorDraftAtom = atom<NodeEditorDraft | null>(null);
+
+//---------------------------------------------------------------------------
+// Edge label editor dialog
+
+export type EdgeLabelEditorState = {
+    edgeId: string;
+    text: string;
+    x: number;
+    y: number;
+};
+
+export const rf_EdgeLabelEditorAtom = atom<EdgeLabelEditorState | null>(null);
+
+//---------------------------------------------------------------------------
+// Search dialog
+
+export const rf_SearchDialogOpenAtom = atom(false);
+
+//---------------------------------------------------------------------------
+// Load dialog
+
+export const rf_LoadDialogOpenAtom = atom(false);
