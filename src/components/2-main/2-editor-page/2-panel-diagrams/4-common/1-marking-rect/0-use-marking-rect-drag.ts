@@ -3,7 +3,7 @@ import { type MarkingRectState, type Rect } from './9-types';
 import { rectFromDrag } from './9-types';
 import { clearMarkingRect, setMarkingRect } from './a-store-marking';
 
-export type MarkingDragOptions = {
+type MarkingRectDragOptions = {
     rect: MarkingRectState;
     surfaceRef: SurfaceRef;
     enabled: boolean;
@@ -21,7 +21,7 @@ type SurfaceRef = { readonly current: HTMLElement | null; };
  * Background drag that writes a marking rectangle into `rect`.
  * Callers decide which pointer starts a drag; this hook does not keep its own React state.
  */
-export function useMarkingDrag({ rect, surfaceRef, enabled, shouldStart, onStart, onUpdate, onCommit, onClick }: MarkingDragOptions): void {
+export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onStart, onUpdate, onCommit, onClick }: MarkingRectDragOptions): void {
     const shouldStartRef = useRef(shouldStart);
     const onStartRef = useRef(onStart);
     const onUpdateRef = useRef(onUpdate);

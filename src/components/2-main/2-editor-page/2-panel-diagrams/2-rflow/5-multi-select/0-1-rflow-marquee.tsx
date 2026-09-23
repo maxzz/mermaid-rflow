@@ -8,20 +8,23 @@ import { idsInScreenRect, type HitEdge, type HitNode } from './8-hit-test';
 import { withSelectedFlag } from './8-selection';
 
 import { type Rect } from '../../4-common/1-marking-rect/9-types';
-import { MarkingRect } from '../../4-common/1-marking-rect/8-1-marking-rect';
-import { useMarkingDrag } from '../../4-common/1-marking-rect/0-use-marking-drag';
+import { MarkingRectDiv } from '../../4-common/1-marking-rect/8-1-marking-rect-div';
+import { useMarkingRectDrag } from '../../4-common/1-marking-rect/0-use-marking-rect-drag';
 
-import './0-rflow-marquee.css';
+import './0-2-rflow-marquee.css';
 
 type SurfaceRef = { readonly current: HTMLDivElement | null; };
 
 export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfaceRef: SurfaceRef; enabled: boolean; onBackgroundClick?: () => void; }) {
-    const store = useStoreApi();
+    const rfStore = useStoreApi();
+
     const setSelectedNodes = useSetAtom(rf_SelectedNodesAtom);
     const setSelectedEdges = useSetAtom(rf_SelectedEdgesAtom);
+
     const lastKey = useRef('');
     const spaceDown = useRef(false);
     const onBackgroundClickRef = useRef(onBackgroundClick);
+
     onBackgroundClickRef.current = onBackgroundClick;
 
     useEffect(
@@ -44,6 +47,7 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
             window.addEventListener('keydown', down, { signal: abortController.signal });
             window.addEventListener('keyup', up, { signal: abortController.signal });
             window.addEventListener('blur', clearSpace, { signal: abortController.signal });
+            
             return () => {
                 abortController.abort();
                 spaceDown.current = false;
@@ -68,7 +72,7 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
             return;
         }
 
-        const state = store.getState();
+        const state = rfStore.getState();
         const origin = flowOrigin(surface);
         const [tx, ty, zoom] = state.transform;
 
@@ -87,7 +91,7 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
         writeSelection(new Set(ids.nodeIds), new Set(ids.edgeIds), setSelectedNodes, setSelectedEdges);
     };
 
-    useMarkingDrag({
+    useMarkingRectDrag({
         rect: rflowMarkingRect,
         surfaceRef,
         enabled,
@@ -102,7 +106,7 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
         },
     });
 
-    return <MarkingRect rect={rflowMarkingRect} />;
+    return <MarkingRectDiv rect={rflowMarkingRect} />;
 }
 
 function writeSelection(nodeIds: ReadonlySet<string>, edgeIds: ReadonlySet<string>, setSelectedNodes: (nodes: Node[]) => void, setSelectedEdges: (edges: Edge[]) => void) {
@@ -192,4 +196,3 @@ const BLOCKED_TARGET = [
 //---------------------------------------------------------------------------
 
 const rflowMarkingRect = createMarkingRect(); // One rectangle state for the Rflow canvas. Other views create their own with `createMarkingRect`.
-
