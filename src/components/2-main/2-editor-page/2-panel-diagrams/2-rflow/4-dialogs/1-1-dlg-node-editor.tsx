@@ -11,7 +11,7 @@ import { resetIconSearchQuery } from '../8-store/a-rflow-icon-search-atoms';
 import { IconSearch } from './2-2-1-dlg-search';
 import { COLOR_PRESETS } from '../2-converter/constants';
 
-export function NodeEditor() {
+export function NodeEditorDialog() {
     const [draft, setDraft] = useAtom(rf_NodeEditorDraftAtom);
     const doRflowSaveNodeEditor = useSetAtom(doRflowSaveNodeEditorAtom);
 
@@ -26,7 +26,7 @@ export function NodeEditor() {
 
     return (
         <Dialog open onOpenChange={(open) => { if (!open) close(); }}>
-            <DialogContent className="p-0 max-w-md min-h-86 gap-0">
+            <DialogContent className="p-0 max-w-md min-h-86 grid-rows-[auto_1fr_auto] gap-0">
                 <DialogHeader className="px-4 py-3 border-b">
                     <DialogTitle className="text-sm">
                         Edit {draft.nodeType === 'group' ? 'subgraph' : 'node'}
@@ -55,7 +55,7 @@ export function NodeEditor() {
                     </Tabs>
                 </div>
 
-                <DialogFooter className="px-4 py-3 border-t">
+                <DialogFooter className="-mx-0.5 -mb-0.5 px-4 py-3 border-t">
                     <Button variant="outline" size="xs" onClick={close}>Cancel</Button>
                     <Button size="xs" onClick={() => doRflowSaveNodeEditor()}>Save</Button>
                 </DialogFooter>
@@ -157,11 +157,11 @@ function ColorField({ label, value, presets, onChange }: { label: string; value:
             </Label>
 
             <div className="flex items-center gap-2">
-                <input type="color" value={value === 'transparent' ? '#ffffff' : value} onChange={(e) => onChange(e.target.value)} className="size-8 rounded border cursor-pointer" />
-                <Input value={value} onChange={(e) => onChange(e.target.value)} />
-            </div>
+                <input className="size-7 p-0.5  rounded border cursor-pointer" type="color" value={value === 'transparent' ? '#ffffff' : value} onChange={(e) => onChange(e.target.value)} />
 
-            <div className="flex flex-wrap gap-1">
+                <Input className="w-24" value={value} onChange={(e) => onChange(e.target.value)} />
+
+                <div className="flex flex-wrap gap-1">
                 {presets.map(
                     (color) => (
                         <button
@@ -175,6 +175,8 @@ function ColorField({ label, value, presets, onChange }: { label: string; value:
                     )
                 )}
             </div>
+            </div>
+
         </div>
     );
 }

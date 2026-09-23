@@ -1,6 +1,3 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT).
- */
 import { useEffect, useRef } from 'react';
 import { Popover, PopoverAnchor, PopoverContent } from '@/ui/shadcn/popover';
 import { Input } from '@/ui/shadcn/input';
@@ -16,7 +13,7 @@ export type EdgeLabelEditorProps = {
     onCancel: () => void;
 };
 
-export function EdgeLabelEditor({ open, x, y, text, onChange, onSave, onCancel }: EdgeLabelEditorProps) {
+export function EdgeLabelEditorDialog({ open, x, y, text, onChange, onSave, onCancel }: EdgeLabelEditorProps) {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(
@@ -27,8 +24,7 @@ export function EdgeLabelEditor({ open, x, y, text, onChange, onSave, onCancel }
             const t = setTimeout(() => inputRef.current?.focus(), 0);
             return () => clearTimeout(t);
         },
-        [open],
-    );
+        [open]);
 
     return (
         <Popover open={open} onOpenChange={(o) => { if (!o) onCancel(); }}>

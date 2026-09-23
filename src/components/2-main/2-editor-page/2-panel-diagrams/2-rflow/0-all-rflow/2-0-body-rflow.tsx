@@ -40,8 +40,8 @@ import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
 import { EditingToolbar } from './8-1-1-0-toolbar-rflow';
 import { PaletteToolbar } from './8-1-3-palette-toolbar';
 import { ZoomControls_Rflow } from './8-3-zoom-controls-rflow';
-import { EdgeLabelEditor } from '../4-dialogs/1-2-dlg-edge-label-editor';
-import { NodeEditor } from '../4-dialogs/1-1-dlg-node-editor';
+import { EdgeLabelEditorDialog } from '../4-dialogs/1-2-dlg-edge-label-editor';
+import { NodeEditorDialog } from '../4-dialogs/1-1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/2-1-dlg-node-search';
 
 import { nextRfId } from '../2-converter/mermaid-ids';
@@ -479,7 +479,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         </div>
 
         {edgeLabelEditor && (
-            <EdgeLabelEditor
+            <EdgeLabelEditorDialog
                 open
                 x={edgeLabelEditor.x}
                 y={edgeLabelEditor.y}
@@ -490,7 +490,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
             />
         )}
 
-        <NodeEditor />
+        <NodeEditorDialog />
     </>);
 }
 
