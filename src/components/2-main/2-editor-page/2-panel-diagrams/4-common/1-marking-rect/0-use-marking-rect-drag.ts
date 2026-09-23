@@ -20,7 +20,7 @@ type SurfaceRef = { readonly current: HTMLElement | null; };
 /**
  * Background drag that writes a marking rectangle into `rect`.
  * Callers decide which pointer starts a drag; this hook does not keep its own React state.
- * Holding Space shows a grabbing cursor and does not start a selection, so every canvas can pan the same way.
+ * Holding Space shows an open hand and does not start a selection. Pressing the mouse closes it; releasing either one steps the cursor back.
  */
 export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onStart, onUpdate, onCommit, onClick }: MarkingRectDragOptions): void {
     const shouldStartRef = useRef(shouldStart);
@@ -29,6 +29,7 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
     const onCommitRef = useRef(onCommit);
     const onClickRef = useRef(onClick);
     const spaceDown = useRef(false);
+    const pointerDown = useRef(false);
 
     shouldStartRef.current = shouldStart;
     onStartRef.current = onStart;
@@ -38,12 +39,15 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
 
     useEffect(
         () => {
+            function syncCursor() {
+                applyPanCursor(surfaceRef.current, spaceDown.current, pointerDown.current);
+            }
             function down(event: KeyboardEvent) {
                 if (event.code !== 'Space' || event.repeat || isEditableTarget(event.target)) {
                     return;
                 }
                 spaceDown.current = true;
-                setSpacePanCursor(surfaceRef.current, true);
+                syncCursor();
             }
             function up(event: KeyboardEvent) {
                 if (event.code === 'Space') {
@@ -52,13 +56,34 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
             }
             function clearSpace() {
                 spaceDown.current = false;
-                setSpacePanCursor(surfaceRef.current, false);
+                pointerDown.current = false;
+                syncCursor();
+            }
+            function onMouseDown(event: MouseEvent) {
+                if (event.button !== 0 || !spaceDown.current) {
+                    return;
+                }
+                const surface = surfaceRef.current;
+                if (!surface || !(event.target instanceof Node) || !surface.contains(event.target)) {
+                    return;
+                }
+                pointerDown.current = true;
+                syncCursor();
+            }
+            function onMouseUp(event: MouseEvent) {
+                if (event.button !== 0 || !pointerDown.current) {
+                    return;
+                }
+                pointerDown.current = false;
+                syncCursor();
             }
 
             const abortController = new AbortController();
             window.addEventListener('keydown', down, { signal: abortController.signal });
             window.addEventListener('keyup', up, { signal: abortController.signal });
             window.addEventListener('blur', clearSpace, { signal: abortController.signal });
+            window.addEventListener('mousedown', onMouseDown, { capture: true, signal: abortController.signal });
+            window.addEventListener('mouseup', onMouseUp, { signal: abortController.signal });
 
             return () => {
                 abortController.abort();
@@ -188,14 +213,20 @@ const DRAG_THRESHOLD = 4;
 
 const POINTER_CURSOR = 'cursor-default!';
 
-/** Closed hand on the surface and its contents. Buttons and links keep their own cursor. */
-const SPACE_PAN_CURSOR = ['cursor-grabbing!', '[&_:not(button):not(a)]:cursor-grabbing!'] as const;
+/** Open hand while Space is held. Closed hand only while the mouse button is also down. */
+const GRAB_CURSOR = ['cursor-grab!', '[&_:not(button):not(a)]:cursor-grab!'] as const;
+const GRABBING_CURSOR = ['cursor-grabbing!', '[&_:not(button):not(a)]:cursor-grabbing!'] as const;
 
-function setSpacePanCursor(surface: HTMLElement | null, on: boolean) {
+function applyPanCursor(surface: HTMLElement | null, space: boolean, pressed: boolean) {
+    setCursorClasses(surface, GRAB_CURSOR, space && !pressed);
+    setCursorClasses(surface, GRABBING_CURSOR, space && pressed);
+}
+
+function setCursorClasses(surface: HTMLElement | null, classes: readonly string[], on: boolean) {
     if (!surface) {
         return;
     }
-    for (const className of SPACE_PAN_CURSOR) {
+    for (const className of classes) {
         surface.classList.toggle(className, on);
     }
 }
