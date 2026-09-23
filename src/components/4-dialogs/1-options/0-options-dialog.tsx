@@ -12,7 +12,8 @@ export function OptionsDialog() {
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0! max-w-md! gap-0!" aria-describedby={DESCRIPTION_ID}>
+            <DialogContent className="p-0! max-w-sm gap-0!" aria-describedby={DESCRIPTION_ID}>
+
                 <DialogHeader className="px-4 py-3 text-left border-b gap-0">
                     <DialogTitle className="text-sm">
                         Options
@@ -38,12 +39,16 @@ function StartupSection() {
 
     return (
         <section className="flex flex-col gap-3">
-            <h3 className="text-[.7rem] font-semibold text-muted-foreground uppercase tracking-wider">
+            <h3 className="text-xs font-medium text-foreground border-b pb-1">
                 Startup
             </h3>
+
             <div className="flex items-center justify-between gap-4">
-                <Label htmlFor={id}>Show welcome page at start</Label>
-                <Switch id={id} checked={showWelcome} onCheckedChange={(v) => { mermaidSettings.showWelcome = v; }} />
+                <Label htmlFor={id}>
+                    Show welcome page at start
+                </Label>
+
+                <Switch className="scale-65" id={id} checked={showWelcome} onCheckedChange={(v) => { mermaidSettings.showWelcome = v; }} />
             </div>
         </section>
     );

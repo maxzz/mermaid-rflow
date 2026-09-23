@@ -16,22 +16,22 @@ import { defaultLoadDialogUiData, rf_LoadDialogOpenAtom, rf_LoadDialogPreviewAto
 import { parseSavedDiagram, removeSavedDiagram, rf_Saved, type SavedDiagram } from '../8-store/8-local-storage-saved-diagrams';
 import { classNames } from '@/utils';
 
-export function LoadDialog() {
+export function Rflow_LoadDialog() {
     const [open, setOpen] = useAtom(rf_LoadDialogOpenAtom);
-    const [ui, setUi] = useAtom(rf_LoadDialogUiDataAtom);
+    const [uiData, setUiData] = useAtom(rf_LoadDialogUiDataAtom);
     const { diagrams } = useSnapshot(rf_Saved);
     const saved = diagrams as SavedDiagram[];
 
     useEffect(
         () => {
             if (!open) {
-                setUi(defaultLoadDialogUiData());
+                setUiData(defaultLoadDialogUiData());
             }
         },
-        [open, setUi]);
+        [open, setUiData]);
 
-    const list: SavedDiagram[] = ui.imported ? [ui.imported, ...saved] : [...saved];
-    const selected = list.find((d) => d.id === ui.selectedId) ?? null;
+    const list: SavedDiagram[] = uiData.imported ? [uiData.imported, ...saved] : [...saved];
+    const selected = list.find((d) => d.id === uiData.selectedId) ?? null;
 
     function onLoad() {
         if (!selected) {
@@ -52,7 +52,7 @@ export function LoadDialog() {
                     throw new Error('Invalid diagram file format');
                 }
                 const imported = { ...parsed, id: 'imported' };
-                setUi({ ...ui, imported, selectedId: 'imported' });
+                setUiData({ ...uiData, imported, selectedId: 'imported' });
             } catch (err) {
                 toast.error(err instanceof Error ? err.message : 'Invalid file format');
             }
@@ -108,7 +108,7 @@ export function LoadDialog() {
                     <Button
                         className="mr-auto"
                         variant="outline"
-                        size="xs"
+                        size="sm"
                         onClick={() => {
                             const input = document.createElement('input');
                             input.type = 'file';
@@ -126,11 +126,11 @@ export function LoadDialog() {
                         Upload JSON
                     </Button>
 
-                    <Button variant="outline" size="xs" onClick={() => setOpen(false)}>
+                    <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
                         Close
                     </Button>
 
-                    <Button size="xs" onClick={onLoad} disabled={!selected}>
+                    <Button size="sm" onClick={onLoad} disabled={!selected}>
                         Load
                     </Button>
                 </div>
@@ -164,27 +164,19 @@ function SavedDiagramRow({ diagram }: { diagram: SavedDiagram; }) {
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     removeSavedDiagram(diagram.id);
-                                    setUi({
-                                        ...ui,
-                                        confirmDeleteId: null,
-                                        selectedId: selected ? null : ui.selectedId,
-                                    });
+                                    setUi({ ...ui, confirmDeleteId: null, selectedId: selected ? null : ui.selectedId });
                                 }}
                             >
                                 Delete
                             </Button>
+
                             <Button variant="ghost" size="xs" onClick={(e) => { e.stopPropagation(); setUi({ ...ui, confirmDeleteId: null }); }}>
                                 Cancel
                             </Button>
                         </div>
                     )
                     : (
-                        <Button
-                            variant="ghost"
-                            size="icon-xs"
-                            onClick={(e) => { e.stopPropagation(); setUi({ ...ui, confirmDeleteId: diagram.id }); }}
-                            title="Delete"
-                        >
+                        <Button variant="ghost" size="icon-xs" onClick={(e) => { e.stopPropagation(); setUi({ ...ui, confirmDeleteId: diagram.id }); }} title="Delete">
                             <Trash2Icon />
                         </Button>
                     )
