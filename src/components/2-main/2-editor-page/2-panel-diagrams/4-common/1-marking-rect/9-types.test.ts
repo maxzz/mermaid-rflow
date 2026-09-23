@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rectFromDrag, rectsIntersect } from './9-types';
+import { rectContains, rectFromDrag, rectsIntersect } from './9-types';
 
 describe('markingRectFromDrag', () => {
     it('keeps a drag that moves down and right', () => {
@@ -24,5 +24,17 @@ describe('rectsIntersect', () => {
 
     it('ignores a box that misses entirely', () => {
         expect(rectsIntersect(box, { x: 200, y: 200, width: 10, height: 10 })).toBe(false);
+    });
+});
+
+describe('rectContains', () => {
+    const box = { x: 0, y: 0, width: 100, height: 40 };
+
+    it('matches a box that shares the outer edge', () => {
+        expect(rectContains(box, { x: 0, y: 0, width: 100, height: 40 })).toBe(true);
+    });
+
+    it('rejects a partial overlap', () => {
+        expect(rectContains(box, { x: 90, y: 30, width: 20, height: 20 })).toBe(false);
     });
 });

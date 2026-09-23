@@ -4,8 +4,8 @@ import { type Edge, type Node, useStoreApi } from 'reactflow';
 import { createMarkingRect } from '../../4-common/1-marking-rect/a-store-marking';
 import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
 import { rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
-import { idsInScreenRect, type HitEdge, type HitNode } from './8-hit-test';
-import { withSelectedFlag } from './8-selection';
+import { idsInScreenRect, type HitEdge, type HitNode, type RectFit } from './8-hit-test';
+import { marqueeSelection, withSelectedFlag } from './8-selection';
 
 import { type Rect } from '../../4-common/1-marking-rect/9-types';
 import { MarkingRectDiv } from '../../4-common/1-marking-rect/8-1-marking-rect-div';
@@ -21,6 +21,8 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
 
     const lastKey = useRef('');
     const onBackgroundClickRef = useRef(onBackgroundClick);
+    const additiveRef = useRef(false);
+    const baseRef = useRef<{ nodeIds: Set<string>; edgeIds: Set<string>; }>({ nodeIds: new Set(), edgeIds: new Set() });
 
     onBackgroundClickRef.current = onBackgroundClick;
 
@@ -33,20 +35,21 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
         const state = rfStore.getState();
         const origin = flowOrigin(surface);
         const [tx, ty, zoom] = state.transform;
+        const nodes = hitNodes(state.nodeInternals);
+        const edges = hitEdges(state.edges);
+        const screenRect = { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height };
+        const transform = { x: tx, y: ty, zoom };
+        const fit: RectFit = additiveRef.current ? 'inside' : 'overlap';
+        const ids = idsInScreenRect(nodes, edges, screenRect, transform, fit);
 
-        const ids = idsInScreenRect(
-            hitNodes(state.nodeInternals),
-            hitEdges(state.edges),
-            { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height },
-            { x: tx, y: ty, zoom },
-        );
+        const selection = marqueeSelection(ids.nodeIds, ids.edgeIds, additiveRef.current ? baseRef.current : null);
 
-        const key = `${ids.nodeIds.join('\0')}|${ids.edgeIds.join('\0')}`;
+        const key = `${[...selection.nodeIds].join('\0')}|${[...selection.edgeIds].join('\0')}`;
         if (key === lastKey.current) {
             return;
         }
         lastKey.current = key;
-        writeSelection(new Set(ids.nodeIds), new Set(ids.edgeIds), setSelectedNodes, setSelectedEdges);
+        writeSelection(selection.nodeIds, selection.edgeIds, setSelectedNodes, setSelectedEdges);
     };
 
     useMarkingRectDrag({
@@ -54,7 +57,11 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
         surfaceRef,
         enabled,
         shouldStart: (event) => isFlowBackgroundTarget(event.target),
-        onStart: () => { lastKey.current = ''; },
+        onStart: (event) => {
+            lastKey.current = '';
+            additiveRef.current = event.shiftKey;
+            baseRef.current = event.shiftKey ? selectedIds() : { nodeIds: new Set(), edgeIds: new Set() };
+        },
         onUpdate: onApply,
         onCommit: onApply,
         onClick: () => {
@@ -65,6 +72,13 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
     });
 
     return <MarkingRectDiv rect={rflowMarkingRect} />;
+}
+
+function selectedIds() {
+    return {
+        nodeIds: new Set((rf_Diagram.nodes as Node[]).filter((node) => node.selected).map((node) => node.id)),
+        edgeIds: new Set((rf_Diagram.edges as Edge[]).filter((edge) => edge.selected).map((edge) => edge.id)),
+    };
 }
 
 function writeSelection(nodeIds: ReadonlySet<string>, edgeIds: ReadonlySet<string>, setSelectedNodes: (nodes: Node[]) => void, setSelectedEdges: (edges: Edge[]) => void) {

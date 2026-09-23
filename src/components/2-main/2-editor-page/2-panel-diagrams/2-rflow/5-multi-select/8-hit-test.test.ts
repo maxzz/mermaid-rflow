@@ -24,6 +24,11 @@ describe('nodeIdsInFlowRect', () => {
     it('returns nodes the rectangle overlaps and skips hidden, unselectable, and unmeasured nodes', () => {
         expect(nodeIdsInFlowRect(nodes, { x: 80, y: 10, width: 30, height: 20 })).toEqual(['a']);
     });
+
+    it('returns only nodes the rectangle covers completely', () => {
+        expect(nodeIdsInFlowRect(nodes, { x: -10, y: -10, width: 120, height: 60 }, 'inside')).toEqual(['a']);
+        expect(nodeIdsInFlowRect(nodes, { x: 80, y: 10, width: 30, height: 20 }, 'inside')).toEqual([]);
+    });
 });
 
 describe('edgeIdsForNodes', () => {

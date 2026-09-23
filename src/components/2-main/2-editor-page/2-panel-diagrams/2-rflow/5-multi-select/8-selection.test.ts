@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { withSelectedFlag } from './8-selection';
+import { marqueeSelection, withSelectedFlag } from './8-selection';
+
+describe('marqueeSelection', () => {
+    it('adds hits to the selection held when the drag began', () => {
+        expect(marqueeSelection(['b'], ['ab'], { nodeIds: new Set(['a']), edgeIds: new Set(['keep']) })).toEqual({
+            nodeIds: new Set(['a', 'b']),
+            edgeIds: new Set(['keep', 'ab']),
+        });
+    });
+
+    it('replaces the selection when the drag did not begin with Shift', () => {
+        expect(marqueeSelection(['b'], ['ab'], null)).toEqual({
+            nodeIds: new Set(['b']),
+            edgeIds: new Set(['ab']),
+        });
+    });
+});
 
 describe('withSelectedFlag', () => {
     const items = [

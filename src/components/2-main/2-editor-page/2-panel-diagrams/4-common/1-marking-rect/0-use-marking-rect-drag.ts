@@ -9,7 +9,7 @@ type MarkingRectDragOptions = {
     enabled: boolean;
     
     shouldStart: (event: MouseEvent) => boolean; // Return false to let the event through (a node, a control, a modifier that should pan).
-    onStart?: () => void;
+    onStart?: (event: MouseEvent) => void; // Pointer went down. The modifier keys here decide how the drag applies.
     onUpdate?: (rect: Rect) => void;
     onCommit?: (rect: Rect) => void;
     onClick?: () => void; // Pointer went down and up without crossing the drag threshold.
@@ -140,7 +140,7 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
                 event.stopPropagation();
                 const point = localPoint(event);
                 session = { startX: point.x, startY: point.y, dragging: false };
-                onStartRef.current?.();
+                onStartRef.current?.(event);
             }
 
             function onMouseMove(event: MouseEvent) {

@@ -435,7 +435,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                     )
                     : null
                 }
-                {/* Shift-click toggles via multiSelectionKeyCode. Drag on the pane draws this rectangle. */}
+                {/* Shift-click toggles via multiSelectionKeyCode. Shift-drag adds blocks fully inside the rectangle. */}
                 <RflowMarquee surfaceRef={canvasRef} enabled={hasBox && active && !panMode} onBackgroundClick={sourceLink.onPaneClick} />
                 {hasBox && !exporting && <ZoomControls_Rflow />}
             </div>

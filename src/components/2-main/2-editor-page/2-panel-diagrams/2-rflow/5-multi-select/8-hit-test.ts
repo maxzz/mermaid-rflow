@@ -1,5 +1,4 @@
-import { type Rect } from '../../4-common/1-marking-rect/9-types';
-import { rectsIntersect } from '../../4-common/1-marking-rect/9-types';
+import { rectContains, rectsIntersect, type Rect } from '../../4-common/1-marking-rect/9-types';
 
 export type HitNode = Rect & {
     id: string;
@@ -31,13 +30,17 @@ export function screenRectToFlow(rect: Rect, transform: FlowTransform): Rect {
     };
 }
 
-export function nodeIdsInFlowRect(nodes: HitNode[], rect: Rect): string[] {
+/** `overlap` counts any shared area. `inside` counts a node only when the rectangle covers it completely. */
+export type RectFit = 'overlap' | 'inside';
+
+export function nodeIdsInFlowRect(nodes: HitNode[], rect: Rect, fit: RectFit = 'overlap'): string[] {
     const ids: string[] = [];
     for (const node of nodes) {
         if (node.hidden || node.selectable === false || node.width <= 0 || node.height <= 0) {
             continue;
         }
-        if (rectsIntersect(rect, node)) {
+        const hit = fit === 'inside' ? rectContains(rect, node) : rectsIntersect(rect, node);
+        if (hit) {
             ids.push(node.id);
         }
     }
@@ -58,8 +61,8 @@ export function edgeIdsForNodes(edges: HitEdge[], nodeIds: ReadonlySet<string>):
     return ids;
 }
 
-export function idsInScreenRect(nodes: HitNode[], edges: HitEdge[], screenRect: Rect, transform: FlowTransform) {
-    const nodeIds = nodeIdsInFlowRect(nodes, screenRectToFlow(screenRect, transform));
+export function idsInScreenRect(nodes: HitNode[], edges: HitEdge[], screenRect: Rect, transform: FlowTransform, fit: RectFit = 'overlap') {
+    const nodeIds = nodeIdsInFlowRect(nodes, screenRectToFlow(screenRect, transform), fit);
     return {
         nodeIds,
         edgeIds: edgeIdsForNodes(edges, new Set(nodeIds)),
