@@ -83,7 +83,8 @@ export function useMarkingRectDrag({ rect, surfaceRef, enabled, shouldStart, onS
             window.addEventListener('keyup', up, { signal: abortController.signal });
             window.addEventListener('blur', clearSpace, { signal: abortController.signal });
             window.addEventListener('mousedown', onMouseDown, { capture: true, signal: abortController.signal });
-            window.addEventListener('mouseup', onMouseUp, { signal: abortController.signal });
+            // Capture runs before the pan gesture, which stops the mouseup from reaching a bubble listener.
+            window.addEventListener('mouseup', onMouseUp, { capture: true, signal: abortController.signal });
 
             return () => {
                 abortController.abort();
