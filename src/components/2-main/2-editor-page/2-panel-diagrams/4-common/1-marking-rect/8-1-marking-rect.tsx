@@ -1,6 +1,7 @@
 import { useSnapshot } from 'valtio';
-import { type MarkingRectState } from './2-store';
-import './3-marking-rect.css';
+import { type MarkingRectState } from './9-types';
+
+import './8-2-marking-rect.css';
 
 /** Overlay for a drag selection. Position it inside the same box the drag coordinates use. */
 export function MarkingRect({ rect }: { rect: MarkingRectState; }) {

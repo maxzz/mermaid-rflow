@@ -1,17 +1,15 @@
 import { proxy } from 'valtio';
-import { type Rect } from './1-geometry';
+import { type MarkingRectState, type Rect } from './9-types';
 
-/**
- * Screen-space box for one marking gesture.
- * Valtio fits this better than an atom: x/y/width change on every pointer move,
- * and only the overlay that reads them needs to render.
- */
-export type MarkingRectState = Rect & {
-    active: boolean;
-};
-
+/** One rectangle state for the canvas. Each view creates its own with `createMarkingRect`. */
 export function createMarkingRect(): MarkingRectState {
-    return proxy<MarkingRectState>({ active: false, x: 0, y: 0, width: 0, height: 0 });
+    return proxy<MarkingRectState>({
+        active: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+    });
 }
 
 export function setMarkingRect(state: MarkingRectState, next: Rect) {

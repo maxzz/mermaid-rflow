@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { edgeIdsForNodes, idsInScreenRect, nodeIdsInFlowRect, screenRectToFlow } from './1-hit-test';
+import { edgeIdsForNodes, idsInScreenRect, nodeIdsInFlowRect, screenRectToFlow } from './8-hit-test';
 
 const nodes = [
     { id: 'a', x: 0, y: 0, width: 100, height: 40 },

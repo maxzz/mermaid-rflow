@@ -1,4 +1,5 @@
-import { rectsIntersect, type Rect } from '../../4-common/1-marking-rect';
+import { type Rect } from '../../4-common/1-marking-rect/9-types';
+import { rectsIntersect } from '../../4-common/1-marking-rect/9-types';
 
 export type HitNode = Rect & {
     id: string;

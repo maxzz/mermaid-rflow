@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { markingRectFromDrag, rectsIntersect } from './1-geometry';
+import { rectFromDrag, rectsIntersect } from './9-types';
 
 describe('markingRectFromDrag', () => {
     it('keeps a drag that moves down and right', () => {
-        expect(markingRectFromDrag(10, 20, 40, 50)).toEqual({ x: 10, y: 20, width: 30, height: 30 });
+        expect(rectFromDrag(10, 20, 40, 50)).toEqual({ x: 10, y: 20, width: 30, height: 30 });
     });
 
     it('normalizes a drag that moves up and left', () => {
-        expect(markingRectFromDrag(40, 50, 10, 20)).toEqual({ x: 10, y: 20, width: 30, height: 30 });
+        expect(rectFromDrag(40, 50, 10, 20)).toEqual({ x: 10, y: 20, width: 30, height: 30 });
     });
 });
 

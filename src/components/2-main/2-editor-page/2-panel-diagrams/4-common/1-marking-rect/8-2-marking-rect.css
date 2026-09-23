@@ -1,7 +1,7 @@
 /* Semi-transparent blue fill with a blue/white dashed border that travels around the box. */
 .marking-rect {
     background-color: rgb(37 99 235 / 0.16);
-    background-image:
+    /* background-image:
         repeating-linear-gradient(90deg, #1d4ed8 0 6px, #fff 6px 12px),
         repeating-linear-gradient(90deg, #1d4ed8 0 6px, #fff 6px 12px),
         repeating-linear-gradient(180deg, #1d4ed8 0 6px, #fff 6px 12px),
@@ -9,7 +9,11 @@
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
     background-size: 12px 1.5px, 12px 1.5px, 1.5px 12px, 1.5px 12px;
     background-position: 0 0, 0 100%, 0 0, 100% 0;
-    animation: marking-rect-ants 0.35s linear infinite;
+    animation: marking-rect-ants 0.35s linear infinite; */
+    /*or*/
+    /* border: 1px dashed rgb(37 99 235 / 0.5); */
+    /*or*/
+    border: 1.5px solid rgb(37 99 235 / 0.5);
 }
 
 @keyframes marking-rect-ants {

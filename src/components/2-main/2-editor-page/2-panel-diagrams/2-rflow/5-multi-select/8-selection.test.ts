@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { withSelectedFlag } from './2-selection';
+import { withSelectedFlag } from './8-selection';
 
 describe('withSelectedFlag', () => {
     const items = [

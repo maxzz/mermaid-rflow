@@ -1,1 +1,1 @@
-export { RflowMarquee } from './3-rflow-marquee';
+export { RflowMarquee } from './0-rflow-marquee';
