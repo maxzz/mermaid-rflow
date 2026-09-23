@@ -3,6 +3,8 @@ import { type Edge, type Node } from 'reactflow';
 import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/constants';
 import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
 import { rf_Diagram, setRflowNodes } from './0-flow-diagram';
+import { syncMermaidFromGraph } from './1-sync-with-source';
+import { resetIconSearchQuery } from './a-rflow-icon-search-atoms';
 
 export type EdgeLabelEditorState = {
     edgeId: string;
@@ -79,6 +81,44 @@ export function draftFromNode(node: Node): NodeEditorDraft {
         imageValid: null,
     };
 }
+
+export const doRflowSaveNodeEditorAtom = atom(null,
+    (get, set) => {
+        const draft = get(rf_NodeEditorDraftAtom);
+        if (!draft) {
+            return;
+        }
+
+        setRflowNodes(
+            (rf_Diagram.nodes as Node[]).map(
+                (node) => (
+                    node.id === draft.nodeId
+                        ? {
+                            ...node,
+                            data: {
+                                ...node.data,
+                                label: draft.label,
+                                imageUrl: draft.imageUrl,
+                                description: draft.description,
+                                style: {
+                                    ...(node.data?.style || {}),
+                                    backgroundColor: draft.backgroundColor,
+                                    borderColor: draft.borderColor,
+                                    iconColor: draft.iconColor,
+                                    border: `2px solid ${draft.borderColor}`,
+                                },
+                            },
+                        }
+                        : node
+                )
+            )
+        );
+
+        syncMermaidFromGraph();
+        set(rf_NodeEditorDraftAtom, null);
+        resetIconSearchQuery();
+    }
+);
 
 //---------------------------------------------------------------------------
 // Load dialog
