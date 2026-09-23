@@ -11,8 +11,6 @@ import { type Rect } from '../../4-common/1-marking-rect/9-types';
 import { MarkingRectDiv } from '../../4-common/1-marking-rect/8-1-marking-rect-div';
 import { useMarkingRectDrag } from '../../4-common/1-marking-rect/0-use-marking-rect-drag';
 
-import './0-2-rflow-marquee.css';
-
 type SurfaceRef = { readonly current: HTMLDivElement | null; };
 
 export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfaceRef: SurfaceRef; enabled: boolean; onBackgroundClick?: () => void; }) {
@@ -22,50 +20,18 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
     const setSelectedEdges = useSetAtom(rf_SelectedEdgesAtom);
 
     const lastKey = useRef('');
-    const spaceDown = useRef(false);
     const onBackgroundClickRef = useRef(onBackgroundClick);
 
     onBackgroundClickRef.current = onBackgroundClick;
 
     useEffect(
         () => {
-            function down(event: KeyboardEvent) {
-                if (event.code !== 'Space' || event.repeat || isEditableTarget(event.target)) {
-                    return;
-                }
-                spaceDown.current = true;
-                surfaceRef.current?.setAttribute('data-space-pan', '');
-            }
-            function up(event: KeyboardEvent) {
-                if (event.code === 'Space') {
-                    clearSpace();
-                }
-            }
-            function clearSpace() {
-                spaceDown.current = false;
-                surfaceRef.current?.removeAttribute('data-space-pan');
-            }
-
-            const abortController = new AbortController();
-            window.addEventListener('keydown', down, { signal: abortController.signal });
-            window.addEventListener('keyup', up, { signal: abortController.signal });
-            window.addEventListener('blur', clearSpace, { signal: abortController.signal });
-            
-            return () => {
-                abortController.abort();
-                clearSpace();
-            };
-        },
-        []);
-
-    useEffect(
-        () => {
-            const surface = surfaceRef.current;
-            if (!surface) {
+            const pane = surfaceRef.current?.querySelector('.react-flow__pane');
+            if (!(pane instanceof HTMLElement)) {
                 return;
             }
-            surface.toggleAttribute('data-marking-armed', enabled);
-            return () => surface.removeAttribute('data-marking-armed');
+            pane.classList.toggle('cursor-default!', enabled);
+            return () => pane.classList.remove('cursor-default!');
         },
         [enabled, surfaceRef]);
 
@@ -98,7 +64,7 @@ export function RflowMarquee({ surfaceRef, enabled, onBackgroundClick }: { surfa
         rect: rflowMarkingRect,
         surfaceRef,
         enabled,
-        shouldStart: (event) => !spaceDown.current && isFlowBackgroundTarget(event.target),
+        shouldStart: (event) => isFlowBackgroundTarget(event.target),
         onStart: () => { lastKey.current = ''; },
         onUpdate: onApply,
         onCommit: onApply,
@@ -167,15 +133,6 @@ function flowOrigin(surface: HTMLElement) {
 }
 
 //---------------------------------------------------------------------------
-
-function isEditableTarget(target: EventTarget | null) {
-    return target instanceof HTMLElement && (
-        target.isContentEditable ||
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.tagName === 'SELECT'
-    );
-}
 
 function isFlowBackgroundTarget(target: EventTarget | null) {
     if (!(target instanceof Element)) {
