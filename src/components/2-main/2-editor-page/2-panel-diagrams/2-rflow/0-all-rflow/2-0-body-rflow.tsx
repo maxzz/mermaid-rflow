@@ -30,7 +30,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
-import { draftFromNode, rf_CanvasMethodsAtom, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_ExportingAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom, rf_SelectedEdgeIdAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
+import { draftFromNode, rf_CanvasMethodsAtom, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_ExportingAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
 import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
 
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
@@ -46,6 +46,7 @@ import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
 import { nextRfId } from '../2-converter/mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
+import { RflowMarquee } from '../5-multi-select';
 
 import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
 import { isThemeDark } from '@/utils/theme-utils';
@@ -69,6 +70,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const isDark = isThemeDark(theme);
     const reactFlowInstance = useReactFlow();
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
+    const canvasRef = useRef<HTMLDivElement | null>(null);
     const [hasBox, setHasBox] = useState(false);
 
     useLayoutEffect(
@@ -89,7 +91,6 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const [selectedNodes, setSelectedNodes] = useAtom(rf_SelectedNodesAtom);
     const [selectedEdges, setSelectedEdges] = useAtom(rf_SelectedEdgesAtom);
-    const [selectedEdgeId, setSelectedEdgeId] = useAtom(rf_SelectedEdgeIdAtom);
     const setSearchOpen = useSetAtom(rf_SearchDialogOpenAtom);
     const setEdgeLabelEditor = useSetAtom(rf_EdgeLabelEditorAtom);
     const setNodeEditorDraft = useSetAtom(rf_NodeEditorDraftAtom);
@@ -197,13 +198,9 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const onEdgeClick = useCallback(
         (event: MouseEvent, edge: Edge) => {
-            setSelectedEdgeId(edge.id);
-            const updated = (rf_Diagram.edges as Edge[]).map((e) => ({ ...e, selected: e.id === edge.id }));
-            setRflowEdges(updated);
-            setSelectedEdges(updated.filter((e) => e.selected));
             sourceLink.onEdgeClick(event, edge);
         },
-        [setSelectedEdgeId, setSelectedEdges, sourceLink.onEdgeClick]);
+        [sourceLink.onEdgeClick]);
 
     const onEdgeDoubleClick = useCallback(
         (event: MouseEvent, edge: Edge) => {
@@ -249,10 +246,10 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const edgesWithSelection = useMemo(
         () => (
             plainEdges.map(
-                (edge) => ({ ...edge, className: classNames(edge.id === selectedEdgeId && 'selected', sourceLink.classForEdge(edge)) })
+                (edge) => ({ ...edge, className: classNames(edge.className, sourceLink.classForEdge(edge)) })
             )
         ),
-        [plainEdges, selectedEdgeId, sourceLink.classForEdge, sourceLink.keys, sourceLink.intensity]);
+        [plainEdges, sourceLink.classForEdge, sourceLink.keys, sourceLink.intensity]);
 
     const commitNodes = useCallback(
         (next: Node[]) => {
@@ -330,7 +327,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                 <PaletteToolbar />
             </div>
 
-            <div className="relative flex-1 min-h-0 w-full">
+            <div ref={canvasRef} className="relative flex-1 min-h-0 w-full">
                 {hasBox
                     ? (
                         <ReactFlow
@@ -341,6 +338,9 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                             nodesDraggable={!panMode}
                             nodesConnectable={!panMode}
                             elementsSelectable={!panMode}
+                            panOnDrag={panMode}
+                            selectionKeyCode={null}
+                            multiSelectionKeyCode="Shift"
                             onlyRenderVisibleElements
                             onNodeDragStart={() => setIsDragging(true)}
                             onNodeDragStop={() => setIsDragging(false)}
@@ -354,16 +354,12 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                             onError={onReactFlowError}
                             fitView
                             deleteKeyCode={['Delete', 'Backspace']}
-                            panOnDrag
                             panOnScroll={false}
                             zoomOnScroll
                             zoomOnPinch
                             connectionLineType={ConnectionLineType.SmoothStep}
                             onEdgeClick={onEdgeClick}
-                            onPaneClick={() => {
-                                setSelectedEdgeId(null);
-                                sourceLink.onPaneClick();
-                            }}
+                            onPaneClick={sourceLink.onPaneClick}
                             edgesUpdatable
                             connectionMode={ConnectionMode.Loose}
                             onEdgeUpdate={(oldEdge, newConnection) => {
@@ -439,6 +435,8 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                     )
                     : null
                 }
+                {/* Shift-click toggles via multiSelectionKeyCode. Drag on the pane draws this rectangle. */}
+                <RflowMarquee surfaceRef={canvasRef} enabled={hasBox && active && !panMode} onBackgroundClick={sourceLink.onPaneClick} />
                 {hasBox && !exporting && <ZoomControls_Rflow />}
             </div>
         </div>

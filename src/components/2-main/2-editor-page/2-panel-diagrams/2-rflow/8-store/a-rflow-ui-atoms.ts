@@ -8,7 +8,6 @@ import { resetIconSearchQuery } from './a-rflow-icon-search-atoms';
 
 export const rf_SelectedNodesAtom = atom<Node[]>([]);
 export const rf_SelectedEdgesAtom = atom<Edge[]>([]);
-export const rf_SelectedEdgeIdAtom = atom<string | null>(null);
 export const rf_PanModeAtom = atom(false);
 export const rf_DraggingAtom = atom(false);
 export const rf_ExportingAtom = atom(false);
