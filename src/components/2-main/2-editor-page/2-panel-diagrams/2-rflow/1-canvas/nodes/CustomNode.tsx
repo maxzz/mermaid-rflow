@@ -2,9 +2,8 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { memo, type CSSProperties } from 'react';
-import { Handle, Position, useStore, type NodeProps } from 'reactflow';
+import { Handle, Position, type NodeProps } from 'reactflow';
 import { classNames } from '@/utils';
-import { screenPx } from './8-resizer-styles';
 
 type CustomNodeData = {
     label: string;
@@ -20,8 +19,7 @@ type CustomNodeData = {
 export const CustomNode = memo(CustomNodeInner);
 
 function CustomNodeInner(props: NodeProps<CustomNodeData>) {
-    const { data, isConnectable, selected } = props;
-    const zoom = useStore((state) => state.transform[2]);
+    const { data, isConnectable } = props;
     const isImageNode = Boolean(data.imageUrl?.trim());
     const displayCaption = data.label?.trim()
         ? (data.label.length > 20 ? `${data.label.slice(0, 20)}...` : data.label)
@@ -74,7 +72,6 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
         <div
             className={classNames(
                 containerClasses,
-                selected && !isImageNode && 'border-[#2563eb]!',
                 data.shape === 'circle' && 'aspect-square rounded-full',
                 data.shape === 'stadium' && 'rounded-[30px]',
                 data.shape === 'round' && 'rounded-[15px]',
@@ -105,7 +102,6 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
                                 src={data.imageUrl}
                                 alt={data.label || 'Node image'}
                                 className="w-full h-full object-contain block bg-transparent"
-                                style={selected ? { outline: `${screenPx(2, zoom)}px solid #1976d2`, outlineOffset: screenPx(2, zoom) } : undefined}
                             />
                         </div>
                         

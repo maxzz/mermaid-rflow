@@ -67,8 +67,13 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
         [enabled, intensity, keys, link.origin, nodes, reactFlow]);
 
     const classForNode = useCallback(
-        (node: Node) => classForKey(catalogKeyForNode(node), keys, intensity, caretNodeClasses, clickNodeClasses),
-        [intensity, keys]);
+        (node: Node) => {
+            if (link.origin === 'diagram') {
+                return undefined;
+            }
+            return classForKey(catalogKeyForNode(node), keys, intensity, caretNodeClasses, clickNodeClasses);
+        },
+        [intensity, keys, link.origin]);
 
     const classForEdge = useCallback(
         (edge: Edge) => classForKey(catalogKeyForEdge(edge), keys, intensity, caretEdgeClasses, clickEdgeClasses),
