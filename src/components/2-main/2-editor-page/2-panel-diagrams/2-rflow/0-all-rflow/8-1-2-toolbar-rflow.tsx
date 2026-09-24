@@ -11,14 +11,14 @@ export function PreviewToolbar_Rflow() {
 
     return (
         <TabDropdownMenu>
-            <DropdownMenuItem onSelect={saveCurrentFlow}>
-                <SaveIcon />
-                Save diagram
-            </DropdownMenuItem>
-
             <DropdownMenuItem onSelect={() => setLoadOpen(true)}>
                 <FolderOpenIcon />
                 Load diagram
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onSelect={saveCurrentFlow}>
+                <SaveIcon />
+                Save diagram
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
@@ -32,6 +32,8 @@ export function PreviewToolbar_Rflow() {
                 <DownloadIcon />
                 Export JSON
             </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
 
             <DropdownMenuItem onSelect={() => void methods.exportImage?.()}>
                 <ImageIcon />

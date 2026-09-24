@@ -1,7 +1,7 @@
 import { BoxSelectIcon, CopyIcon, LockIcon, SearchIcon, Trash2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { type Edge, type Node } from 'reactflow';
-import { AlignHorizontalGroup, AlignVerticalGroup, DistributeGroup } from './8-1-1-1-arrange-groups';
+import { AlignHorizontalGroup, AlignVerticalGroup, DistributeGroup } from './8-1-1-1-arrange-buttons';
 
 type EditingToolbarProps = {
     selectedNodes: Node[];

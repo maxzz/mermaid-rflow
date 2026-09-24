@@ -430,7 +430,9 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                             }}
                         >
                             <Background variant={BackgroundVariant.Dots} />
+                            
                             <MiniMap />
+
                         </ReactFlow>
                     )
                     : null
