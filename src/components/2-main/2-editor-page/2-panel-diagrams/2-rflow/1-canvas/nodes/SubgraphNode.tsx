@@ -2,14 +2,25 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { memo, type CSSProperties } from 'react';
-import { Handle, Position, NodeResizer, type NodeProps } from 'reactflow';
+import { Handle, Position, NodeResizer, useStore, type NodeProps } from 'reactflow';
 import { classNames } from '@/utils';
+import { resizerStyles, screenPx } from './8-resizer-styles';
 
 export const SubgraphNode = memo(SubgraphNodeInner);
 
 function SubgraphNodeInner({ data, selected, isConnectable }: NodeProps<{ label: string; isDragging?: boolean; }>) {
+    const zoom = useStore((state) => state.transform[2]);
+    const chrome = resizerStyles(zoom);
     return (
-        <div className={classNames('relative w-full h-full', selected && 'outline-2 outline-[#2563eb] -outline-offset-1 shadow-[0_0_0_4px_rgba(37,99,235,0.1)]')} title={selected ? 'Drag corners to resize' : undefined}>
+        <div
+            className="relative w-full h-full"
+            title={selected ? 'Drag corners to resize' : undefined}
+            style={selected ? {
+                outline: `${screenPx(2, zoom)}px solid #2563eb`,
+                outlineOffset: -screenPx(1, zoom),
+                boxShadow: `0 0 0 ${screenPx(4, zoom)}px rgba(37, 99, 235, 0.1)`,
+            } : undefined}
+        >
             {!data.isDragging && (
                 <NodeResizer
                     isVisible={selected}
@@ -17,8 +28,8 @@ function SubgraphNodeInner({ data, selected, isConnectable }: NodeProps<{ label:
                     minHeight={40}
                     maxWidth={600}
                     maxHeight={500}
-                    handleStyle={RESIZER_STYLES.handle}
-                    lineStyle={RESIZER_STYLES.line}
+                    handleStyle={chrome.handle}
+                    lineStyle={chrome.line}
                 />
             )}
 
@@ -61,22 +72,6 @@ const HANDLE_STYLES = {
         border: '2px solid white',
         zIndex: 11,
         opacity: 0.8,
-    },
-};
-
-const RESIZER_STYLES = {
-    handle: {
-        backgroundColor: '#2563eb',
-        border: '2px solid white',
-        width: 12,
-        height: 12,
-        borderRadius: '3px',
-        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-    },
-    line: {
-        borderColor: '#2563eb',
-        borderWidth: 2,
-        opacity: 0.6,
     },
 };
 

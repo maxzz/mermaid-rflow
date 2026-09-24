@@ -457,7 +457,6 @@ relative w-full h-full flex flex-col \
 [&_.react-flow__node-diamond.react-flow__node-selected]:shadow-none! \
 [&_.react-flow__node-diamond.react-flow__node-selected]:outline-none! \
 [&_.react-flow__node-group]:cursor-move \
-[&_.react-flow__node-group.selected]:shadow-[0_0_0_2px_#1976d2]! \
 [&_.react-flow__edge-text]:text-xs! [&_.react-flow__edge-text]:font-medium! \
 [&_.react-flow__handle]:opacity-0 \
 [&_.react-flow__handle]:scale-[0.8] \

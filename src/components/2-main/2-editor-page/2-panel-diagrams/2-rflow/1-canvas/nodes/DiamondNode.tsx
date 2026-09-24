@@ -1,11 +1,14 @@
 import { type CSSProperties, memo } from 'react';
-import { type NodeProps, Handle, Position, NodeResizer } from 'reactflow';
+import { type NodeProps, Handle, Position, NodeResizer, useStore } from 'reactflow';
 import { classNames } from '@/utils';
+import { resizerStyles } from './8-resizer-styles';
 
 export const DiamondNode = memo(DiamondNodeInner);
 
 function DiamondNodeInner(props: NodeProps<DiamondNodeData>) {
     const { data, isConnectable, selected } = props;
+    const zoom = useStore((state) => state.transform[2]);
+    const chrome = resizerStyles(zoom);
 
     const style = data?.style as (CSSProperties & { borderColor?: string; borderWidth?: string | number; }) | undefined;
     const bgColor = style?.backgroundColor || '#FFF3E0';
@@ -34,8 +37,8 @@ function DiamondNodeInner(props: NodeProps<DiamondNodeData>) {
                     minHeight={60}
                     maxWidth={500}
                     maxHeight={500}
-                    handleStyle={RESIZER_STYLES.handle}
-                    lineStyle={RESIZER_STYLES.line}
+                    handleStyle={chrome.handle}
+                    lineStyle={chrome.line}
                 />
             )}
 
@@ -101,18 +104,3 @@ type DiamondNodeData = {
     onEdit?: () => void;
 };
 
-const RESIZER_STYLES = {
-    handle: {
-        backgroundColor: '#2563eb',
-        border: '2px solid white',
-        width: 12,
-        height: 12,
-        borderRadius: '3px',
-        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-    },
-    line: {
-        borderColor: '#2563eb',
-        borderWidth: 2,
-        opacity: 0.6,
-    },
-};
