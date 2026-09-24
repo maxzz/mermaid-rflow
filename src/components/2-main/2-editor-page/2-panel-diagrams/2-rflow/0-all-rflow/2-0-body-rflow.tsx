@@ -394,8 +394,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                                 if (!type) {
                                     return;
                                 }
-                                const bounds = reactFlowWrapper.current!.getBoundingClientRect();
-                                const position = reactFlowInstance.project({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
+                                const position = reactFlowInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
                                 const current = rf_Diagram.nodes as Node[];
                                 let newNode: Node | undefined;
                                 if (type === 'node') {

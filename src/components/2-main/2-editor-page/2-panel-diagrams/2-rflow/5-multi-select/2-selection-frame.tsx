@@ -5,7 +5,7 @@ import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
 import { FRAME_STROKE, HANDLE_RADIUS, HANDLE_SIZE, type Corner, type FlowBox, frameAround, scaleFromCorner, unionBounds } from './3-selection-frame-math';
 
 export function SelectionFrame() {
-    const { project } = useReactFlow();
+    const { screenToFlowPosition } = useReactFlow();
     const store = useStoreApi();
     const transform = useStore((state) => state.transform);
     const nodeInternals = useStore((state) => state.nodeInternals);
@@ -51,11 +51,7 @@ export function SelectionFrame() {
         if (!session) {
             return;
         }
-        const pane = event.currentTarget.closest('.react-flow')?.getBoundingClientRect();
-        if (!pane) {
-            return;
-        }
-        const pointer = project({ x: event.clientX - pane.left, y: event.clientY - pane.top });
+        const pointer = screenToFlowPosition({ x: event.clientX, y: event.clientY });
         const scaled = scaleFromCorner(session.start, session.bounds, session.corner, pointer);
         applyScaledBoxes(scaled);
     }

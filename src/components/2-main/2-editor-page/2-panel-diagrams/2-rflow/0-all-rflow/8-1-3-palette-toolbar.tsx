@@ -23,6 +23,7 @@ export function PaletteToolbar({ className }: { className?: string; }) {
                             role="button"
                             key={it.id}
                         >
+                            +
                             <Icon className="size-3.5" />
                             <span className="whitespace-nowrap">{it.label}</span>
                         </div>
