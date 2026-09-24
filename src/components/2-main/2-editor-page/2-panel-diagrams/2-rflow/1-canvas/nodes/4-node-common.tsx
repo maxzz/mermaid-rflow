@@ -1,5 +1,6 @@
 import { classNames } from '@/utils';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position, type Node, type XYPosition } from 'reactflow';
+import { nextRfId } from '../../2-converter/8-mermaid-ids';
 
 export function ConnectionHandle({ type, position, id, isConnectable }: { type: 'source' | 'target'; position: Position; id: string; isConnectable?: boolean; }) {
     return (
@@ -22,4 +23,34 @@ export function ConnectionHandle({ type, position, id, isConnectable }: { type: 
             id={id}
         />
     );
+}
+
+export function createPaletteNode(type: string, position: XYPosition, existing: Node[]): Node | undefined {
+    if (type === 'node') {
+        return {
+            id: nextRfId(existing, 'n'),
+            type: 'custom',
+            position,
+            data: { label: 'New Node', shape: 'rect' },
+            style: { width: 150, height: 50 },
+        };
+    }
+    if (type === 'subgraph') {
+        return {
+            id: nextRfId(existing, 'sg'),
+            type: 'group',
+            position,
+            data: { label: 'New Subgraph', isSubgraph: true },
+            style: { width: 220, height: 120, background: '#e3f2fd', border: '2px dashed #1976D2' },
+        };
+    }
+    if (type === 'diamond') {
+        return {
+            id: nextRfId(existing, 'd'),
+            type: 'diamond',
+            position,
+            data: { label: 'Conditional', shape: 'diamond' },
+            style: { width: 120, height: 120, backgroundColor: '#FFF3E0', borderColor: '#F57C00' },
+        };
+    }
 }

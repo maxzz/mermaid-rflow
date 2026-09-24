@@ -36,6 +36,7 @@ import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
 import { deleteSelected, duplicateNodes, lockNodes, unlockNodes } from '../1-canvas/8-diagram-editing-utils';
 import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
+import { createPaletteNode } from '../1-canvas/nodes/4-node-common';
 
 import { EditingToolbar } from './8-1-1-0-toolbar-rflow';
 import { PaletteToolbar } from './8-1-3-palette-toolbar';
@@ -44,7 +45,6 @@ import { EdgeLabelEditorDialog } from '../4-dialogs/2-dlg-edge-label-editor';
 import { NodeEditorDialog } from '../4-dialogs/1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
-import { nextRfId } from '../2-converter/8-mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
 import { RflowMarquee, SelectionFrame } from '../5-multi-select';
 
@@ -396,32 +396,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                                 }
                                 const position = reactFlowInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
                                 const current = rf_Diagram.nodes as Node[];
-                                let newNode: Node | undefined;
-                                if (type === 'node') {
-                                    newNode = {
-                                        id: nextRfId(current, 'n'),
-                                        type: 'custom',
-                                        position,
-                                        data: { label: 'New Node', shape: 'rect' },
-                                        style: { width: 150, height: 50 },
-                                    };
-                                } else if (type === 'subgraph') {
-                                    newNode = {
-                                        id: nextRfId(current, 'sg'),
-                                        type: 'group',
-                                        position,
-                                        data: { label: 'New Subgraph', isSubgraph: true },
-                                        style: { width: 220, height: 120, background: '#e3f2fd', border: '2px dashed #1976D2' },
-                                    };
-                                } else if (type === 'diamond') {
-                                    newNode = {
-                                        id: nextRfId(current, 'd'),
-                                        type: 'diamond',
-                                        position,
-                                        data: { label: 'Conditional', shape: 'diamond' },
-                                        style: { width: 120, height: 120, backgroundColor: '#FFF3E0', borderColor: '#F57C00' },
-                                    };
-                                }
+                                const newNode = createPaletteNode(type, position, current);
                                 if (newNode) {
                                     setRflowNodes([...current, newNode]);
                                     syncMermaidFromGraph();
