@@ -1,6 +1,5 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT) layout / alignment / shape constants.
- */
+//---------------------------------------------------------------------------
+// Layout spacing.
 
 export const LAYOUT_SPACING = {
     SUBGRAPH_HEADER_HEIGHT: 35,
@@ -18,6 +17,9 @@ export const LAYOUT_SPACING = {
     MIXED_CONTENT_HORIZONTAL_SPACING: 120,
 } as const;
 
+//---------------------------------------------------------------------------
+// Alignment types.
+
 export const ALIGNMENT_TYPES = {
     LEFT: 'left',
     RIGHT: 'right',
@@ -29,12 +31,18 @@ export const ALIGNMENT_TYPES = {
 
 export type AlignmentType = typeof ALIGNMENT_TYPES[keyof typeof ALIGNMENT_TYPES];
 
+//---------------------------------------------------------------------------
+// Distribution types.
+
 export const DISTRIBUTION_TYPES = {
     HORIZONTAL: 'horizontal',
     VERTICAL: 'vertical',
 } as const;
 
 export type DistributionType = typeof DISTRIBUTION_TYPES[keyof typeof DISTRIBUTION_TYPES];
+
+//---------------------------------------------------------------------------
+// Layout directions.
 
 export const LAYOUT_DIRECTIONS = {
     TOP_TO_BOTTOM: 'TB',
@@ -45,6 +53,9 @@ export const LAYOUT_DIRECTIONS = {
 
 export type LayoutDirection = typeof LAYOUT_DIRECTIONS[keyof typeof LAYOUT_DIRECTIONS];
 
+//---------------------------------------------------------------------------
+// Node shapes.
+
 export const NODE_SHAPES = {
     RECTANGLE: 'rect',
     DIAMOND: 'diamond',
@@ -54,6 +65,9 @@ export const NODE_SHAPES = {
 } as const;
 
 export type NodeShape = typeof NODE_SHAPES[keyof typeof NODE_SHAPES];
+
+//---------------------------------------------------------------------------
+// Node shape colors.
 
 export const NODE_SHAPE_COLORS = {
     [NODE_SHAPES.RECTANGLE]: ['#E3F2FD', '#1976D2'],

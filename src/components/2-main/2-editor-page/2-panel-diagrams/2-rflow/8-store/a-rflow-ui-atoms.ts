@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
-import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/constants';
+import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/8-constants';
 import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
 import { rf_Diagram, setRflowNodes } from './0-flow-diagram';
 import { syncMermaidFromGraph } from './1-sync-with-source';

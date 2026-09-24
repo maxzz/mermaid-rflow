@@ -1,5 +1,4 @@
 /**
- * Adapted from mermaid-reactflow-editor (MIT).
  * Extract and sanitize Mermaid source from fenced or mixed text.
  */
 
@@ -7,6 +6,7 @@ export function extractMermaidFromFences(content: string) {
     if (!content) {
         return content;
     }
+
     const fencedRegex = /```(?:\s*mermaid\b)?\s*\n([\s\S]*?)```/im;
     const m = content.match(fencedRegex);
     if (m && m[1]) {
@@ -42,6 +42,7 @@ export function sanitizeMermaidLabels(src: string) {
     if (!src) {
         return src;
     }
+    
     const replaced = src.replace(/([A-Za-z0-9_]+)\[((?:(?![\"']).)*?)\]/g, (m, id, label) => {
         if (/^[\"']/.test(label)) {
             return m;

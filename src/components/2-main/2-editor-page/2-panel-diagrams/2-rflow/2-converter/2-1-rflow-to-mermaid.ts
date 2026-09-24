@@ -1,38 +1,11 @@
-/**
- * Serialize a React Flow graph back to Mermaid flowchart text.
- * Positions, colors, icons, and images are canvas-only and are not emitted.
- */
 import { type Edge, type Node } from 'reactflow';
-import { mermaidIdFromEndpoint, mermaidIdOf, isSubgraphNode } from './mermaid-ids';
+import { mermaidIdFromEndpoint, mermaidIdOf, isSubgraphNode } from './8-mermaid-ids';
+
+//Serialize a React Flow graph back to Mermaid flowchart text. Positions, colors, icons, and images are canvas-only and are not emitted.
 
 export type SerializeResult =
     | { ok: true; mermaid: string }
     | { ok: false; reason: 'not-flowchart' };
-
-const FLOWCHART_DECL = /^(flowchart|graph)\b/i;
-
-const MERMAID_OPS: Record<string, string> = {
-    '->': '-->',
-    '-->': '-->',
-    '->>': '-->',
-    '---': '---',
-    '-.-': '-.->',
-    '-.->': '-.->',
-    '==>': '==>',
-    '===>': '==>',
-    '===': '==>',
-};
-
-export function classifyMermaidSource(source: string): 'empty' | 'flowchart' | 'other' {
-    const header = extractHeader(source);
-    if (header === 'empty') {
-        return 'empty';
-    }
-    if (header === 'other') {
-        return 'other';
-    }
-    return 'flowchart';
-}
 
 export function reactFlowToMermaid(nodes: Node[], edges: Edge[], currentSource: string): SerializeResult {
     const header = extractHeader(currentSource);
@@ -62,6 +35,9 @@ export function reactFlowToMermaid(nodes: Node[], edges: Edge[], currentSource: 
     }
     return { ok: true, mermaid: `${chunks.join('\n')}\n` };
 }
+
+//---------------------------------------------------------------------------
+// Extract a flowchart declaration from a Mermaid source.
 
 type FlowHeader = {
     prefix: string;
@@ -114,13 +90,7 @@ export function extractHeader(source: string): FlowHeader | 'empty' | 'other' {
     return 'other';
 }
 
-function parentOf(node: Node, ids: Set<string>): string | undefined {
-    const parent = node.parentNode;
-    if (!parent || !ids.has(parent)) {
-        return undefined;
-    }
-    return parent;
-}
+const FLOWCHART_DECL = /^(flowchart|graph)\b/i;
 
 function emitNodes(nodes: Node[], parentRfId: string | undefined, ids: Set<string>, indent: string): string[] {
     const children = nodes.filter((n) => parentOf(n, ids) === parentRfId);
@@ -141,6 +111,14 @@ function emitNodes(nodes: Node[], parentRfId: string | undefined, ids: Set<strin
         }
     }
     return lines;
+}
+
+function parentOf(node: Node, ids: Set<string>): string | undefined {
+    const parent = node.parentNode;
+    if (!parent || !ids.has(parent)) {
+        return undefined;
+    }
+    return parent;
 }
 
 function nodeLabel(node: Node): string {
@@ -193,6 +171,9 @@ function escapeLabel(label: string): string {
     return label.replace(/\r\n/g, '\n').replace(/\n/g, '<br/>').replace(/"/g, '#quot;');
 }
 
+//---------------------------------------------------------------------------
+// Format an edge.
+
 function formatEdge(edge: Edge): string {
     const from = mermaidIdFromEndpoint(edge.source);
     const to = mermaidIdFromEndpoint(edge.target);
@@ -216,4 +197,29 @@ function normalizeOp(raw: string | undefined): string {
         return '-->';
     }
     return MERMAID_OPS[raw] ?? '-->';
+}
+
+const MERMAID_OPS: Record<string, string> = {
+    '->': '-->',
+    '-->': '-->',
+    '->>': '-->',
+    '---': '---',
+    '-.-': '-.->',
+    '-.->': '-.->',
+    '==>': '==>',
+    '===>': '==>',
+    '===': '==>',
+};
+
+//---------------------------------------------------------------------------
+
+export function classifyMermaidSource(source: string): 'empty' | 'flowchart' | 'other' {
+    const header = extractHeader(source);
+    if (header === 'empty') {
+        return 'empty';
+    }
+    if (header === 'other') {
+        return 'other';
+    }
+    return 'flowchart';
 }

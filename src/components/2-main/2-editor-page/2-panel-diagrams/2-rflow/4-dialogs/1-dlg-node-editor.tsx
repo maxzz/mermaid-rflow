@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 import { rf_NodeEditorDraftAtom, doRflowSaveNodeEditorAtom } from '../8-store/a-rflow-ui-atoms';
 import { resetIconSearchQuery } from '../8-store/a-rflow-icon-search-atoms';
 import { IconSearch } from './3-dlg-search';
-import { COLOR_PRESETS } from '../2-converter/constants';
+import { COLOR_PRESETS } from '../2-converter/8-constants';
 
 export function NodeEditorDialog() {
     const [draft, setDraft] = useAtom(rf_NodeEditorDraftAtom);

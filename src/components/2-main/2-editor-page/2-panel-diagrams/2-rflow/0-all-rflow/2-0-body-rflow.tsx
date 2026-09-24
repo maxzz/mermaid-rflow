@@ -44,7 +44,7 @@ import { EdgeLabelEditorDialog } from '../4-dialogs/2-dlg-edge-label-editor';
 import { NodeEditorDialog } from '../4-dialogs/1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
-import { nextRfId } from '../2-converter/mermaid-ids';
+import { nextRfId } from '../2-converter/8-mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
 import { RflowMarquee } from '../5-multi-select';
 

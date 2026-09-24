@@ -1,4 +1,4 @@
-// export { markingRectFromDrag, rectsIntersect, type Rect } from './1-geometry';
-// export { clearMarkingRect, createMarkingRect, setMarkingRect, type MarkingRectState } from './a-store-marking';
-// export { MarkingRect } from './3-marking-rect';
-// export { useMarkingDrag, type MarkingDragOptions } from './4-use-marking-drag';
+export { type Rect, rectContains, rectsIntersect } from './9-types';
+export { useMarkingRectDrag } from './0-use-marking-rect-drag';
+export { MarkingRectDiv } from './8-1-marking-rect-div';
+export { clearMarkingRect, createMarkingRect, setMarkingRect } from './a-store-marking';

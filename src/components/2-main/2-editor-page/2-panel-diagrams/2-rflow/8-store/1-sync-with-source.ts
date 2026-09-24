@@ -2,7 +2,7 @@ import { type Edge, type Node } from 'reactflow';
 import { toast } from 'sonner';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { captureMonacoView } from '../../3-bm/5-1-source-diagram-link-monaco/2-monaco-editor-handle';
-import { reactFlowToMermaid } from '../2-converter/reactFlowToMermaid';
+import { reactFlowToMermaid } from '../2-converter/2-1-rflow-to-mermaid';
 import { rf_Diagram } from './0-flow-diagram';
 
 /** 
