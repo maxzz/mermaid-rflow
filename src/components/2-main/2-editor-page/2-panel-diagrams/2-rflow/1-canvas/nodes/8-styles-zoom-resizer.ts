@@ -1,15 +1,4 @@
-import type { CSSProperties } from 'react';
-
-/** Flow pixels that occupy `screenPx` on screen at the current zoom. */
-export function screenPx(screenPx: number, zoom: number): number {
-    return screenPx / (zoom > 0 ? zoom : 1);
-}
-
-/** Screen pixels at zoom 1. Flow space divides by zoom so the chrome stays this size on screen. */
-const HANDLE = 12;
-const HANDLE_BORDER = 2;
-const HANDLE_RADIUS = 3;
-const LINE = 2;
+import { type CSSProperties } from 'react';
 
 export function resizerStyles(zoom: number): { handle: CSSProperties; line: CSSProperties; } {
     const px = (n: number) => screenPx(n, zoom);
@@ -28,4 +17,15 @@ export function resizerStyles(zoom: number): { handle: CSSProperties; line: CSSP
             opacity: 0.6,
         },
     };
+}
+
+/** Screen pixels at zoom 1. Flow space divides by zoom so the chrome stays this size on screen. */
+const HANDLE = 12;
+const HANDLE_BORDER = 2;
+const HANDLE_RADIUS = 3;
+const LINE = 2;
+
+/** Flow pixels that occupy `screenPx` on screen at the current zoom. */
+export function screenPx(screenPx: number, zoom: number): number {
+    return screenPx / (zoom > 0 ? zoom : 1);
 }

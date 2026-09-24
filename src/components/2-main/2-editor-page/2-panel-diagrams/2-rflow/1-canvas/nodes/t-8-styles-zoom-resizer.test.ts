@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resizerStyles } from './8-resizer-styles';
+import { resizerStyles } from './8-styles-zoom-resizer';
 
 describe('resizerStyles', () => {
     it('keeps handle size, radius, and line thickness constant on screen', () => {

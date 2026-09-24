@@ -1,29 +1,13 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT).
- */
-import { memo, type CSSProperties } from 'react';
-import { Handle, Position, type NodeProps } from 'reactflow';
+import { type CSSProperties, type JSX, memo } from 'react';
 import { classNames } from '@/utils';
-
-type CustomNodeData = {
-    label: string;
-    description?: string;
-    imageUrl?: string;
-    shape?: 'rect' | 'circle' | 'diamond' | 'stadium' | 'round';
-    style?: CSSProperties;
-    isDragging?: boolean;
-    locked?: boolean;
-    onEdit?: () => void;
-};
+import { type NodeProps, Handle, Position } from 'reactflow';
 
 export const CustomNode = memo(CustomNodeInner);
 
 function CustomNodeInner(props: NodeProps<CustomNodeData>) {
     const { data, isConnectable } = props;
     const isImageNode = Boolean(data.imageUrl?.trim());
-    const displayCaption = data.label?.trim()
-        ? (data.label.length > 20 ? `${data.label.slice(0, 20)}...` : data.label)
-        : '';
+    const displayCaption = data.label?.trim() ? (data.label.length > 20 ? `${data.label.slice(0, 20)}...` : data.label) : '';
     const hasLongCaption = (data.label?.length || 0) > 20;
 
     const mergedStyle: CSSProperties = {
@@ -42,17 +26,10 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
         ));
     }
 
-    function ConnectionHandle({ type, position, id }: { type: 'source' | 'target'; position: Position; id: string; }) {
+    function ConnectionHandle({ type, position, id }: { type: 'source' | 'target'; position: Position; id: string; }): JSX.Element {
         return (
             <Handle
-                type={type}
-                position={position}
-                isConnectable={isConnectable}
-                id={id}
-                className={classNames(
-                    `handle-${position.toLowerCase()}`,
-                    'absolute! z-12 bg-[#555] border-2 border-white shadow-[0_0_4px_rgba(0,0,0,0.3)]',
-                )}
+                className={classNames(`handle-${position.toLowerCase()}`, 'absolute! z-12 bg-[#555] border-2 border-white shadow-[0_0_4px_rgba(0,0,0,0.3)]',)}
                 style={{
                     left: position === Position.Left ? 0 : position === Position.Right ? undefined : '50%',
                     right: position === Position.Right ? 0 : undefined,
@@ -64,6 +41,10 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
                                 position === Position.Left ? 'translate(-50%, -50%)' :
                                     'translate(50%, -50%)',
                 }}
+                type={type}
+                position={position}
+                isConnectable={isConnectable}
+                id={id}
             />
         );
     }
@@ -81,18 +62,16 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
             onDoubleClick={data.onEdit}
             style={mergedStyle}
         >
-            {!data.isDragging && (
-                <>
-                    <ConnectionHandle type="target" position={Position.Top} id="top-target" />
-                    <ConnectionHandle type="source" position={Position.Top} id="top-source" />
-                    <ConnectionHandle type="target" position={Position.Bottom} id="bottom-target" />
-                    <ConnectionHandle type="source" position={Position.Bottom} id="bottom-source" />
-                    <ConnectionHandle type="target" position={Position.Left} id="left-target" />
-                    <ConnectionHandle type="source" position={Position.Left} id="left-source" />
-                    <ConnectionHandle type="target" position={Position.Right} id="right-target" />
-                    <ConnectionHandle type="source" position={Position.Right} id="right-source" />
-                </>
-            )}
+            {!data.isDragging && (<>
+                <ConnectionHandle type="target" position={Position.Top} id="top-target" />
+                <ConnectionHandle type="source" position={Position.Top} id="top-source" />
+                <ConnectionHandle type="target" position={Position.Bottom} id="bottom-target" />
+                <ConnectionHandle type="source" position={Position.Bottom} id="bottom-source" />
+                <ConnectionHandle type="target" position={Position.Left} id="left-target" />
+                <ConnectionHandle type="source" position={Position.Left} id="left-source" />
+                <ConnectionHandle type="target" position={Position.Right} id="right-target" />
+                <ConnectionHandle type="source" position={Position.Right} id="right-source" />
+            </>)}
 
             <div className={classNames('relative z-2 box-border p-3.5 w-full h-full overflow-hidden flex flex-col items-center justify-center', isImageNode && 'p-0 overflow-visible')}>
                 {isImageNode
@@ -104,7 +83,7 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
                                 className="w-full h-full object-contain block bg-transparent"
                             />
                         </div>
-                        
+
                         {data.label?.trim() && (
                             <div
                                 className="absolute top-[calc(100%+8px)] left-1/2 z-1000 px-2 py-1 max-w-30 text-[10px] font-medium text-[#333] bg-white/90 rounded truncate -translate-x-1/2"
@@ -150,3 +129,14 @@ justify-center \
 cursor-pointer transition-[border-color,box-shadow] duration-200 \
 hover:border-[#d1d5db] \
 ";
+
+type CustomNodeData = {
+    label: string;
+    description?: string;
+    imageUrl?: string;
+    shape?: 'rect' | 'circle' | 'diamond' | 'stadium' | 'round';
+    style?: CSSProperties;
+    isDragging?: boolean;
+    locked?: boolean;
+    onEdit?: () => void;
+};
