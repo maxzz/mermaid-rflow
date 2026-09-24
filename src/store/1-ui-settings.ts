@@ -6,16 +6,28 @@ const STORE_KEY = "tm-mermaid-rflow";
 const STORE_VER = "v1.0";
 const STORAGE_ID = `${STORE_KEY}__${STORE_VER}`;
 
+export interface RflowCanvasSettings {
+    showBgGrid: boolean;         // dotted background on the Rflow canvas
+    showMinimap: boolean;        // React Rflow minimap
+}
+
 export interface AppSettings {
     theme: ThemeMode;            // Theme mode
     showFooter: boolean;         // Show footer in main layout
     panelSizes: PanelSizes;      // ResizablePanelGroup panel sizes (horizontal: editor | preview)
+    rflow: RflowCanvasSettings;  // React Flow canvas chrome
 }
+
+const DEFAULT_RFLOW: RflowCanvasSettings = {
+    showBgGrid: false,
+    showMinimap: false,
+};
 
 const DEFAULT_SETTINGS: AppSettings = {
     theme: 'light',
     showFooter: true,
     panelSizes: getValidPanelSizes(),
+    rflow: DEFAULT_RFLOW,
 };
 
 // Load settings from localStorage
@@ -31,6 +43,7 @@ function loadSettings(): AppSettings {
                 ...DEFAULT_SETTINGS,
                 ...parsed,
                 panelSizes: getValidPanelSizes(parsed.panelSizes),
+                rflow: { ...DEFAULT_RFLOW, ...parsed.rflow },
             };
         }
     } catch (e) {
@@ -38,6 +51,8 @@ function loadSettings(): AppSettings {
     }
     return { ...DEFAULT_SETTINGS };
 }
+
+//---------------------------------------------------------------------------
 
 export const appSettings = proxy<AppSettings>(loadSettings());
 

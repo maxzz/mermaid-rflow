@@ -66,7 +66,7 @@ export function Body_Rflow({ active = true }: { active?: boolean; }) {
 
 function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const { nodes, edges } = useSnapshot(rf_Diagram);
-    const { theme } = useSnapshot(appSettings);
+    const { theme, rflow } = useSnapshot(appSettings);
     const isDark = isThemeDark(theme);
     const reactFlowInstance = useReactFlow();
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
@@ -429,9 +429,8 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                                 }
                             }}
                         >
-                            <Background variant={BackgroundVariant.Dots} />
-                            
-                            <MiniMap />
+                            {rflow.showBgGrid && <Background variant={BackgroundVariant.Dots} />}
+                            {rflow.showMinimap && <MiniMap />}
 
                         </ReactFlow>
                     )
