@@ -1,6 +1,7 @@
 import { type CSSProperties, memo } from 'react';
-import { type NodeProps, Handle, Position } from 'reactflow';
+import { type NodeProps, Position } from 'reactflow';
 import { classNames } from '@/utils';
+import { ConnectionHandle } from './4-node-common';
 
 export const DiamondNode = memo(DiamondNodeInner);
 
@@ -54,28 +55,6 @@ function DiamondNodeInner(props: NodeProps<DiamondNodeData>) {
                 <ConnectionHandle type="source" position={Position.Right} id="right-source" isConnectable={isConnectable} />
             </>)}
         </div>
-    );
-}
-
-function ConnectionHandle({ type, position, id, isConnectable }: { type: 'source' | 'target'; position: Position; id: string; isConnectable?: boolean; }) {
-    return (
-        <Handle
-            type={type}
-            position={position}
-            isConnectable={isConnectable}
-            id={id}
-            style={{
-                left: position === Position.Left ? 0 : position === Position.Right ? undefined : '50%',
-                right: position === Position.Right ? 0 : undefined,
-                top: position === Position.Top ? 0 : position === Position.Bottom ? undefined : '50%',
-                bottom: position === Position.Bottom ? 0 : undefined,
-                transform:
-                    position === Position.Top ? 'translate(-50%, -50%)' :
-                        position === Position.Bottom ? 'translate(-50%, 50%)' :
-                            position === Position.Left ? 'translate(-50%, -50%)' :
-                                'translate(50%, -50%)',
-            }}
-        />
     );
 }
 

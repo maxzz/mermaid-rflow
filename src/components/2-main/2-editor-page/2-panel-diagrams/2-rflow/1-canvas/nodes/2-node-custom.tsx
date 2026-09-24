@@ -1,6 +1,7 @@
-import { type CSSProperties, type JSX, memo } from 'react';
+import { type CSSProperties, memo } from 'react';
 import { classNames } from '@/utils';
-import { type NodeProps, Handle, Position } from 'reactflow';
+import { type NodeProps, Position } from 'reactflow';
+import { ConnectionHandle } from './4-node-common';
 
 export const CustomNode = memo(CustomNodeInner);
 
@@ -26,29 +27,6 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
         ));
     }
 
-    function ConnectionHandle({ type, position, id }: { type: 'source' | 'target'; position: Position; id: string; }): JSX.Element {
-        return (
-            <Handle
-                className={classNames(`handle-${position.toLowerCase()}`, 'absolute! z-12 bg-[#555] border-2 border-white shadow-[0_0_4px_rgba(0,0,0,0.3)]',)}
-                style={{
-                    left: position === Position.Left ? 0 : position === Position.Right ? undefined : '50%',
-                    right: position === Position.Right ? 0 : undefined,
-                    top: position === Position.Top ? 0 : position === Position.Bottom ? undefined : '50%',
-                    bottom: position === Position.Bottom ? 0 : undefined,
-                    transform:
-                        position === Position.Top ? 'translate(-50%, -50%)' :
-                            position === Position.Bottom ? 'translate(-50%, 50%)' :
-                                position === Position.Left ? 'translate(-50%, -50%)' :
-                                    'translate(50%, -50%)',
-                }}
-                type={type}
-                position={position}
-                isConnectable={isConnectable}
-                id={id}
-            />
-        );
-    }
-
     return (
         <div
             className={classNames(
@@ -63,14 +41,14 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
             style={mergedStyle}
         >
             {!data.isDragging && (<>
-                <ConnectionHandle type="target" position={Position.Top} id="top-target" />
-                <ConnectionHandle type="source" position={Position.Top} id="top-source" />
-                <ConnectionHandle type="target" position={Position.Bottom} id="bottom-target" />
-                <ConnectionHandle type="source" position={Position.Bottom} id="bottom-source" />
-                <ConnectionHandle type="target" position={Position.Left} id="left-target" />
-                <ConnectionHandle type="source" position={Position.Left} id="left-source" />
-                <ConnectionHandle type="target" position={Position.Right} id="right-target" />
-                <ConnectionHandle type="source" position={Position.Right} id="right-source" />
+                <ConnectionHandle type="target" position={Position.Top} id="top-target" isConnectable={isConnectable} />
+                <ConnectionHandle type="source" position={Position.Top} id="top-source" isConnectable={isConnectable} />
+                <ConnectionHandle type="target" position={Position.Bottom} id="bottom-target" isConnectable={isConnectable} />
+                <ConnectionHandle type="source" position={Position.Bottom} id="bottom-source" isConnectable={isConnectable} />
+                <ConnectionHandle type="target" position={Position.Left} id="left-target" isConnectable={isConnectable} />
+                <ConnectionHandle type="source" position={Position.Left} id="left-source" isConnectable={isConnectable} />
+                <ConnectionHandle type="target" position={Position.Right} id="right-target" isConnectable={isConnectable} />
+                <ConnectionHandle type="source" position={Position.Right} id="right-source" isConnectable={isConnectable} />
             </>)}
 
             <div className={classNames('relative z-2 box-border p-3.5 w-full h-full overflow-hidden flex flex-col items-center justify-center', isImageNode && 'p-0 overflow-visible')}>
