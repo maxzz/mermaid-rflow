@@ -2,7 +2,7 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { memo, type CSSProperties } from 'react';
-import { Handle, Position, NodeResizer, type NodeProps } from 'reactflow';
+import { Handle, Position, type NodeProps } from 'reactflow';
 import { classNames } from '@/utils';
 
 type CustomNodeData = {
@@ -16,26 +16,10 @@ type CustomNodeData = {
     onEdit?: () => void;
 };
 
-const RESIZER_STYLES = {
-    handle: {
-        backgroundColor: '#2563eb',
-        border: '2px solid white',
-        width: 12,
-        height: 12,
-        borderRadius: '3px',
-        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-    },
-    line: {
-        borderColor: '#2563eb',
-        borderWidth: 2,
-        opacity: 0.6,
-    },
-};
-
 export const CustomNode = memo(CustomNodeInner);
 
 function CustomNodeInner(props: NodeProps<CustomNodeData>) {
-    const { data, isConnectable, selected } = props;
+    const { data, isConnectable } = props;
     const isImageNode = Boolean(data.imageUrl?.trim());
     const displayCaption = data.label?.trim()
         ? (data.label.length > 20 ? `${data.label.slice(0, 20)}...` : data.label)
@@ -88,7 +72,6 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
         <div
             className={classNames(
                 containerClasses,
-                selected && !isImageNode && 'border-[#2563eb]! shadow-[0_0_0_2px_rgba(37,99,235,0.2)]!',
                 data.shape === 'circle' && 'aspect-square rounded-full',
                 data.shape === 'stadium' && 'rounded-[30px]',
                 data.shape === 'round' && 'rounded-[15px]',
@@ -98,19 +81,6 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
             onDoubleClick={data.onEdit}
             style={mergedStyle}
         >
-            {!data.isDragging && (
-                <NodeResizer
-                    isVisible={selected}
-                    minWidth={isImageNode ? 60 : 40}
-                    minHeight={isImageNode ? 60 : 30}
-                    maxWidth={500}
-                    maxHeight={400}
-                    keepAspectRatio={data.shape === 'circle' || isImageNode}
-                    handleStyle={RESIZER_STYLES.handle}
-                    lineStyle={RESIZER_STYLES.line}
-                />
-            )}
-
             {!data.isDragging && (
                 <>
                     <ConnectionHandle type="target" position={Position.Top} id="top-target" />
@@ -131,10 +101,7 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
                             <img
                                 src={data.imageUrl}
                                 alt={data.label || 'Node image'}
-                                className={classNames(
-                                    'w-full h-full object-contain block bg-transparent',
-                                    selected && 'outline-2 outline-[#1976d2] outline-offset-2',
-                                )}
+                                className="w-full h-full object-contain block bg-transparent"
                             />
                         </div>
                         

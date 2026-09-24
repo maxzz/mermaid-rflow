@@ -2,26 +2,13 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { memo, type CSSProperties } from 'react';
-import { Handle, Position, NodeResizer, type NodeProps } from 'reactflow';
-import { classNames } from '@/utils';
+import { Handle, Position, type NodeProps } from 'reactflow';
 
 export const SubgraphNode = memo(SubgraphNodeInner);
 
-function SubgraphNodeInner({ data, selected, isConnectable }: NodeProps<{ label: string; isDragging?: boolean; }>) {
+function SubgraphNodeInner({ data, isConnectable }: NodeProps<{ label: string; isDragging?: boolean; }>) {
     return (
-        <div className={classNames('relative w-full h-full', selected && 'outline-2 outline-[#2563eb] -outline-offset-1 shadow-[0_0_0_4px_rgba(37,99,235,0.1)]')} title={selected ? 'Drag corners to resize' : undefined}>
-            {!data.isDragging && (
-                <NodeResizer
-                    isVisible={selected}
-                    minWidth={60}
-                    minHeight={40}
-                    maxWidth={600}
-                    maxHeight={500}
-                    handleStyle={RESIZER_STYLES.handle}
-                    lineStyle={RESIZER_STYLES.line}
-                />
-            )}
-
+        <div className="relative w-full h-full">
             {!data.isDragging && isConnectable && handlePositions.map(({ type, position, id }) => (
                 <ConnectionHandle key={id} type={type} position={position} id={id} />
             ))}
@@ -61,22 +48,6 @@ const HANDLE_STYLES = {
         border: '2px solid white',
         zIndex: 11,
         opacity: 0.8,
-    },
-};
-
-const RESIZER_STYLES = {
-    handle: {
-        backgroundColor: '#2563eb',
-        border: '2px solid white',
-        width: 12,
-        height: 12,
-        borderRadius: '3px',
-        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-    },
-    line: {
-        borderColor: '#2563eb',
-        borderWidth: 2,
-        opacity: 0.6,
     },
 };
 

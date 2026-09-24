@@ -1,11 +1,11 @@
 import { type CSSProperties, memo } from 'react';
-import { type NodeProps, Handle, Position, NodeResizer } from 'reactflow';
+import { type NodeProps, Handle, Position } from 'reactflow';
 import { classNames } from '@/utils';
 
 export const DiamondNode = memo(DiamondNodeInner);
 
 function DiamondNodeInner(props: NodeProps<DiamondNodeData>) {
-    const { data, isConnectable, selected } = props;
+    const { data, isConnectable } = props;
 
     const style = data?.style as (CSSProperties & { borderColor?: string; borderWidth?: string | number; }) | undefined;
     const bgColor = style?.backgroundColor || '#FFF3E0';
@@ -26,19 +26,6 @@ function DiamondNodeInner(props: NodeProps<DiamondNodeData>) {
             className={classNames("relative size-full bg-transparent border-none", data.locked && 'locked')}
             onDoubleClick={data.onEdit}
         >
-            {!data.isDragging && (
-                <NodeResizer
-                    isVisible={selected}
-                    keepAspectRatio
-                    minWidth={60}
-                    minHeight={60}
-                    maxWidth={500}
-                    maxHeight={500}
-                    handleStyle={RESIZER_STYLES.handle}
-                    lineStyle={RESIZER_STYLES.line}
-                />
-            )}
-
             <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
                 <polygon points="50,2 98,50 50,98 2,50" fill={String(bgColor)} stroke={String(borderColor)} strokeWidth={borderWidth} />
             </svg>
@@ -101,18 +88,3 @@ type DiamondNodeData = {
     onEdit?: () => void;
 };
 
-const RESIZER_STYLES = {
-    handle: {
-        backgroundColor: '#2563eb',
-        border: '2px solid white',
-        width: 12,
-        height: 12,
-        borderRadius: '3px',
-        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-    },
-    line: {
-        borderColor: '#2563eb',
-        borderWidth: 2,
-        opacity: 0.6,
-    },
-};
