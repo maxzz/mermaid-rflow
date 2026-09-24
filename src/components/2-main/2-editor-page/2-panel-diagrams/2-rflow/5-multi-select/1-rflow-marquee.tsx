@@ -3,8 +3,8 @@ import { useSetAtom } from 'jotai';
 import { type Edge, type Node, useStoreApi } from 'reactflow';
 import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
 import { rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
-import { idsInScreenRect, type HitEdge, type HitNode, type RectFit } from './8-hit-test';
-import { marqueeSelection, withSelectedFlag } from './8-selection';
+import { idsInScreenRect, type HitEdge, type HitNode, type RectFit } from './8-hit-test-math';
+import { marqueeSelection, withSelectedFlag } from './3-selection-frame-math';
 
 import { type Rect, createMarkingRect, useMarkingRectDrag, MarkingRectDiv } from '../../../../../../ui/local-ui/1-marking-rect';
 
