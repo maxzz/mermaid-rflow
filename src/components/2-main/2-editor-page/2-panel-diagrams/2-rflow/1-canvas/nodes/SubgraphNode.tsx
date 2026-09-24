@@ -2,37 +2,13 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { memo, type CSSProperties } from 'react';
-import { Handle, Position, NodeResizer, useStore, type NodeProps } from 'reactflow';
-import { classNames } from '@/utils';
-import { resizerStyles, screenPx } from './8-resizer-styles';
+import { Handle, Position, type NodeProps } from 'reactflow';
 
 export const SubgraphNode = memo(SubgraphNodeInner);
 
-function SubgraphNodeInner({ data, selected, isConnectable }: NodeProps<{ label: string; isDragging?: boolean; }>) {
-    const zoom = useStore((state) => state.transform[2]);
-    const chrome = resizerStyles(zoom);
+function SubgraphNodeInner({ data, isConnectable }: NodeProps<{ label: string; isDragging?: boolean; }>) {
     return (
-        <div
-            className="relative w-full h-full"
-            title={selected ? 'Drag corners to resize' : undefined}
-            style={selected ? {
-                outline: `${screenPx(2, zoom)}px solid #2563eb`,
-                outlineOffset: -screenPx(1, zoom),
-                boxShadow: `0 0 0 ${screenPx(4, zoom)}px rgba(37, 99, 235, 0.1)`,
-            } : undefined}
-        >
-            {!data.isDragging && (
-                <NodeResizer
-                    isVisible={selected}
-                    minWidth={60}
-                    minHeight={40}
-                    maxWidth={600}
-                    maxHeight={500}
-                    handleStyle={chrome.handle}
-                    lineStyle={chrome.line}
-                />
-            )}
-
+        <div className="relative w-full h-full">
             {!data.isDragging && isConnectable && handlePositions.map(({ type, position, id }) => (
                 <ConnectionHandle key={id} type={type} position={position} id={id} />
             ))}

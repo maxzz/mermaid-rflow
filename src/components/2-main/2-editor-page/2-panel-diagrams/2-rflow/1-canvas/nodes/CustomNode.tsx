@@ -2,9 +2,9 @@
  * Adapted from mermaid-reactflow-editor (MIT).
  */
 import { memo, type CSSProperties } from 'react';
-import { Handle, Position, NodeResizer, useStore, type NodeProps } from 'reactflow';
+import { Handle, Position, useStore, type NodeProps } from 'reactflow';
 import { classNames } from '@/utils';
-import { resizerStyles, screenPx } from './8-resizer-styles';
+import { screenPx } from './8-resizer-styles';
 
 type CustomNodeData = {
     label: string;
@@ -22,7 +22,6 @@ export const CustomNode = memo(CustomNodeInner);
 function CustomNodeInner(props: NodeProps<CustomNodeData>) {
     const { data, isConnectable, selected } = props;
     const zoom = useStore((state) => state.transform[2]);
-    const chrome = resizerStyles(zoom);
     const isImageNode = Boolean(data.imageUrl?.trim());
     const displayCaption = data.label?.trim()
         ? (data.label.length > 20 ? `${data.label.slice(0, 20)}...` : data.label)
@@ -83,24 +82,8 @@ function CustomNodeInner(props: NodeProps<CustomNodeData>) {
                 data.locked && 'locked',
             )}
             onDoubleClick={data.onEdit}
-            style={{
-                ...mergedStyle,
-                ...(selected && !isImageNode ? { boxShadow: `0 0 0 ${screenPx(2, zoom)}px rgba(37, 99, 235, 0.2)` } : {}),
-            }}
+            style={mergedStyle}
         >
-            {!data.isDragging && (
-                <NodeResizer
-                    isVisible={selected}
-                    minWidth={isImageNode ? 60 : 40}
-                    minHeight={isImageNode ? 60 : 30}
-                    maxWidth={500}
-                    maxHeight={400}
-                    keepAspectRatio={data.shape === 'circle' || isImageNode}
-                    handleStyle={chrome.handle}
-                    lineStyle={chrome.line}
-                />
-            )}
-
             {!data.isDragging && (
                 <>
                     <ConnectionHandle type="target" position={Position.Top} id="top-target" />

@@ -46,7 +46,7 @@ import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
 import { nextRfId } from '../2-converter/8-mermaid-ids';
 import { useFlowSourceLink } from './2-1-use-rflow-source-link';
-import { RflowMarquee } from '../5-multi-select';
+import { RflowMarquee, SelectionFrame } from '../5-multi-select';
 
 import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
 import { isThemeDark } from '@/utils/theme-utils';
@@ -431,6 +431,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
                         >
                             {rflow.showBgGrid && <Background variant={BackgroundVariant.Dots} />}
                             {rflow.showMinimap && <MiniMap />}
+                            <SelectionFrame />
 
                         </ReactFlow>
                     )
