@@ -1,15 +1,15 @@
 import { useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { type Edge, type Node, useStoreApi } from 'reactflow';
-import { createMarkingRect } from '../../4-common/1-marking-rect/a-store-marking';
+import { createMarkingRect } from '../../../../../../ui/local-ui/1-marking-rect/a-store-marking';
 import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
 import { rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
 import { idsInScreenRect, type HitEdge, type HitNode, type RectFit } from './8-hit-test';
 import { marqueeSelection, withSelectedFlag } from './8-selection';
 
-import { type Rect } from '../../4-common/1-marking-rect/9-types';
-import { MarkingRectDiv } from '../../4-common/1-marking-rect/8-1-marking-rect-div';
-import { useMarkingRectDrag } from '../../4-common/1-marking-rect/0-use-marking-rect-drag';
+import { type Rect } from '../../../../../../ui/local-ui/1-marking-rect/9-types';
+import { MarkingRectDiv } from '../../../../../../ui/local-ui/1-marking-rect/8-1-marking-rect-div';
+import { useMarkingRectDrag } from '../../../../../../ui/local-ui/1-marking-rect/0-use-marking-rect-drag';
 
 type SurfaceRef = { readonly current: HTMLDivElement | null; };
 
