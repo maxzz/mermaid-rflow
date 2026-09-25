@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { CopyIcon, DownloadIcon } from "lucide-react";
 import { Button } from "@/ui/shadcn/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/ui/shadcn/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
+import { Tabs } from "@/ui/shadcn/tabs";
+import { TabsListAnimated, TabsTriggerAnimated } from "@/ui/local-ui/5-tabs-animated";
 import { BarsLoaderIcon } from "@/ui/local-ui";
 
 import { ExportFormat, mermaidSettings, OutputFormat, type PngScale } from "@/store/2-mermaid-settings";
@@ -84,15 +85,15 @@ function Body() {
         <div className="px-4 py-3 flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
                 <Tabs value={format} onValueChange={(v) => setFormat(v as ExportFormat)}>
-                    <TabsList className="h-7!">
+                    <TabsListAnimated layoutId="export-format" className="h-7!">
                         {EXPORT_FORMATS.map(
                             (f) => (
-                                <TabsTrigger key={f.value} value={f.value} className="px-3">
+                                <TabsTriggerAnimated key={f.value} value={f.value} selectedValue={format} className="px-3">
                                     {f.label}
-                                </TabsTrigger>
+                                </TabsTriggerAnimated>
                             )
                         )}
-                    </TabsList>
+                    </TabsListAnimated>
                 </Tabs>
 
                 {format === ExportFormat.png && (

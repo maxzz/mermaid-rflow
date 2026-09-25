@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/shadcn/dialog';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { Label } from '@/ui/shadcn/label';
 import { Textarea } from '@/ui/shadcn/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
+import { Tabs, TabsContent } from '@/ui/shadcn/tabs';
+import { TabsListAnimated, TabsTriggerAnimated } from '@/ui/local-ui/5-tabs-animated';
 
 import { rf_NodeEditorDraftAtom, doRflowSaveNodeEditorAtom } from '../8-store/a-1-rflow-ui-atoms';
 import { resetIconSearchQuery } from '../8-store/a-3-rflow-icon-search-atoms';
@@ -34,25 +36,7 @@ export function NodeEditorDialog() {
                 </DialogHeader>
 
                 <div className="px-4 py-3">
-                    <Tabs defaultValue="content">
-                        <TabsList className="h-7">
-                            <TabsTrigger value="content" className="px-2 text-[.7rem]">Content</TabsTrigger>
-                            <TabsTrigger value="image" className="px-2 text-[.7rem]">Image</TabsTrigger>
-                            <TabsTrigger value="style" className="px-2 text-[.7rem]">Style</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="content" className="pt-3 flex flex-col gap-3">
-                            <Tab_Content />
-                        </TabsContent>
-
-                        <TabsContent value="image" className="pt-3 flex flex-col gap-3">
-                            <Tab_Image />
-                        </TabsContent>
-
-                        <TabsContent value="style" className="pt-3 flex flex-col gap-4">
-                            <Tab_Style />
-                        </TabsContent>
-                    </Tabs>
+                    <NodeEditorTabs />
                 </div>
 
                 <DialogFooter className="-mx-0.5 -mb-0.5 px-4 py-3 border-t">
@@ -66,6 +50,32 @@ export function NodeEditorDialog() {
 
 //---------------------------------------------------------------------------
 // Tabs
+
+function NodeEditorTabs() {
+    const [tab, setTab] = useState('content');
+
+    return (
+        <Tabs value={tab} onValueChange={setTab}>
+            <TabsListAnimated layoutId="node-editor-tabs" className="h-7">
+                <TabsTriggerAnimated value="content" selectedValue={tab} className="px-2 text-[.7rem]">Content</TabsTriggerAnimated>
+                <TabsTriggerAnimated value="image" selectedValue={tab} className="px-2 text-[.7rem]">Image</TabsTriggerAnimated>
+                <TabsTriggerAnimated value="style" selectedValue={tab} className="px-2 text-[.7rem]">Style</TabsTriggerAnimated>
+            </TabsListAnimated>
+
+            <TabsContent value="content" className="pt-3 flex flex-col gap-3">
+                <Tab_Content />
+            </TabsContent>
+
+            <TabsContent value="image" className="pt-3 flex flex-col gap-3">
+                <Tab_Image />
+            </TabsContent>
+
+            <TabsContent value="style" className="pt-3 flex flex-col gap-4">
+                <Tab_Style />
+            </TabsContent>
+        </Tabs>
+    );
+}
 
 function Tab_Content() {
     const [draft, setDraft] = useAtom(rf_NodeEditorDraftAtom);
