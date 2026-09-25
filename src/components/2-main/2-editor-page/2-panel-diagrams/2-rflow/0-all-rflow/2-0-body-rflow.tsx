@@ -45,7 +45,7 @@ import { EdgeLabelEditorDialog } from '../4-dialogs/2-dlg-edge-label-editor';
 import { NodeEditorDialog } from '../4-dialogs/1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
-import { useFlowSourceLink } from './2-1-use-rflow-source-link';
+import { useFlowSourceLink } from './2-3-use-rflow-source-link';
 import { RflowMarquee, SelectionFrame } from '../5-multi-select';
 
 import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';

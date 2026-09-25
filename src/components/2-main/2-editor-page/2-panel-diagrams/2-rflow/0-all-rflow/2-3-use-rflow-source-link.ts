@@ -1,16 +1,8 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, type MouseEvent } from 'react';
-import { type Edge, type Node, type ReactFlowInstance } from 'reactflow';
 import { useSnapshot } from 'valtio';
+import { type Edge, type Node, type ReactFlowInstance } from 'reactflow';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import {
-    buildSourceIndex,
-    clearSelection,
-    clearSourceLink,
-    selectFromDiagram,
-    setSourceIndex,
-    sourceLink,
-    type LinkIntensity,
-} from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
+import { type LinkIntensity, buildSourceIndex, clearSelection, clearSourceLink, selectFromDiagram, setSourceIndex, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKeys } from '../1-canvas/8-catalog-rflow';
 
 export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: ReactFlowInstance, enabled = true) {
