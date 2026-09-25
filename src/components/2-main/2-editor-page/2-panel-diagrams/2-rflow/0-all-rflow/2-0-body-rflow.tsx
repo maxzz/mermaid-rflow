@@ -10,7 +10,7 @@ import { type Edge, type Node, ReactFlowProvider, useReactFlow } from 'reactflow
 import 'reactflow/dist/style.css';
 
 import { rf_Diagram } from '../8-store/0-flow-diagram';
-import { rf_CanvasMethodsAtom, rf_DraggingAtom, rf_ExportingAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_CanvasMethodsAtom, rf_DraggingAtom, rf_ExportingAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom } from '../8-store/a-rflow-ui-atoms';
 
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
 
@@ -22,7 +22,7 @@ import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 import { useFlowSourceLink } from './2-3-use-rflow-source-link';
 import { RflowMarquee } from '../5-multi-select';
 import { isThemeDark } from '@/utils/theme-utils';
-import { selectSubgraphContents, RflowToolbars } from './2-1-rflow-toolbars';
+import { doSelectSubgraphContentsAtom, RflowToolbars } from './2-1-rflow-toolbars';
 import { ReactFlowErrorGuard, RflowCanvas } from './2-2-rflow-canvas';
 
 export function Body_Rflow({ active = true }: { active?: boolean; }) {
@@ -63,9 +63,8 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         []);
 
-    const setSelectedNodes = useSetAtom(rf_SelectedNodesAtom);
-    const setSelectedEdges = useSetAtom(rf_SelectedEdgesAtom);
     const setSearchOpen = useSetAtom(rf_SearchDialogOpenAtom);
+    const selectSubgraphContents = useSetAtom(doSelectSubgraphContentsAtom);
     const [exporting, setExporting] = useAtom(rf_ExportingAtom);
     const [isDragging] = useAtom(rf_DraggingAtom);
     const [panMode] = useAtom(rf_PanModeAtom);
@@ -92,23 +91,17 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         [reactFlowInstance, setExporting]);
 
-    const onSelectSubgraphContents = useCallback(
-        (subgraphNodeId?: string) => {
-            selectSubgraphContents(subgraphNodeId, setSelectedNodes, setSelectedEdges);
-        },
-        [setSelectedEdges, setSelectedNodes]);
-
     useEffect(
         () => {
             setCanvasMethods({
                 openSearch: () => setSearchOpen(true),
                 exportImage: handleDownloadImage,
-                selectSubgraphContents: onSelectSubgraphContents,
+                selectSubgraphContents,
                 fitView: () => reactFlowInstance.fitView({ padding: 0.2 }),
             });
             return () => setCanvasMethods({});
         },
-        [handleDownloadImage, onSelectSubgraphContents, reactFlowInstance, setCanvasMethods, setSearchOpen]);
+        [handleDownloadImage, reactFlowInstance, selectSubgraphContents, setCanvasMethods, setSearchOpen]);
 
     useEffect(
         () => {

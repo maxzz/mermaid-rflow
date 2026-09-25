@@ -27,7 +27,7 @@ export const rf_CanvasMethodsAtom = atom<RflowCanvasMethods>({});
 //---------------------------------------------------------------------------
 // Arrange selected nodes
 
-const rf_CommitNodesAtom = atom(null, (_get, set, next: Node[]) => {
+export const rf_CommitNodesAtom = atom(null, (_get, set, next: Node[]) => {
     setRflowNodes(next);
     set(rf_SelectedNodesAtom, next.filter((node) => node.selected));
 });
