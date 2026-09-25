@@ -62,9 +62,9 @@ function refreshedSelection(next: Node[], selected: Node[]): Node[] {
 
 export const rf_SelectedLockedAtom = atom((get) => get(rf_SelectedNodesAtom).some((node) => node.data?.locked));
 
-export const rf_HasSelectedNodesAtom = atom((get) => get(rf_SelectedNodesAtom).length > 0);
+export const rf_SelectedNodesLengthAtom = atom((get) => get(rf_SelectedNodesAtom).length);
 
-export const rf_SelectedElementsLengthAtom = atom((get) => get(rf_SelectedNodesAtom).length + get(rf_SelectedEdgesAtom).length);
+export const rf_SelectedElementsLengthAtom = atom((get) => get(rf_SelectedNodesLengthAtom) + get(rf_SelectedEdgesAtom).length);
 
 export const rf_SubgraphSelectedAtom = atom((get) => {
     const selectedNodes = get(rf_SelectedNodesAtom);

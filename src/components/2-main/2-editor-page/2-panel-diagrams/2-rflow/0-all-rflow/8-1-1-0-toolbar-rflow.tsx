@@ -2,7 +2,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { BoxSelectIcon, CopyIcon, LockIcon, SearchIcon, Trash2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { rf_SearchDialogOpenAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
-import { doDeleteSelectedAtom, doDuplicateNodesAtom, doLockNodesAtom, doSelectSubgraphContentsAtom, doUnlockNodesAtom, rf_HasSelectedNodesAtom, rf_SelectedElementsLengthAtom, rf_SelectedLockedAtom, rf_SubgraphSelectedAtom } from '../8-store/2-rflow-toolbars-atoms';
+import { doDeleteSelectedAtom, doDuplicateNodesAtom, doLockNodesAtom, doSelectSubgraphContentsAtom, doUnlockNodesAtom, rf_SelectedElementsLengthAtom, rf_SelectedLockedAtom, rf_SelectedNodesLengthAtom, rf_SubgraphSelectedAtom } from '../8-store/2-rflow-toolbars-atoms';
 import { AlignHorizontalGroup, AlignVerticalGroup, DistributeGroup } from './8-1-1-1-arrange-buttons';
 
 export function EditingToolbar() {
@@ -15,7 +15,7 @@ export function EditingToolbar() {
     const onSelectSubgraphContents = useSetAtom(doSelectSubgraphContentsAtom);
 
     const locked = useAtomValue(rf_SelectedLockedAtom);
-    const hasSelectedNodes = useAtomValue(rf_HasSelectedNodesAtom);
+    const selectedNodesLength = useAtomValue(rf_SelectedNodesLengthAtom);
     const selectedElementsLength = useAtomValue(rf_SelectedElementsLengthAtom);
     const subgraphSelected = useAtomValue(rf_SubgraphSelectedAtom);
 
@@ -28,7 +28,7 @@ export function EditingToolbar() {
             )}
 
             <span className="px-1.5 min-w-5 h-5 text-[.65rem] tabular-nums text-muted-foreground bg-muted rounded-sm inline-flex items-center justify-center">
-                {selectedNodes.length}
+                {selectedNodesLength}
             </span>
 
             <div className="mx-1 w-0 h-full border-l border-border" />
@@ -51,7 +51,7 @@ export function EditingToolbar() {
 
             <div className="mx-1 w-0 h-full border-l border-border" />
 
-            <Button variant="ghost" size="icon-xs" title="Duplicate" onClick={onDuplicateNodes} disabled={!hasSelectedNodes}>
+            <Button variant="ghost" size="icon-xs" title="Duplicate" onClick={onDuplicateNodes} disabled={!selectedNodesLength}>
                 <CopyIcon />
             </Button>
 
@@ -60,7 +60,7 @@ export function EditingToolbar() {
                 size="icon-xs"
                 title={locked ? 'Unlock selected nodes' : 'Lock selected nodes'}
                 onClick={() => locked ? onUnlockNodes() : onLockNodes()}
-                disabled={!hasSelectedNodes}
+                disabled={!selectedNodesLength}
             >
                 <LockIcon />
             </Button>
