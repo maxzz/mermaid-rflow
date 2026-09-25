@@ -1,8 +1,7 @@
 import { type ComponentProps } from "react";
-import { type Atom, useAtomValue } from "jotai";
 import { classNames } from "@/utils";
 import { TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
-import { LayoutGroup, motion } from "motion/react";
+import { motion, LayoutGroup } from "motion/react";
 
 type TabsListAnimatedProps = ComponentProps<typeof TabsList> & {
     layoutId: string; // Unique id for the sliding indicator within a LayoutGroup. For example, "animated-tab-outline".
@@ -19,17 +18,13 @@ export function TabsListAnimated({ layoutId, className, children, ...rest }: Tab
 }
 
 type AnimatedTabsTriggerProps = ComponentProps<typeof TabsTrigger> & {
-    /** Atom holding the active tab value (same as Tabs root). */
-    valueAtom: Atom<string>;
+    isSelected: boolean;
 };
 
-export function TabsTriggerAnimated({ className, children, value, valueAtom, ...rest }: AnimatedTabsTriggerProps) {
-    const selectedValue = useAtomValue(valueAtom);
-    const selected = selectedValue === value;
-
+export function TabsTriggerAnimated({ className, children, value, isSelected, ...rest }: AnimatedTabsTriggerProps) {
     return (
-        <TabsTrigger className={classNames(animatedTabsTriggerClasses, selected ? "text-foreground" : "text-foreground/60 hover:text-foreground", className)} value={value} {...rest}>
-            {selected && (
+        <TabsTrigger className={classNames(animatedTabsTriggerClasses, isSelected ? "text-foreground" : "text-foreground/60 hover:text-foreground", className)} value={value} {...rest}>
+            {isSelected && (
                 <motion.div
                     layoutId="animated-tab-outline"
                     className="absolute inset-0 bg-background border border-border rounded shadow-xs"
