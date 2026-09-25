@@ -6,30 +6,11 @@ import { doDeleteSelectedAtom, doDuplicateNodesAtom, doLockNodesAtom, doSelectSu
 import { AlignHorizontalGroup, AlignVerticalGroup, DistributeGroup } from './8-1-1-1-arrange-buttons';
 
 export function EditingToolbar() {
-    const selectedNodes = useAtomValue(rf_SelectedNodesAtom);
     const setSearchOpen = useSetAtom(rf_SearchDialogOpenAtom);
-    const onDuplicateNodes = useSetAtom(doDuplicateNodesAtom);
-    const onDeleteSelected = useSetAtom(doDeleteSelectedAtom);
-    const onLockNodes = useSetAtom(doLockNodesAtom);
-    const onUnlockNodes = useSetAtom(doUnlockNodesAtom);
-    const onSelectSubgraphContents = useSetAtom(doSelectSubgraphContentsAtom);
-
-    const locked = useAtomValue(rf_SelectedLockedAtom);
-    const selectedNodesLength = useAtomValue(rf_SelectedNodesLengthAtom);
-    const selectedElementsLength = useAtomValue(rf_SelectedElementsLengthAtom);
-    const subgraphSelected = useAtomValue(rf_SubgraphSelectedAtom);
 
     return (
         <div className="flex items-center gap-0.5 flex-wrap" role="toolbar" aria-label="Editing tools">
-            {subgraphSelected && (
-                <Button variant="ghost" size="icon-xs" title="Select contents" onClick={() => onSelectSubgraphContents(selectedNodes[0].id)}>
-                    <BoxSelectIcon />
-                </Button>
-            )}
-
-            <span className="px-1.5 min-w-5 h-5 text-[.65rem] tabular-nums text-muted-foreground bg-muted rounded-sm inline-flex items-center justify-center">
-                {selectedNodesLength}
-            </span>
+            <SelectedNodesGroup />
 
             <div className="mx-1 w-0 h-full border-l border-border" />
 
@@ -51,23 +32,69 @@ export function EditingToolbar() {
 
             <div className="mx-1 w-0 h-full border-l border-border" />
 
-            <Button variant="ghost" size="icon-xs" title="Duplicate" onClick={onDuplicateNodes} disabled={!selectedNodesLength}>
-                <CopyIcon />
-            </Button>
-
-            <Button
-                variant={locked ? 'default' : 'ghost'}
-                size="icon-xs"
-                title={locked ? 'Unlock selected nodes' : 'Lock selected nodes'}
-                onClick={() => locked ? onUnlockNodes() : onLockNodes()}
-                disabled={!selectedNodesLength}
-            >
-                <LockIcon />
-            </Button>
-
-            <Button variant="ghost" size="icon-xs" className="text-destructive" title="Delete" onClick={onDeleteSelected} disabled={!selectedElementsLength}>
-                <Trash2Icon />
-            </Button>
+            <DuplicateNodesButton />
+            <LockNodesButton />
+            <DeleteSelectedButton />
         </div>
+    );
+}
+
+function SelectedNodesGroup() {
+    const selectedNodes = useAtomValue(rf_SelectedNodesAtom);
+    const selectedNodesLength = useAtomValue(rf_SelectedNodesLengthAtom);
+    const subgraphSelected = useAtomValue(rf_SubgraphSelectedAtom);
+    const onSelectSubgraphContents = useSetAtom(doSelectSubgraphContentsAtom);
+
+    return (<>
+        {subgraphSelected && (
+            <Button variant="ghost" size="icon-xs" title="Select contents" onClick={() => onSelectSubgraphContents(selectedNodes[0].id)}>
+                <BoxSelectIcon />
+            </Button>
+        )}
+
+        <span className="px-1.5 min-w-5 h-5 text-[.65rem] tabular-nums text-muted-foreground bg-muted rounded-sm inline-flex items-center justify-center">
+            {selectedNodesLength}
+        </span>
+    </>);
+}
+
+function DuplicateNodesButton() {
+    const selectedNodesLength = useAtomValue(rf_SelectedNodesLengthAtom);
+    const onDuplicateNodes = useSetAtom(doDuplicateNodesAtom);
+
+    return (
+        <Button variant="ghost" size="icon-xs" title="Duplicate" onClick={onDuplicateNodes} disabled={!selectedNodesLength}>
+            <CopyIcon />
+        </Button>
+    );
+}
+
+function LockNodesButton() {
+    const selectedNodesLength = useAtomValue(rf_SelectedNodesLengthAtom);
+    const locked = useAtomValue(rf_SelectedLockedAtom);
+    const onLockNodes = useSetAtom(doLockNodesAtom);
+    const onUnlockNodes = useSetAtom(doUnlockNodesAtom);
+
+    return (
+        <Button
+            variant={locked ? 'default' : 'ghost'}
+            size="icon-xs"
+            title={locked ? 'Unlock selected nodes' : 'Lock selected nodes'}
+            onClick={() => locked ? onUnlockNodes() : onLockNodes()}
+            disabled={!selectedNodesLength}
+        >
+            <LockIcon />
+        </Button>
+    );
+}
+
+function DeleteSelectedButton() {
+    const selectedElementsLength = useAtomValue(rf_SelectedElementsLengthAtom);
+    const onDeleteSelected = useSetAtom(doDeleteSelectedAtom);
+
+    return (
+        <Button variant="ghost" size="icon-xs" className="text-destructive" title="Delete" onClick={onDeleteSelected} disabled={!selectedElementsLength}>
+            <Trash2Icon />
+        </Button>
     );
 }
