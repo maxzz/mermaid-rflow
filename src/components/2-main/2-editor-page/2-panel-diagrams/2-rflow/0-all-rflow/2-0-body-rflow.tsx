@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type MouseEvent, type RefObject } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
@@ -6,50 +6,24 @@ import { appSettings } from '@/store/1-ui-settings';
 import { toast } from 'sonner';
 import { BarsLoaderIcon } from '@/ui/local-ui';
 
-import ReactFlow, {
-    type Connection,
-    type DefaultEdgeOptions,
-    type Edge,
-    type EdgeChange,
-    type Node,
-    type NodeChange,
-    type NodeTypes,
-    addEdge,
-    applyEdgeChanges,
-    applyNodeChanges,
-    Background,
-    BackgroundVariant,
-    ConnectionLineType,
-    ConnectionMode,
-    MarkerType,
-    MiniMap,
-    ReactFlowProvider,
-    useReactFlow,
-    useStoreApi,
-} from 'reactflow';
+import { type Edge, type Node, ReactFlowProvider, useReactFlow } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
-import { draftFromNode, rf_CanvasMethodsAtom, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_ExportingAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
-import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
+import { rf_Diagram } from '../8-store/0-flow-diagram';
+import { rf_CanvasMethodsAtom, rf_DraggingAtom, rf_ExportingAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
 
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
-import { deleteSelected, duplicateNodes, lockNodes, unlockNodes } from '../1-canvas/8-diagram-editing-utils';
-import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
-import { createPaletteNode } from '../1-canvas/nodes/4-node-common';
 
-import { EditingToolbar } from './8-1-1-0-toolbar-rflow';
-import { PaletteToolbar } from './8-1-3-palette-toolbar';
 import { ZoomControls_Rflow } from './8-3-zoom-controls-rflow';
 import { EdgeLabelEditorDialog } from '../4-dialogs/2-dlg-edge-label-editor';
 import { NodeEditorDialog } from '../4-dialogs/1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
 import { useFlowSourceLink } from './2-3-use-rflow-source-link';
-import { RflowMarquee, SelectionFrame } from '../5-multi-select';
-
-import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
+import { RflowMarquee } from '../5-multi-select';
 import { isThemeDark } from '@/utils/theme-utils';
+import { selectSubgraphContents, RflowToolbars } from './2-1-rflow-toolbars';
+import { ReactFlowErrorGuard, RflowCanvas } from './2-2-rflow-canvas';
 
 export function Body_Rflow({ active = true }: { active?: boolean; }) {
     return (<>
@@ -178,271 +152,6 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
     </>);
 }
 
-function RflowToolbars() {
-    const [selectedNodes, setSelectedNodes] = useAtom(rf_SelectedNodesAtom);
-    const [selectedEdges, setSelectedEdges] = useAtom(rf_SelectedEdgesAtom);
-    const setSearchOpen = useSetAtom(rf_SearchDialogOpenAtom);
-
-    const commitNodes = useCallback(
-        (next: Node[]) => {
-            setRflowNodes(next);
-            setSelectedNodes(next.filter((n) => n.selected));
-        },
-        [setSelectedNodes]);
-
-    const onDuplicateNodes = useCallback(
-        () => {
-            commitNodes(duplicateNodes(rf_Diagram.nodes as Node[], selectedNodes));
-            syncMermaidFromGraph();
-        },
-        [commitNodes, selectedNodes]);
-
-    const onDeleteSelected = useCallback(
-        () => {
-            const { newNodes, newEdges } = deleteSelected(rf_Diagram.nodes as Node[], rf_Diagram.edges as Edge[], selectedNodes, selectedEdges);
-            setRflowNodes(newNodes);
-            setRflowEdges(newEdges);
-            setSelectedNodes([]);
-            setSelectedEdges([]);
-            syncMermaidFromGraph();
-        },
-        [selectedEdges, selectedNodes, setSelectedEdges, setSelectedNodes]);
-
-    const onLockNodes = useCallback(
-        () => {
-            const next = lockNodes(rf_Diagram.nodes as Node[], selectedNodes);
-            setRflowNodes(next);
-            setSelectedNodes(
-                selectedNodes
-                    .map((n) => next.find((x) => x.id === n.id))
-                    .filter((n): n is Node => n !== undefined),
-            );
-        },
-        [selectedNodes, setSelectedNodes]);
-
-    const onUnlockNodes = useCallback(
-        () => {
-            const next = unlockNodes(rf_Diagram.nodes as Node[], selectedNodes);
-            setRflowNodes(next);
-            setSelectedNodes(
-                selectedNodes
-                    .map((n) => next.find((x) => x.id === n.id))
-                    .filter((n): n is Node => n !== undefined),
-            );
-        },
-        [selectedNodes, setSelectedNodes]);
-
-    const onSelectSubgraphContents = useCallback(
-        (subgraphNodeId?: string) => {
-            selectSubgraphContents(subgraphNodeId, setSelectedNodes, setSelectedEdges);
-        },
-        [setSelectedEdges, setSelectedNodes]);
-
-    return (
-        <div className="px-2 py-1.5 border-b border-border bg-muted/20 shrink-0 flex flex-col gap-1.5">
-            <EditingToolbar
-                selectedNodes={selectedNodes}
-                selectedEdges={selectedEdges}
-                onDuplicateNodes={onDuplicateNodes}
-                onDeleteSelected={onDeleteSelected}
-                onLockNodes={onLockNodes}
-                onUnlockNodes={onUnlockNodes}
-                onSelectSubgraphContents={onSelectSubgraphContents}
-                onOpenSearch={() => setSearchOpen(true)}
-            />
-            <PaletteToolbar />
-        </div>
-    );
-}
-
-function selectSubgraphContents(subgraphNodeId: string | undefined, setSelectedNodes: (nodes: Node[]) => void, setSelectedEdges: (edges: Edge[]) => void) {
-    if (!subgraphNodeId) {
-        return;
-    }
-    const updatedNodes = (rf_Diagram.nodes as Node[]).map((n) => ({ ...n, selected: n.parentNode === subgraphNodeId }));
-    const nodeIds = new Set(updatedNodes.filter((n) => n.parentNode === subgraphNodeId).map((n) => n.id));
-    const updatedEdges = (rf_Diagram.edges as Edge[]).map((e) => ({ ...e, selected: nodeIds.has(e.source) && nodeIds.has(e.target) }));
-    setRflowNodes(updatedNodes);
-    setRflowEdges(updatedEdges);
-    setSelectedNodes(updatedNodes.filter((n) => n.selected));
-    setSelectedEdges(updatedEdges.filter((e) => e.selected));
-}
-
-function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<typeof useFlowSourceLink>; anchorRef: RefObject<HTMLDivElement | null>; }) {
-    const { nodes, edges } = useSnapshot(rf_Diagram);
-    const { rflow } = useSnapshot(appSettings);
-    const reactFlowInstance = useReactFlow();
-    const [panMode] = useAtom(rf_PanModeAtom);
-    const setIsDragging = useSetAtom(rf_DraggingAtom);
-    const setSelectedNodes = useSetAtom(rf_SelectedNodesAtom);
-    const setSelectedEdges = useSetAtom(rf_SelectedEdgesAtom);
-    const setEdgeLabelEditor = useSetAtom(rf_EdgeLabelEditorAtom);
-    const setNodeEditorDraft = useSetAtom(rf_NodeEditorDraftAtom);
-
-    const nodesWithLink = useMemo(
-        () => (nodes as Node[]).map((n) => ({ ...n, className: classNames(n.className, sourceLink.classForNode(n)) })),
-        [nodes, sourceLink.classForNode, sourceLink.keys, sourceLink.intensity]);
-
-    const edgesWithSelection = useMemo(
-        () => (edges as Edge[]).map((edge) => ({ ...edge, className: classNames(edge.className, sourceLink.classForEdge(edge)) })),
-        [edges, sourceLink.classForEdge, sourceLink.keys, sourceLink.intensity]);
-
-    const onNodesChange = useCallback(
-        (changes: NodeChange[]) => {
-            const updated = applyNodeChanges(changes, rf_Diagram.nodes as Node[]);
-            setRflowNodes(updated);
-            if (changes.some((c) => c.type === 'select')) {
-                setSelectedNodes(updated.filter((n) => n.selected));
-            }
-            if (changes.some((c) => c.type === 'remove' || c.type === 'add')) {
-                if (changes.some((c) => c.type === 'remove')) {
-                    const ids = new Set(updated.map((n) => n.id));
-                    const nextEdges = (rf_Diagram.edges as Edge[]).filter((e) => ids.has(e.source) && ids.has(e.target));
-                    if (nextEdges.length !== rf_Diagram.edges.length) {
-                        setRflowEdges(nextEdges);
-                    }
-                }
-                syncMermaidFromGraph();
-            }
-        },
-        [setSelectedNodes]);
-
-    const onEdgesChange = useCallback(
-        (changes: EdgeChange[]) => {
-            const updated = applyEdgeChanges(changes, rf_Diagram.edges as Edge[]);
-            setRflowEdges(updated);
-            if (changes.some((c) => c.type === 'select')) {
-                setSelectedEdges(updated.filter((e) => e.selected));
-            }
-            if (changes.some((c) => c.type === 'remove' || c.type === 'add')) {
-                syncMermaidFromGraph();
-            }
-        },
-        [setSelectedEdges]);
-
-    const onConnect = useCallback(
-        (connection: Connection) => {
-            setRflowEdges(
-                addEdge(
-                    {
-                        ...defaultEdgeOptions,
-                        ...connection,
-                        data: { ...defaultEdgeOptions.data, mermaidType: '-->' },
-                    },
-                    rf_Diagram.edges as Edge[],
-                ),
-            );
-            syncMermaidFromGraph();
-        },
-        []);
-
-    const onEdgeDoubleClick = useCallback(
-        (event: MouseEvent, edge: Edge) => {
-            const rect = anchorRef.current?.getBoundingClientRect() ?? { left: 0, top: 0 };
-            setEdgeLabelEditor({
-                edgeId: edge.id,
-                text: String(edge.label ?? ''),
-                x: event.clientX - rect.left,
-                y: event.clientY - rect.top,
-            });
-        },
-        [anchorRef, setEdgeLabelEditor]);
-
-    const onNodeDoubleClick = useCallback(
-        (_event: MouseEvent, node: Node) => {
-            setNodeEditorDraft(draftFromNode(node));
-        },
-        [setNodeEditorDraft]);
-
-    const onEdgeUpdate = useCallback(
-        (oldEdge: Edge, newConnection: Connection) => {
-            if (!newConnection.source || !newConnection.target) {
-                return;
-            }
-            setRflowEdges(
-                (rf_Diagram.edges as Edge[]).map(
-                    (edge) => (
-                        edge.id === oldEdge.id
-                            ? {
-                                ...edge,
-                                ...newConnection,
-                                source: newConnection.source!,
-                                target: newConnection.target!,
-                                data: { ...edge.data, mermaidType: edge.data?.mermaidType ?? '-->' },
-                            }
-                            : edge
-                    )
-                ),
-            );
-            syncMermaidFromGraph();
-        },
-        []);
-
-    function onDragOver(event: DragEvent) {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-    }
-
-    function onDrop(event: DragEvent) {
-        event.preventDefault();
-        const type = event.dataTransfer.getData('application/reactflow');
-        if (!type) {
-            return;
-        }
-        const position = reactFlowInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
-        const current = rf_Diagram.nodes as Node[];
-        const newNode = createPaletteNode(type, position, current);
-        if (newNode) {
-            setRflowNodes([...current, newNode]);
-            syncMermaidFromGraph();
-        }
-    }
-
-    return (
-        <ReactFlow
-            minZoom={ZOOM_MIN}
-            maxZoom={ZOOM_MAX}
-            nodes={nodesWithLink}
-            edges={edgesWithSelection}
-            nodesDraggable={!panMode}
-            nodesConnectable={!panMode}
-            elementsSelectable={!panMode}
-            panOnDrag={panMode}
-            selectionKeyCode={null}
-            multiSelectionKeyCode="Shift"
-            onlyRenderVisibleElements
-            onNodeDragStart={() => setIsDragging(true)}
-            onNodeDragStop={() => setIsDragging(false)}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={sourceLink.onNodeClick}
-            onNodeDoubleClick={onNodeDoubleClick}
-            nodeTypes={nodeTypes}
-            defaultEdgeOptions={defaultEdgeOptions}
-            onError={onReactFlowError}
-            fitView
-            deleteKeyCode={['Delete', 'Backspace']}
-            panOnScroll={false}
-            zoomOnScroll
-            zoomOnPinch
-            connectionLineType={ConnectionLineType.SmoothStep}
-            onEdgeClick={sourceLink.onEdgeClick}
-            onPaneClick={sourceLink.onPaneClick}
-            edgesUpdatable
-            connectionMode={ConnectionMode.Loose}
-            onEdgeUpdate={onEdgeUpdate}
-            onEdgeDoubleClick={onEdgeDoubleClick}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
-        >
-            {rflow.showBgGrid && <Background variant={BackgroundVariant.Dots} />}
-            {rflow.showMinimap && <MiniMap />}
-            <SelectionFrame />
-        </ReactFlow>
-    );
-}
-
 const containerClasses = " \
 relative w-full h-full flex flex-col \
 [&_.react-flow__node-custom]:shadow-none! \
@@ -483,35 +192,3 @@ const containerDraggingClasses = " \
 [&_.react-flow__edge.animated_path]:[stroke-dasharray:none] \
 [&_.react-flow__node-resizer]:invisible \
 [&_.react-flow__handle]:invisible";
-
-//---------------------------------------------------------------------------
-
-const nodeTypes: NodeTypes = {
-    custom: CustomNode,
-    diamond: DiamondNode,
-    group: SubgraphNode,
-};
-
-const defaultEdgeOptions: DefaultEdgeOptions = {
-    type: 'smoothstep',
-    animated: true,
-    style: { stroke: '#1976D2', strokeWidth: 2.5 },
-    markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#1976D2' },
-    data: { mermaidType: '-->' },
-};
-
-/** reactflow@11 checks type keys inside useMemo; React Strict Mode runs that callback twice and false-positives error 002. */
-function onReactFlowError(id: string, message: string) {
-    if (id === '002' || id === '004') {
-        return;
-    }
-    console.warn(`[React Flow]: ${message} Help: https://reactflow.dev/error#${id}`);
-}
-
-function ReactFlowErrorGuard({ children }: { children: React.ReactNode; }) {
-    const store = useStoreApi();
-    if (store.getState().onError !== onReactFlowError) {
-        store.getState().onError = onReactFlowError;
-    }
-    return children;
-}
