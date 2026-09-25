@@ -1,7 +1,8 @@
 import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
 import { rf_Diagram, setRflowEdges, setRflowNodes } from './a-0-flow-diagram';
-import { rf_CommitNodesAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from './a-1-rflow-ui-atoms';
+import { rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from './a-1-rflow-ui-atoms';
+import { rf_CommitNodesAtom } from './a-3-rflow-arrange-atoms';
 import { syncMermaidFromGraph } from './a-7-sync-with-source';
 import { nextRfId, prefixForNode } from '../2-converter/8-mermaid-ids';
 

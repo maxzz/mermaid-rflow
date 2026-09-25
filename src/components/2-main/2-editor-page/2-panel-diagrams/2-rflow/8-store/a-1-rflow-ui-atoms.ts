@@ -1,7 +1,6 @@
 import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
-import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/8-constants';
-import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
+import { DEFAULT_COLORS } from '../2-converter/8-constants';
 import { rf_Diagram, setRflowNodes } from './a-0-flow-diagram';
 import { syncMermaidFromGraph } from './a-7-sync-with-source';
 import { resetIconSearchQuery } from './a-3-rflow-icon-search-atoms';
@@ -23,24 +22,6 @@ export type RflowCanvasMethods = {
 };
 
 export const rf_CanvasMethodsAtom = atom<RflowCanvasMethods>({});
-
-//---------------------------------------------------------------------------
-// Arrange selected nodes
-
-export const rf_CommitNodesAtom = atom(null, (_get, set, next: Node[]) => {
-    setRflowNodes(next);
-    set(rf_SelectedNodesAtom, next.filter((node) => node.selected));
-});
-
-export const rf_AlignNodesAtom = atom(null, (get, set, alignment: AlignmentType) => {
-    const next = alignNodes(rf_Diagram.nodes as Node[], get(rf_SelectedNodesAtom), alignment);
-    set(rf_CommitNodesAtom, next);
-});
-
-export const rf_DistributeNodesAtom = atom(null, (get, set, direction: DistributionType) => {
-    const next = distributeNodes(rf_Diagram.nodes as Node[], get(rf_SelectedNodesAtom), direction);
-    set(rf_CommitNodesAtom, next);
-});
 
 //---------------------------------------------------------------------------
 

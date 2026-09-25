@@ -39,12 +39,7 @@ export function reactFlowToMermaid(nodes: Node[], edges: Edge[], currentSource: 
 //---------------------------------------------------------------------------
 // Extract a flowchart declaration from a Mermaid source.
 
-type FlowHeader = {
-    prefix: string;
-    declaration: string;
-};
-
-export function extractHeader(source: string): FlowHeader | 'empty' | 'other' {
+export function extractHeader(source: string): { prefix: string; declaration: string } | 'empty' | 'other' {
     let rest = source.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
     if (!rest.trim()) {
         return 'empty';

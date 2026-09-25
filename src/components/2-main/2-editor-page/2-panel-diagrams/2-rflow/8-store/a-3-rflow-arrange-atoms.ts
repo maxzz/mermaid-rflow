@@ -1,10 +1,51 @@
-/**
- * Adapted from mermaid-reactflow-editor (MIT).
- */
+import { atom } from 'jotai';
 import { type Node } from 'reactflow';
-import { ALIGNMENT_TYPES, DISTRIBUTION_TYPES, type AlignmentType, type DistributionType } from '../2-converter/8-constants';
+import { rf_Diagram, setRflowNodes } from './a-0-flow-diagram';
+import { rf_SelectedNodesAtom } from './a-1-rflow-ui-atoms';
 
-export function alignNodes(nodes: Node[], selectedNodes: Node[], alignment: AlignmentType): Node[] {
+//---------------------------------------------------------------------------
+// Alignment types.
+
+export const ALIGNMENT_TYPES = {
+    LEFT: 'left',
+    RIGHT: 'right',
+    TOP: 'top',
+    BOTTOM: 'bottom',
+    CENTER_HORIZONTAL: 'center-horizontal',
+    CENTER_VERTICAL: 'center-vertical',
+} as const;
+
+export type AlignmentType = typeof ALIGNMENT_TYPES[keyof typeof ALIGNMENT_TYPES];
+
+//---------------------------------------------------------------------------
+// Distribution types.
+
+export const DISTRIBUTION_TYPES = {
+    HORIZONTAL: 'horizontal',
+    VERTICAL: 'vertical',
+} as const;
+
+export type DistributionType = typeof DISTRIBUTION_TYPES[keyof typeof DISTRIBUTION_TYPES];
+
+//---------------------------------------------------------------------------
+// Arrange selected nodes
+
+export const rf_CommitNodesAtom = atom(null, (_get, set, next: Node[]) => {
+    setRflowNodes(next);
+    set(rf_SelectedNodesAtom, next.filter((node) => node.selected));
+});
+
+export const rf_AlignNodesAtom = atom(null, (get, set, alignment: AlignmentType) => {
+    const next = alignNodes(rf_Diagram.nodes as Node[], get(rf_SelectedNodesAtom), alignment);
+    set(rf_CommitNodesAtom, next);
+});
+
+export const rf_DistributeNodesAtom = atom(null, (get, set, direction: DistributionType) => {
+    const next = distributeNodes(rf_Diagram.nodes as Node[], get(rf_SelectedNodesAtom), direction);
+    set(rf_CommitNodesAtom, next);
+});
+
+function alignNodes(nodes: Node[], selectedNodes: Node[], alignment: AlignmentType): Node[] {
     if (selectedNodes.length < 2) {
         return nodes;
     }
@@ -85,7 +126,7 @@ export function alignNodes(nodes: Node[], selectedNodes: Node[], alignment: Alig
     return newNodes;
 }
 
-export function distributeNodes(nodes: Node[], selectedNodes: Node[], direction: DistributionType): Node[] {
+function distributeNodes(nodes: Node[], selectedNodes: Node[], direction: DistributionType): Node[] {
     if (selectedNodes.length < 3) {
         return nodes;
     }
@@ -139,7 +180,10 @@ export function distributeNodes(nodes: Node[], selectedNodes: Node[], direction:
     return newNodes;
 }
 
-export function bringToFront(nodes: Node[], selectedNodes: Node[]): Node[] {
+//---------------------------------------------------------------------------
+// bring to front / send to back (Not used yet)
+
+function bringToFront(nodes: Node[], selectedNodes: Node[]): Node[] {
     const maxZ = Math.max(...nodes.map((n) => n.zIndex || 0));
     return nodes.map(
         (node) => (
@@ -148,7 +192,7 @@ export function bringToFront(nodes: Node[], selectedNodes: Node[]): Node[] {
     );
 }
 
-export function sendToBack(nodes: Node[], selectedNodes: Node[]): Node[] {
+function sendToBack(nodes: Node[], selectedNodes: Node[]): Node[] {
     const minZ = Math.min(...nodes.map((n) => n.zIndex || 0));
     return nodes.map(
         (node) => (
