@@ -1,9 +1,8 @@
 /**
  * Adapted from mermaid-reactflow-editor (MIT).
  */
-import { type Edge, type Node } from 'reactflow';
+import { type Node } from 'reactflow';
 import { ALIGNMENT_TYPES, DISTRIBUTION_TYPES, type AlignmentType, type DistributionType } from '../2-converter/8-constants';
-import { nextRfId, prefixForNode } from '../2-converter/8-mermaid-ids';
 
 export function alignNodes(nodes: Node[], selectedNodes: Node[], alignment: AlignmentType): Node[] {
     if (selectedNodes.length < 2) {
@@ -154,51 +153,6 @@ export function sendToBack(nodes: Node[], selectedNodes: Node[]): Node[] {
     return nodes.map(
         (node) => (
             selectedNodes.some((sn) => sn.id === node.id) ? { ...node, zIndex: minZ - 1 } : node
-        )
-    );
-}
-
-export function duplicateNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
-    const newNodes = [...nodes];
-    selectedNodes.forEach(
-        (node) => {
-            newNodes.push({
-                ...node,
-                id: nextRfId(newNodes, prefixForNode(node)),
-                position: { x: node.position.x + 50, y: node.position.y + 50 },
-                selected: false,
-            });
-        }
-    );
-    return newNodes;
-}
-
-export function deleteSelected(nodes: Node[], edges: Edge[], selectedNodes: Node[], selectedEdges: Edge[]) {
-    const nodeIdsToDelete = selectedNodes.map((n) => n.id);
-    const edgeIdsToDelete = selectedEdges.map((e) => e.id);
-    const newNodes = nodes.filter((n) => !nodeIdsToDelete.includes(n.id));
-    const newEdges = edges.filter((
-        (e) =>
-            !edgeIdsToDelete.includes(e.id) &&
-            !nodeIdsToDelete.includes(e.source) &&
-            !nodeIdsToDelete.includes(e.target)
-    )
-    );
-    return { newNodes, newEdges };
-}
-
-export function lockNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
-    return nodes.map(
-        (node) => (
-            selectedNodes.some((sn) => sn.id === node.id) ? { ...node, draggable: false, data: { ...node.data, locked: true } } : node
-        )
-    );
-}
-
-export function unlockNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
-    return nodes.map(
-        (node) => (
-            selectedNodes.some((sn) => sn.id === node.id) ? { ...node, draggable: true, data: { ...node.data, locked: false } } : node
         )
     );
 }
