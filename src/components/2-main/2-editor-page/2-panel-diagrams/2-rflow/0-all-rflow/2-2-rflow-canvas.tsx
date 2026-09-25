@@ -1,8 +1,9 @@
-import { useCallback, useMemo, type DragEvent, type MouseEvent, type ReactNode, type RefObject } from 'react';
+import { type DragEvent, type MouseEvent, type ReactNode, type RefObject, useCallback, useMemo } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { appSettings } from '@/store/1-ui-settings';
+
 import ReactFlow, {
     type Connection,
     type DefaultEdgeOptions,
@@ -23,6 +24,7 @@ import ReactFlow, {
     useReactFlow,
     useStoreApi,
 } from 'reactflow';
+
 import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
 import { draftFromNode, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
 import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
@@ -37,6 +39,7 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
     const { rflow } = useSnapshot(appSettings);
     const reactFlowInstance = useReactFlow();
     const [panMode] = useAtom(rf_PanModeAtom);
+
     const setIsDragging = useSetAtom(rf_DraggingAtom);
     const setSelectedNodes = useSetAtom(rf_SelectedNodesAtom);
     const setSelectedEdges = useSetAtom(rf_SelectedEdgesAtom);
@@ -44,11 +47,15 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
     const setNodeEditorDraft = useSetAtom(rf_NodeEditorDraftAtom);
 
     const nodesWithLink = useMemo(
-        () => (nodes as Node[]).map((n) => ({ ...n, className: classNames(n.className, sourceLink.classForNode(n)) })),
+        () => (nodes as Node[]).map(
+            (n) => ({ ...n, className: classNames(n.className, sourceLink.classForNode(n)) })
+        ),
         [nodes, sourceLink.classForNode, sourceLink.keys, sourceLink.intensity]);
 
     const edgesWithSelection = useMemo(
-        () => (edges as Edge[]).map((edge) => ({ ...edge, className: classNames(edge.className, sourceLink.classForEdge(edge)) })),
+        () => (edges as Edge[]).map(
+            (edge) => ({ ...edge, className: classNames(edge.className, sourceLink.classForEdge(edge)) })
+        ),
         [edges, sourceLink.classForEdge, sourceLink.keys, sourceLink.intensity]);
 
     const onNodesChange = useCallback(
@@ -58,6 +65,7 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedNodes(updated.filter((n) => n.selected));
             }
+
             if (changes.some((c) => c.type === 'remove' || c.type === 'add')) {
                 if (changes.some((c) => c.type === 'remove')) {
                     const ids = new Set(updated.map((n) => n.id));
@@ -75,9 +83,11 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
         (changes: EdgeChange[]) => {
             const updated = applyEdgeChanges(changes, rf_Diagram.edges as Edge[]);
             setRflowEdges(updated);
+
             if (changes.some((c) => c.type === 'select')) {
                 setSelectedEdges(updated.filter((e) => e.selected));
             }
+
             if (changes.some((c) => c.type === 'remove' || c.type === 'add')) {
                 syncMermaidFromGraph();
             }
@@ -87,14 +97,7 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
     const onConnect = useCallback(
         (connection: Connection) => {
             setRflowEdges(
-                addEdge(
-                    {
-                        ...defaultEdgeOptions,
-                        ...connection,
-                        data: { ...defaultEdgeOptions.data, mermaidType: '-->' },
-                    },
-                    rf_Diagram.edges as Edge[],
-                ),
+                addEdge({ ...defaultEdgeOptions, ...connection, data: { ...defaultEdgeOptions.data, mermaidType: '-->' } }, rf_Diagram.edges as Edge[]),
             );
             syncMermaidFromGraph();
         },
@@ -166,6 +169,7 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
         <ReactFlow
             minZoom={ZOOM_MIN}
             maxZoom={ZOOM_MAX}
+
             nodes={nodesWithLink}
             edges={edgesWithSelection}
             nodesDraggable={!panMode}
@@ -174,28 +178,30 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
             panOnDrag={panMode}
             selectionKeyCode={null}
             multiSelectionKeyCode="Shift"
+            deleteKeyCode={['Delete', 'Backspace']}
             onlyRenderVisibleElements
-            onNodeDragStart={() => setIsDragging(true)}
-            onNodeDragStop={() => setIsDragging(false)}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={sourceLink.onNodeClick}
-            onNodeDoubleClick={onNodeDoubleClick}
+            
             nodeTypes={nodeTypes}
             defaultEdgeOptions={defaultEdgeOptions}
-            onError={onReactFlowError}
             fitView
-            deleteKeyCode={['Delete', 'Backspace']}
             panOnScroll={false}
             zoomOnScroll
             zoomOnPinch
+            edgesUpdatable
             connectionLineType={ConnectionLineType.SmoothStep}
+            connectionMode={ConnectionMode.Loose}
+
+            onConnect={onConnect}
+            onError={onReactFlowError}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onEdgeUpdate={onEdgeUpdate}
+            onNodeDragStart={() => setIsDragging(true)}
+            onNodeDragStop={() => setIsDragging(false)}
+            onNodeClick={sourceLink.onNodeClick}
             onEdgeClick={sourceLink.onEdgeClick}
             onPaneClick={sourceLink.onPaneClick}
-            edgesUpdatable
-            connectionMode={ConnectionMode.Loose}
-            onEdgeUpdate={onEdgeUpdate}
+            onNodeDoubleClick={onNodeDoubleClick}
             onEdgeDoubleClick={onEdgeDoubleClick}
             onDragOver={onDragOver}
             onDrop={onDrop}
