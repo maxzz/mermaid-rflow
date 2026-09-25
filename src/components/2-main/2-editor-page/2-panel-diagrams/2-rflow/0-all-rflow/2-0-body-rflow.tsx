@@ -89,8 +89,8 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         []);
 
-    const [selectedNodes, setSelectedNodes] = useAtom(rf_SelectedNodesAtom);
-    const [selectedEdges, setSelectedEdges] = useAtom(rf_SelectedEdgesAtom);
+    const setSelectedNodes = useSetAtom(rf_SelectedNodesAtom);
+    const setSelectedEdges = useSetAtom(rf_SelectedEdgesAtom);
     const setSearchOpen = useSetAtom(rf_SearchDialogOpenAtom);
     const [exporting, setExporting] = useAtom(rf_ExportingAtom);
     const [isDragging] = useAtom(rf_DraggingAtom);
@@ -120,16 +120,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
     const onSelectSubgraphContents = useCallback(
         (subgraphNodeId?: string) => {
-            if (!subgraphNodeId) {
-                return;
-            }
-            const updatedNodes = (rf_Diagram.nodes as Node[]).map((n) => ({ ...n, selected: n.parentNode === subgraphNodeId }));
-            const nodeIds = new Set(updatedNodes.filter((n) => n.parentNode === subgraphNodeId).map((n) => n.id));
-            const updatedEdges = (rf_Diagram.edges as Edge[]).map((e) => ({ ...e, selected: nodeIds.has(e.source) && nodeIds.has(e.target) }));
-            setRflowNodes(updatedNodes);
-            setRflowEdges(updatedEdges);
-            setSelectedNodes(updatedNodes.filter((n) => n.selected));
-            setSelectedEdges(updatedEdges.filter((e) => e.selected));
+            selectSubgraphContents(subgraphNodeId, setSelectedNodes, setSelectedEdges);
         },
         [setSelectedEdges, setSelectedNodes]);
 
@@ -161,6 +152,36 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
             return () => abortController.abort();
         },
         [setSearchOpen]);
+
+    return (<>
+        {exporting && (
+            <div className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center gap-3">
+                <BarsLoaderIcon />
+                <div className="text-sm text-muted-foreground">
+                    Exporting image...
+                </div>
+            </div>
+        )}
+
+        <NodeSearchDialog />
+
+        <div ref={reactFlowWrapper} className={classNames(containerClasses, isDragging && containerDraggingClasses, isDark && 'dark',)}>
+            <RflowToolbars />
+
+            <div ref={canvasRef} className="relative flex-1 min-h-0 w-full">
+                {hasBox ? <RflowCanvas sourceLink={sourceLink} anchorRef={reactFlowWrapper} /> : null}
+                {/* Shift-click toggles via multiSelectionKeyCode. Shift-drag adds blocks fully inside the rectangle. */}
+                <RflowMarquee surfaceRef={canvasRef} enabled={hasBox && active && !panMode} onBackgroundClick={sourceLink.onPaneClick} />
+                {hasBox && !exporting && <ZoomControls_Rflow />}
+            </div>
+        </div>
+    </>);
+}
+
+function RflowToolbars() {
+    const [selectedNodes, setSelectedNodes] = useAtom(rf_SelectedNodesAtom);
+    const [selectedEdges, setSelectedEdges] = useAtom(rf_SelectedEdgesAtom);
+    const setSearchOpen = useSetAtom(rf_SearchDialogOpenAtom);
 
     const commitNodes = useCallback(
         (next: Node[]) => {
@@ -211,41 +232,40 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
         },
         [selectedNodes, setSelectedNodes]);
 
-    return (<>
-        {exporting && (
-            <div className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center gap-3">
-                <BarsLoaderIcon />
-                <div className="text-sm text-muted-foreground">
-                    Exporting image...
-                </div>
-            </div>
-        )}
+    const onSelectSubgraphContents = useCallback(
+        (subgraphNodeId?: string) => {
+            selectSubgraphContents(subgraphNodeId, setSelectedNodes, setSelectedEdges);
+        },
+        [setSelectedEdges, setSelectedNodes]);
 
-        <NodeSearchDialog />
-
-        <div ref={reactFlowWrapper} className={classNames(containerClasses, isDragging && containerDraggingClasses, isDark && 'dark',)}>
-            <div className="px-2 py-1.5 border-b border-border bg-muted/20 shrink-0 flex flex-col gap-1.5">
-                <EditingToolbar
-                    selectedNodes={selectedNodes}
-                    selectedEdges={selectedEdges}
-                    onDuplicateNodes={onDuplicateNodes}
-                    onDeleteSelected={onDeleteSelected}
-                    onLockNodes={onLockNodes}
-                    onUnlockNodes={onUnlockNodes}
-                    onSelectSubgraphContents={onSelectSubgraphContents}
-                    onOpenSearch={() => setSearchOpen(true)}
-                />
-                <PaletteToolbar />
-            </div>
-
-            <div ref={canvasRef} className="relative flex-1 min-h-0 w-full">
-                {hasBox ? <RflowCanvas sourceLink={sourceLink} anchorRef={reactFlowWrapper} /> : null}
-                {/* Shift-click toggles via multiSelectionKeyCode. Shift-drag adds blocks fully inside the rectangle. */}
-                <RflowMarquee surfaceRef={canvasRef} enabled={hasBox && active && !panMode} onBackgroundClick={sourceLink.onPaneClick} />
-                {hasBox && !exporting && <ZoomControls_Rflow />}
-            </div>
+    return (
+        <div className="px-2 py-1.5 border-b border-border bg-muted/20 shrink-0 flex flex-col gap-1.5">
+            <EditingToolbar
+                selectedNodes={selectedNodes}
+                selectedEdges={selectedEdges}
+                onDuplicateNodes={onDuplicateNodes}
+                onDeleteSelected={onDeleteSelected}
+                onLockNodes={onLockNodes}
+                onUnlockNodes={onUnlockNodes}
+                onSelectSubgraphContents={onSelectSubgraphContents}
+                onOpenSearch={() => setSearchOpen(true)}
+            />
+            <PaletteToolbar />
         </div>
-    </>);
+    );
+}
+
+function selectSubgraphContents(subgraphNodeId: string | undefined, setSelectedNodes: (nodes: Node[]) => void, setSelectedEdges: (edges: Edge[]) => void) {
+    if (!subgraphNodeId) {
+        return;
+    }
+    const updatedNodes = (rf_Diagram.nodes as Node[]).map((n) => ({ ...n, selected: n.parentNode === subgraphNodeId }));
+    const nodeIds = new Set(updatedNodes.filter((n) => n.parentNode === subgraphNodeId).map((n) => n.id));
+    const updatedEdges = (rf_Diagram.edges as Edge[]).map((e) => ({ ...e, selected: nodeIds.has(e.source) && nodeIds.has(e.target) }));
+    setRflowNodes(updatedNodes);
+    setRflowEdges(updatedEdges);
+    setSelectedNodes(updatedNodes.filter((n) => n.selected));
+    setSelectedEdges(updatedEdges.filter((e) => e.selected));
 }
 
 function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<typeof useFlowSourceLink>; anchorRef: RefObject<HTMLDivElement | null>; }) {
