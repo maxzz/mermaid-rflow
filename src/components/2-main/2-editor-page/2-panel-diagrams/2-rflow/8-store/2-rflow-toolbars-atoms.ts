@@ -25,16 +25,11 @@ export const doDeleteSelectedAtom = atom(null, (get, set) => {
     syncMermaidFromGraph();
 });
 
-export const doLockNodesAtom = atom(null, (get, set) => {
+export const doToggleLockNodesAtom = atom(null, (get, set) => {
     const selected = get(rf_SelectedNodesAtom);
-    const next = lockNodes(rf_Diagram.nodes as Node[], selected);
-    setRflowNodes(next);
-    set(rf_SelectedNodesAtom, refreshedSelection(next, selected));
-});
-
-export const doUnlockNodesAtom = atom(null, (get, set) => {
-    const selected = get(rf_SelectedNodesAtom);
-    const next = unlockNodes(rf_Diagram.nodes as Node[], selected);
+    const next = get(rf_SelectedLockedAtom)
+        ? unlockNodes(rf_Diagram.nodes as Node[], selected)
+        : lockNodes(rf_Diagram.nodes as Node[], selected);
     setRflowNodes(next);
     set(rf_SelectedNodesAtom, refreshedSelection(next, selected));
 });
