@@ -1,7 +1,7 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import { type Node, useReactFlow, useStore, useStoreApi } from 'reactflow';
-import { setRflowNodes } from '../8-store/0-flow-diagram';
-import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
+import { setRflowNodes } from '../8-store/a-0-flow-diagram';
+import { syncMermaidFromGraph } from '../8-store/a-7-sync-with-source';
 import { FRAME_STROKE, HANDLE_RADIUS, HANDLE_SIZE, type Corner, type FlowBox, frameAround, scaleFromCorner, unionBounds } from './3-selection-frame-math';
 
 export function SelectionFrame() {

@@ -5,7 +5,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Loader2Icon, SearchIcon, XIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
-import { resetIconSearchQuery, rf_IconSearchQueryAtom, doLoadMoreIconSearchAtom, doSearchIconsAtom } from '../8-store/a-rflow-icon-search-atoms';
+import { resetIconSearchQuery, rf_IconSearchQueryAtom, doLoadMoreIconSearchAtom, doSearchIconsAtom } from '../8-store/a-3-rflow-icon-search-atoms';
 
 export function IconSearch({ onSelect }: { onSelect: (iconUrl: string) => void; }) {
     const [searchQuery, setSearchQuery] = useAtom(rf_IconSearchQueryAtom);

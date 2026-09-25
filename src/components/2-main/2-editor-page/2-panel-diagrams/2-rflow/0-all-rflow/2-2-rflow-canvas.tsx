@@ -25,9 +25,9 @@ import ReactFlow, {
     useStoreApi,
 } from 'reactflow';
 
-import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/0-flow-diagram';
-import { draftFromNode, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
-import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
+import { rf_Diagram, setRflowEdges, setRflowNodes } from '../8-store/a-0-flow-diagram';
+import { draftFromNode, rf_DraggingAtom, rf_EdgeLabelEditorAtom, rf_NodeEditorDraftAtom, rf_PanModeAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from '../8-store/a-1-rflow-ui-atoms';
+import { syncMermaidFromGraph } from '../8-store/a-7-sync-with-source';
 import { CustomNode, DiamondNode, SubgraphNode } from '../1-canvas/nodes';
 import { createPaletteNode } from '../1-canvas/nodes/4-node-common';
 import { SelectionFrame } from '../5-multi-select';

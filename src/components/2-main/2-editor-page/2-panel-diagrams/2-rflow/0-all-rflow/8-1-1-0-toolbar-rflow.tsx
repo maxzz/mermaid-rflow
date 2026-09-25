@@ -1,8 +1,8 @@
 import { useAtomValue, useSetAtom } from 'jotai';
 import { BoxSelectIcon, CopyIcon, LockIcon, SearchIcon, Trash2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
-import { rf_SearchDialogOpenAtom, rf_SelectedNodesAtom } from '../8-store/a-rflow-ui-atoms';
-import { doDeleteSelectedAtom, doDuplicateNodesAtom, doSelectSubgraphContentsAtom, doToggleLockNodesAtom, rf_SelectedElementsLengthAtom, rf_SelectedLockedAtom, rf_SelectedNodesLengthAtom, rf_SubgraphSelectedAtom } from '../8-store/2-rflow-toolbars-atoms';
+import { rf_SearchDialogOpenAtom, rf_SelectedNodesAtom } from '../8-store/a-1-rflow-ui-atoms';
+import { doDeleteSelectedAtom, doDuplicateNodesAtom, doSelectSubgraphContentsAtom, doToggleLockNodesAtom, rf_SelectedElementsLengthAtom, rf_SelectedLockedAtom, rf_SelectedNodesLengthAtom, rf_SubgraphSelectedAtom } from '../8-store/a-2-rflow-toolbars-atoms';
 import { AlignHorizontalGroup, AlignVerticalGroup, DistributeGroup } from './8-1-1-1-arrange-buttons';
 
 export function EditingToolbar() {

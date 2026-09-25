@@ -1,15 +1,9 @@
 import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
+import { rf_Diagram, setRflowEdges, setRflowNodes } from './a-0-flow-diagram';
+import { rf_CommitNodesAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from './a-1-rflow-ui-atoms';
+import { syncMermaidFromGraph } from './a-7-sync-with-source';
 import { nextRfId, prefixForNode } from '../2-converter/8-mermaid-ids';
-import { rf_Diagram, setRflowEdges, setRflowNodes } from './0-flow-diagram';
-import { syncMermaidFromGraph } from './1-sync-with-source';
-import { rf_CommitNodesAtom, rf_SelectedEdgesAtom, rf_SelectedNodesAtom } from './a-rflow-ui-atoms';
-
-export const doDuplicateNodesAtom = atom(null, (get, set) => {
-    const next = duplicateNodes(rf_Diagram.nodes as Node[], get(rf_SelectedNodesAtom));
-    set(rf_CommitNodesAtom, next);
-    syncMermaidFromGraph();
-});
 
 export const doSelectSubgraphContentsAtom = atom(null, (_get, set, subgraphNodeId?: string) => {
     if (!subgraphNodeId) {
@@ -24,6 +18,30 @@ export const doSelectSubgraphContentsAtom = atom(null, (_get, set, subgraphNodeI
     set(rf_SelectedNodesAtom, updatedNodes.filter((n) => n.selected));
     set(rf_SelectedEdgesAtom, updatedEdges.filter((e) => e.selected));
 });
+
+//---------------------------------------------------------------------------
+// duplicate nodes
+
+export const doDuplicateNodesAtom = atom(null, (get, set) => {
+    const next = duplicateNodes(rf_Diagram.nodes as Node[], get(rf_SelectedNodesAtom));
+    set(rf_CommitNodesAtom, next);
+    syncMermaidFromGraph();
+});
+
+function duplicateNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
+    const newNodes = [...nodes];
+    selectedNodes.forEach(
+        (node) => {
+            newNodes.push({
+                ...node,
+                id: nextRfId(newNodes, prefixForNode(node)),
+                position: { x: node.position.x + 50, y: node.position.y + 50 },
+                selected: false,
+            });
+        }
+    );
+    return newNodes;
+}
 
 //---------------------------------------------------------------------------
 // delete selected
@@ -42,21 +60,6 @@ export const doDeleteSelectedAtom = atom(null, (get, set) => {
     set(rf_SelectedEdgesAtom, []);
     syncMermaidFromGraph();
 });
-
-function duplicateNodes(nodes: Node[], selectedNodes: Node[]): Node[] {
-    const newNodes = [...nodes];
-    selectedNodes.forEach(
-        (node) => {
-            newNodes.push({
-                ...node,
-                id: nextRfId(newNodes, prefixForNode(node)),
-                position: { x: node.position.x + 50, y: node.position.y + 50 },
-                selected: false,
-            });
-        }
-    );
-    return newNodes;
-}
 
 function deleteSelected(nodes: Node[], edges: Edge[], selectedNodes: Node[], selectedEdges: Edge[]) {
     const nodeIdsToDelete = selectedNodes.map((n) => n.id);

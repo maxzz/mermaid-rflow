@@ -1,7 +1,7 @@
 import { useSetAtom } from 'jotai';
 import { Button } from '@/ui/shadcn/button';
 import { IconAlignBottom, IconAlignCenterHorizontally, IconAlignCenterVertically, IconAlignLeft, IconAlignRight, IconAlignTop, IconDistributeHorizontally, IconDistributeVertically } from '@/ui/icons/normal/align';
-import { rf_AlignNodesAtom, rf_DistributeNodesAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_AlignNodesAtom, rf_DistributeNodesAtom } from '../8-store/a-1-rflow-ui-atoms';
 
 export function AlignHorizontalGroup() {
     const align = useSetAtom(rf_AlignNodesAtom);

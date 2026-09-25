@@ -9,8 +9,8 @@ import { BarsLoaderIcon } from '@/ui/local-ui';
 import { type Edge, type Node, ReactFlowProvider, useReactFlow } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { rf_Diagram } from '../8-store/0-flow-diagram';
-import { rf_CanvasMethodsAtom, rf_DraggingAtom, rf_ExportingAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_Diagram } from '../8-store/a-0-flow-diagram';
+import { rf_CanvasMethodsAtom, rf_DraggingAtom, rf_ExportingAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom } from '../8-store/a-1-rflow-ui-atoms';
 
 import { exportReactFlowImage } from '../1-canvas/8-export-image';
 
@@ -22,7 +22,7 @@ import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 import { useFlowSourceLink } from './2-3-use-rflow-source-link';
 import { RflowMarquee } from '../5-multi-select';
 import { isThemeDark } from '@/utils/theme-utils';
-import { doSelectSubgraphContentsAtom } from '../8-store/2-rflow-toolbars-atoms';
+import { doSelectSubgraphContentsAtom } from '../8-store/a-2-rflow-toolbars-atoms';
 import { RflowToolbars } from './2-1-rflow-toolbars';
 import { ReactFlowErrorGuard, RflowCanvas } from './2-2-rflow-canvas';
 

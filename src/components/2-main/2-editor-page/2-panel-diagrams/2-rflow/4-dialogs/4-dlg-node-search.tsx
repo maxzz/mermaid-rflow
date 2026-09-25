@@ -4,8 +4,8 @@ import { useSnapshot } from 'valtio';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/ui/shadcn/command';
 
 import { type Node, useReactFlow } from 'reactflow';
-import { rf_Diagram, setRflowNodes } from '../8-store/0-flow-diagram';
-import { rf_SearchDialogOpenAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_Diagram, setRflowNodes } from '../8-store/a-0-flow-diagram';
+import { rf_SearchDialogOpenAtom } from '../8-store/a-1-rflow-ui-atoms';
 
 export function NodeSearchDialog() {
     const [open, setOpen] = useAtom(rf_SearchDialogOpenAtom);

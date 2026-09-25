@@ -6,8 +6,8 @@ import { Label } from '@/ui/shadcn/label';
 import { Textarea } from '@/ui/shadcn/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/shadcn/tabs';
 
-import { rf_NodeEditorDraftAtom, doRflowSaveNodeEditorAtom } from '../8-store/a-rflow-ui-atoms';
-import { resetIconSearchQuery } from '../8-store/a-rflow-icon-search-atoms';
+import { rf_NodeEditorDraftAtom, doRflowSaveNodeEditorAtom } from '../8-store/a-1-rflow-ui-atoms';
+import { resetIconSearchQuery } from '../8-store/a-3-rflow-icon-search-atoms';
 import { IconSearch } from './3-dlg-search';
 import { COLOR_PRESETS } from '../2-converter/8-constants';
 

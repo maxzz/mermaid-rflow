@@ -4,9 +4,9 @@ import { type Edge } from 'reactflow';
 import { Popover, PopoverAnchor, PopoverContent } from '@/ui/shadcn/popover';
 import { Input } from '@/ui/shadcn/input';
 import { Button } from '@/ui/shadcn/button';
-import { rf_Diagram, setRflowEdges } from '../8-store/0-flow-diagram';
-import { syncMermaidFromGraph } from '../8-store/1-sync-with-source';
-import { rf_EdgeLabelEditorAtom } from '../8-store/a-rflow-ui-atoms';
+import { rf_Diagram, setRflowEdges } from '../8-store/a-0-flow-diagram';
+import { syncMermaidFromGraph } from '../8-store/a-7-sync-with-source';
+import { rf_EdgeLabelEditorAtom } from '../8-store/a-1-rflow-ui-atoms';
 
 export function EdgeLabelEditorDialog() {
     const [editor, setEditor] = useAtom(rf_EdgeLabelEditorAtom);

@@ -2,9 +2,9 @@ import { atom } from 'jotai';
 import { type Edge, type Node } from 'reactflow';
 import { DEFAULT_COLORS, type AlignmentType, type DistributionType } from '../2-converter/8-constants';
 import { alignNodes, distributeNodes } from '../1-canvas/8-diagram-editing-utils';
-import { rf_Diagram, setRflowNodes } from './0-flow-diagram';
-import { syncMermaidFromGraph } from './1-sync-with-source';
-import { resetIconSearchQuery } from './a-rflow-icon-search-atoms';
+import { rf_Diagram, setRflowNodes } from './a-0-flow-diagram';
+import { syncMermaidFromGraph } from './a-7-sync-with-source';
+import { resetIconSearchQuery } from './a-3-rflow-icon-search-atoms';
 
 export const rf_SelectedNodesAtom = atom<Node[]>([]);
 export const rf_SelectedEdgesAtom = atom<Edge[]>([]);
@@ -104,7 +104,7 @@ export const doRflowSaveNodeEditorAtom = atom(null,
 
 export type LoadDialogUiData = {
     selectedId: string | null;
-    imported: import('./8-local-storage-saved-diagrams').SavedDiagram | null;
+    imported: import('./a-8-local-storage-saved-diagrams').SavedDiagram | null;
     confirmDeleteId: string | null;
 };
 
