@@ -1,4 +1,4 @@
-import { monaco } from "@/components/2-main/2-editor-page/1-panel-editor/3-monaco-setup";
+import { monaco } from "@/components/2-main/2-editor-page/1-panel-editor/8-monaco-setup";
 
 type MonacoEditor = monaco.editor.IStandaloneCodeEditor;
 type ViewState = monaco.editor.ICodeEditorViewState | null;

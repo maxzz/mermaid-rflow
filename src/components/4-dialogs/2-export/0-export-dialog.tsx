@@ -11,7 +11,7 @@ import { BarsLoaderIcon } from "@/ui/local-ui";
 
 import { ExportFormat, mermaidSettings, OutputFormat, type PngScale } from "@/store/2-mermaid-settings";
 import { renderDiagram, type RenderResult } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
-import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
+import { loadBeautifulMermaid } from "@/components/2-main/1-welcome-page/8-lazy-modules";
 import { copyPngBlob, copyText, downloadBlob, downloadText, getSvgNaturalSize } from "@/components/4-dialogs/2-export/8-export-utils";
 import { ErrorBoundary } from "@/ui/local-ui/8-error-boundary";
 import { Switch } from "@/ui/shadcn/switch";

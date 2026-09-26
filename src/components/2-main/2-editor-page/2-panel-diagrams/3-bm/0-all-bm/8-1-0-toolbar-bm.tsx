@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { CopyIcon, DownloadIcon } from "lucide-react";
 import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 import { renderDiagram } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/5-render-diagram/5-render";
-import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
+import { loadBeautifulMermaid } from "@/components/2-main/1-welcome-page/8-lazy-modules";
 import { copyText } from "@/components/4-dialogs/2-export/8-export-utils";
 import { isOpenExportDialogAtom } from "@/components/4-dialogs/2-export/a-types-export";
 import { DropdownMenuItem } from "@/ui/shadcn/dropdown-menu";

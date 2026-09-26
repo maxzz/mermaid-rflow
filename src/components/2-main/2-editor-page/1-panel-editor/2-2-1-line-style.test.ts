@@ -10,7 +10,7 @@ import {
     resolveStyleDirective,
     setStyleDecl,
     setStyleInterpolate,
-} from './4-line-style';
+} from './2-2-1-line-style';
 
 const FLOW = `\
 graph TD

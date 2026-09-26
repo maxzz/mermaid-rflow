@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type BeautifulMermaidModule } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
+import { type BeautifulMermaidModule } from "@/components/2-main/1-welcome-page/8-lazy-modules";
 import { buildSvgOptions, isolateFromAppTheme } from "./5-render";
 
 const UNSET = "initial";

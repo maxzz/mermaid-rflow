@@ -25,7 +25,7 @@ import {
     setStyleInterpolate,
     type StyleDirectiveLine,
     type StyleFieldSpec,
-} from './4-line-style';
+} from './2-2-1-line-style';
 
 export function LineStylePopover() {
     const { source } = useSnapshot(mermaidSettings);

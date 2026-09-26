@@ -2,7 +2,7 @@ import { useEffect, useId } from "react";
 import { useSnapshot } from "valtio";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
 import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
-import { preloadEditorPageModules } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
+import { preloadEditorPageModules } from "@/components/2-main/1-welcome-page/8-lazy-modules";
 import { Button } from "@/ui/shadcn/button";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
@@ -13,7 +13,9 @@ export function WelcomePage() {
     const navigate = useNavigateToPage();
 
     // Warm up Monaco and the renderer while the user reads the welcome text
-    useEffect(() => preloadEditorPageModules(), []);
+    useEffect(
+        () => preloadEditorPageModules(),
+        []);
 
     return (
         <div className="min-h-dvh text-foreground bg-background grid grid-rows-[1fr_auto]">

@@ -11,7 +11,7 @@ import { TooltipProvider } from "@/ui/shadcn/tooltip";
 
 import { DIAGRAM_FONTS, type DiagramTheme, mermaidSettings } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon, PreviewSelectItem, useSelectPreview } from "@/ui/local-ui";
-import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
+import { loadBeautifulMermaid } from "@/components/2-main/1-welcome-page/8-lazy-modules";
 import { HintLabel, Row, popoverRowSubGridClasses, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 export function RenderOptionsPopover() {
