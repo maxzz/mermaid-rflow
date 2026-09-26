@@ -14,7 +14,7 @@ import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-ato
 import { MmdPaletteRail } from './8-1-2-0-mmd-palette-rail';
 import { ZoomControls_Mmd } from './8-3-1-zoom-controls-mmd';
 import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from './8-3-2-mmd-zoom-utils';
-import { MmdEditOverlay } from '../1-2-overlay/2-3-mmd-edit-overlay';
+import { MmdEditOverlay } from '../1-2-overlay/0-mmd-edit-overlay';
 import { useMmdLayout } from './2-1-use-mmd-layout';
 import { useMmdSourceLink } from './2-2-use-mmd-source-link';
 import { usePanToTranslate } from './use-pan-to-translate';

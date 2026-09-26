@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import { type NodeShape } from '../3-catalog/1-flowchart-source';
 import { type AlignGuide } from '../3-catalog/7-drag-guides';
-import { type MmdDragLinkPreview } from '../1-2-overlay/5-mmd-layout';
+import { type MmdDragLinkPreview } from '../1-2-overlay/8-mmd-layout-math';
 
 export type MmdInlineEdit = {
     id: string;

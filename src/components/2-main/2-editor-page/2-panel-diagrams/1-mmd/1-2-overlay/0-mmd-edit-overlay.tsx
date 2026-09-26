@@ -23,7 +23,7 @@ import {
     originOfNode,
     mmdDragLinkPreviews,
     overlayScale,
-} from './5-mmd-layout';
+} from './8-mmd-layout-math';
 import { alignDragBox, type GuideBox } from '../3-catalog/7-drag-guides';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
@@ -665,6 +665,14 @@ function EndpointHandle({ pt, label, onPointerDown, }: { pt: { x: number; y: num
     );
 }
 
+//---------------------------------------------------------------------------
+
+
+function handleStyle(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
+    const c = handleCenter(box, side);
+    return { x: c.x - HANDLE_SIZE / 2, y: c.y - HANDLE_SIZE / 2 };
+}
+
 function handleCenter(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
     switch (side) {
         case 'top': return { x: box.x + box.w / 2, y: box.y };
@@ -674,10 +682,7 @@ function handleCenter(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left')
     }
 }
 
-function handleStyle(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
-    const c = handleCenter(box, side);
-    return { x: c.x - HANDLE_SIZE / 2, y: c.y - HANDLE_SIZE / 2 };
-}
+//---------------------------------------------------------------------------
 
 function nodeElementById(root: Element, id: string): Element | null {
     for (const el of root.querySelectorAll('g.node')) {
@@ -704,6 +709,8 @@ function nodeIdFromPoint(clientX: number, clientY: number, fromId: string): stri
 
     return null;
 }
+
+//---------------------------------------------------------------------------
 
 function isTypingTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) {

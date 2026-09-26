@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseTranslateAttr, shiftPathD } from './5-mmd-layout';
+import { parseTranslateAttr, shiftPathD } from './8-mmd-layout-math';
 
 describe('shiftPathD', () => {
     it('lerps start and end of a cubic path', () => {
