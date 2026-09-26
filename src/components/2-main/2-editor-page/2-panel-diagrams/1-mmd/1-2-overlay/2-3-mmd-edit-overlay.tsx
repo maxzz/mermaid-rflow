@@ -23,7 +23,7 @@ import {
     originOfNode,
     mmdDragLinkPreviews,
     overlayScale,
-} from '../3-catalog/5-mmd-layout';
+} from './5-mmd-layout';
 import { alignDragBox, type GuideBox } from '../3-catalog/7-drag-guides';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
@@ -45,25 +45,21 @@ export type MmdEditOverlayProps = {
 
 type DragLine = { x1: number; y1: number; x2: number; y2: number; };
 
-const HANDLES: { side: 'top' | 'right' | 'bottom' | 'left'; }[] = [
-    { side: 'top' },
-    { side: 'right' },
-    { side: 'bottom' },
-    { side: 'left' },
-];
-
 export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, layoutKey = '' }: MmdEditOverlayProps) {
     const { source } = useSnapshot(mermaidSettings);
     const { svg, diagramType } = useSnapshot(mmdDiagram);
     const { autofit } = useSnapshot(mmdSettings);
     const link = useSnapshot(sourceLink);
+
     const zoom = useAtomValue(mmdZoomAtom);
     const panMode = useAtomValue(mmdPanModeAtom);
     const shape = useAtomValue(mmdPaletteShapeAtom);
     const [inline, setInline] = useAtom(mmdInlineEditAtom);
+
     const [boxes, setBoxes] = useState<MmdHitBox[]>([]);
     const [edges, setEdges] = useState<MmdEdgeHit[]>([]);
     const [connect, setConnect] = useState<DragLine | null>(null);
+    
     const draggingRef = useRef(false);
 
     const flowchart = classifyMermaidSource(source) === 'flowchart' || isFlowchartDiagramType(diagramType);
@@ -512,6 +508,13 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
         )}
     </>);
 }
+
+const HANDLES: { side: 'top' | 'right' | 'bottom' | 'left'; }[] = [
+    { side: 'top' },
+    { side: 'right' },
+    { side: 'bottom' },
+    { side: 'left' },
+];
 
 function InlineLabelEditor({ onClose }: { onClose: () => void; }) {
     const [inline, setInline] = useAtom(mmdInlineEditAtom);
