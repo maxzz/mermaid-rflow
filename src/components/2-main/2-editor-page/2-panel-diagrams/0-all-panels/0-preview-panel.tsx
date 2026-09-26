@@ -11,7 +11,7 @@ import { Preview_Bm } from "../3-bm/0-all-bm/1-view-bm";
 
 import { PreviewToolbar_Mmd } from "../1-mmd/0-all-mmd/8-1-0-mmd-toolbar";
 import { PreviewToolbar_Rflow } from "../2-rflow/0-all-rflow/8-1-2-toolbar-rflow";
-import { PreviewToolbar_Bm } from "../3-bm/0-all-bm/8-1-toolbar-bm";
+import { PreviewToolbar_Bm } from "../3-bm/0-all-bm/8-1-0-toolbar-bm";
 
 import { StatusBar_Mmd } from "../1-mmd/0-all-mmd/8-2-statusbar-mmd-";
 import { StatusBar_Rflow } from "../2-rflow/0-all-rflow/8-2-statusbar-rflow";
