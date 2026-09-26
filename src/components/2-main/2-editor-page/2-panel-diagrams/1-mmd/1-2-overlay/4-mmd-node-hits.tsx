@@ -2,20 +2,12 @@ import { type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { getDefaultStore, useAtomValue, useSetAtom } from 'jotai';
 import { classNames } from '@/utils';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
+
 import { selectFromDiagram } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
+import { type MmdHitBox, type MmdNodePos, applyMmdNodeDrag, bakeMmdDragEdges, clientDeltaToSvg, mmdDragLinkPreviews, originOfNode, overlayScale } from './8-mmd-layout-math';
 import { readNodeLabel } from '../3-catalog/1-flowchart-source';
 import { mermaidIdFromDomId } from '../3-catalog/3-catalog-mmd';
 import { alignDragBox } from '../3-catalog/7-drag-guides';
-import {
-    type MmdHitBox,
-    type MmdNodePos,
-    applyMmdNodeDrag,
-    bakeMmdDragEdges,
-    clientDeltaToSvg,
-    mmdDragLinkPreviews,
-    originOfNode,
-    overlayScale,
-} from './8-mmd-layout-math';
 import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
 import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPanModeAtom } from '../8-store/3-mmd-ui-atoms';
 import { watchDrag } from './5-mmd-edge-endpoints';
@@ -23,13 +15,7 @@ import { watchDrag } from './5-mmd-edge-endpoints';
 const DRAG_SLOP_PX = 4;
 const HIT_PAD = 2;
 
-export function MmdNodeHits({
-    boxes,
-    selectedId,
-    hostRef,
-    contentRef,
-    draggingRef,
-}: {
+export function MmdNodeHits({ boxes, selectedId, hostRef, contentRef, draggingRef }: {
     boxes: MmdHitBox[];
     selectedId: string | null;
     hostRef: RefObject<HTMLElement | null>;
@@ -45,6 +31,7 @@ export function MmdNodeHits({
         }
         e.preventDefault();
         e.stopPropagation();
+
         selectFromDiagram([`node:${id}`]);
         const root = contentRef.current;
         const overlayHost = hostRef.current;
@@ -53,6 +40,7 @@ export function MmdNodeHits({
         if (!root || !overlayHost || !(svgEl instanceof SVGSVGElement) || !(nodeEl instanceof Element)) {
             return;
         }
+
         const liveRoot = root;
         const board = overlayHost;
         const liveSvg = svgEl;
@@ -77,9 +65,10 @@ export function MmdNodeHits({
         }
         const store = getDefaultStore();
 
-        function move(ev: PointerEvent | MouseEvent) {
-            const dx = ev.clientX - start.x;
-            const dy = ev.clientY - start.y;
+        function move(event: PointerEvent | MouseEvent) {
+            const dx = event.clientX - start.x;
+            const dy = event.clientY - start.y;
+
             if (!moved) {
                 if (dx * dx + dy * dy < DRAG_SLOP_PX * DRAG_SLOP_PX) {
                     return;
@@ -89,6 +78,7 @@ export function MmdNodeHits({
                 board.classList.add('is-mmd-dragging');
                 store.set(mmdNodeDraggingAtom, true);
             }
+
             let snapDx = 0;
             let snapDy = 0;
             let guides: { x1: number; y1: number; x2: number; y2: number; }[] = [];
@@ -144,43 +134,41 @@ export function MmdNodeHits({
         });
     }
 
-    return (
-        <>
-            {boxes.map(
-                (box) => {
-                    const selectedBox = box.id === selectedId;
-                    return (
-                        <button
-                            key={box.id}
-                            type="button"
-                            data-mmd-hit=""
-                            data-mmd-id={box.id}
-                            aria-label={`Select ${box.id}`}
-                            aria-pressed={selectedBox}
-                            title="Drag to move. Double-click to rename."
-                            className={classNames(
-                                'absolute touch-none bg-transparent hover:shadow-[0_0_0_2px_color-mix(in_oklab,var(--primary)_50%,transparent)] rounded-sm cursor-grab active:cursor-grabbing',
-                                panMode ? 'pointer-events-none z-5' : 'pointer-events-auto z-5',
-                            )}
-                            style={{
-                                left: box.x,
-                                top: box.y,
-                                width: box.w,
-                                height: box.h,
-                                boxShadow: selectedBox ? '0 0 0 2px var(--primary)' : undefined,
-                            }}
-                            onPointerDown={(e) => onNodePointerDown(e, box.id)}
-                            onDoubleClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onDoubleClick(box.id, box);
-                            }}
-                        />
-                    );
-                }
-            )}
-        </>
-    );
+    return (<>
+        {boxes.map(
+            (box) => {
+                const selectedBox = box.id === selectedId;
+                return (
+                    <button
+                        key={box.id}
+                        type="button"
+                        data-mmd-hit=""
+                        data-mmd-id={box.id}
+                        aria-label={`Select ${box.id}`}
+                        aria-pressed={selectedBox}
+                        title="Drag to move. Double-click to rename."
+                        className={classNames(
+                            'absolute touch-none bg-transparent hover:shadow-[0_0_0_2px_color-mix(in_oklab,var(--primary)_50%,transparent)] rounded-sm cursor-grab active:cursor-grabbing',
+                            panMode ? 'pointer-events-none z-5' : 'pointer-events-auto z-5',
+                        )}
+                        style={{
+                            left: box.x,
+                            top: box.y,
+                            width: box.w,
+                            height: box.h,
+                            boxShadow: selectedBox ? '0 0 0 2px var(--primary)' : undefined,
+                        }}
+                        onPointerDown={(e) => onNodePointerDown(e, box.id)}
+                        onDoubleClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onDoubleClick(box.id, box);
+                        }}
+                    />
+                );
+            }
+        )}
+    </>);
 }
 
 function visualBox(box: { x: number; y: number; w: number; h: number; }) {

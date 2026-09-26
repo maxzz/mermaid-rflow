@@ -9,24 +9,10 @@ import { type DragLine, nodeIdFromPoint, watchDrag } from './5-mmd-edge-endpoint
 
 const HANDLE_SIZE = 14;
 
-const HANDLES: { side: 'top' | 'right' | 'bottom' | 'left'; }[] = [
-    { side: 'top' },
-    { side: 'right' },
-    { side: 'bottom' },
-    { side: 'left' },
-];
-
-export function MmdNodeHandles({
-    box,
-    hostRef,
-    setConnect,
-}: {
-    box: MmdHitBox | undefined;
-    hostRef: RefObject<HTMLElement | null>;
-    setConnect: Dispatch<SetStateAction<DragLine | null>>;
-}) {
+export function MmdNodeHandles({ box, hostRef, setConnect }: { box: MmdHitBox | undefined; hostRef: RefObject<HTMLElement | null>; setConnect: Dispatch<SetStateAction<DragLine | null>>; }) {
     const panMode = useAtomValue(mmdPanModeAtom);
     const shape = useAtomValue(mmdPaletteShapeAtom);
+    
     if (!box || panMode) {
         return null;
     }
@@ -40,6 +26,7 @@ export function MmdNodeHandles({
         if (!host) {
             return;
         }
+        
         const origin = handleCenter(selected, side);
         const overlayHost = host;
         setConnect({ x1: origin.x, y1: origin.y, x2: origin.x, y2: origin.y });
@@ -74,29 +61,34 @@ export function MmdNodeHandles({
         watchDrag(move, up);
     }
 
-    return (
-        <>
-            {HANDLES.map(
-                ({ side }) => {
-                    const pos = handleStyle(selected, side);
-                    return (
-                        <button
-                            key={side}
-                            type="button"
-                            data-mmd-chrome=""
-                            data-mmd-add-handle=""
-                            className="absolute bg-primary rounded-full shadow-[0_0_0_2px_var(--background)] pointer-events-auto z-10"
-                            style={{ left: pos.x, top: pos.y, width: HANDLE_SIZE, height: HANDLE_SIZE }}
-                            title="Drag to another block to connect, or click to add a block"
-                            onPointerDown={(e) => onHandlePointerDown(e, side)}
-                            onDoubleClick={(e) => e.stopPropagation()}
-                        />
-                    );
-                }
-            )}
-        </>
-    );
+    return (<>
+        {HANDLES.map(
+            ({ side }) => {
+                const pos = handleStyle(selected, side);
+                return (
+                    <button
+                        key={side}
+                        type="button"
+                        data-mmd-chrome=""
+                        data-mmd-add-handle=""
+                        className="absolute bg-primary rounded-full shadow-[0_0_0_2px_var(--background)] pointer-events-auto z-10"
+                        style={{ left: pos.x, top: pos.y, width: HANDLE_SIZE, height: HANDLE_SIZE }}
+                        title="Drag to another block to connect, or click to add a block"
+                        onPointerDown={(e) => onHandlePointerDown(e, side)}
+                        onDoubleClick={(e) => e.stopPropagation()}
+                    />
+                );
+            }
+        )}
+    </>);
 }
+
+const HANDLES: { side: 'top' | 'right' | 'bottom' | 'left'; }[] = [
+    { side: 'top' },
+    { side: 'right' },
+    { side: 'bottom' },
+    { side: 'left' },
+];
 
 function handleStyle(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
     const c = handleCenter(box, side);

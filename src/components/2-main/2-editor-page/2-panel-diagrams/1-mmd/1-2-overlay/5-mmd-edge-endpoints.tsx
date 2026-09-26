@@ -28,10 +28,12 @@ export function MmdEdgeEndpoints({ edge, hostRef, setConnect }: { edge: MmdEdgeH
         }
         e.preventDefault();
         e.stopPropagation();
+
         const host = hostRef.current;
         if (!host) {
             return;
         }
+
         const anchor = which === 'from' ? end : start;
         const parsed = parseCatalogEdgeKey(selected.key);
         const overlayHost = host;
@@ -81,10 +83,9 @@ export function MmdEdgeEndpoints({ edge, hostRef, setConnect }: { edge: MmdEdgeH
 function EndpointHandle({ pt, label, onPointerDown }: { pt: { x: number; y: number; }; label: string; onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => void; }) {
     return (
         <button
-            type="button"
+            className="absolute bg-background border-2 border-primary rounded-full shadow-[0_0_0_1px_var(--background)] cursor-grab active:cursor-grabbing pointer-events-auto z-10"
             data-mmd-chrome=""
             data-mmd-edge-handle=""
-            className="absolute bg-background border-2 border-primary rounded-full shadow-[0_0_0_1px_var(--background)] cursor-grab active:cursor-grabbing pointer-events-auto z-10"
             style={{
                 left: pt.x - EDGE_HANDLE_SIZE / 2,
                 top: pt.y - EDGE_HANDLE_SIZE / 2,
@@ -95,6 +96,7 @@ function EndpointHandle({ pt, label, onPointerDown }: { pt: { x: number; y: numb
             aria-label={label}
             onPointerDown={onPointerDown}
             onDoubleClick={(e) => e.stopPropagation()}
+            type="button"
         />
     );
 }

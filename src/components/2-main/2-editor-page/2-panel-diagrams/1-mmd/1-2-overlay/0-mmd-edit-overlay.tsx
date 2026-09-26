@@ -46,7 +46,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
     const [boxes, setBoxes] = useState<MmdHitBox[]>([]);
     const [edges, setEdges] = useState<MmdEdgeHit[]>([]);
     const [connect, setConnect] = useState<DragLine | null>(null);
-    
+
     const draggingRef = useRef(false);
 
     const flowchart = classifyMermaidSource(source) === 'flowchart' || isFlowchartDiagramType(diagramType);
@@ -140,6 +140,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
             if (!interactive) {
                 return;
             }
+
             function onKeyDown(e: KeyboardEvent) {
                 if (e.key !== 'Delete' && e.key !== 'Backspace') {
                     return;
@@ -169,9 +170,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
         [inline, interactive, selectedEdgeKey, selectedId]);
 
     if (!interactive) {
-        return inline && enabled
-            ? <InlineLabelEditor onClose={() => setInline(null)} />
-            : null;
+        return inline && enabled ? <InlineLabelEditor onClose={() => setInline(null)} /> : null;
     }
 
     const selected = selectedId ? boxes.find((box) => box.id === selectedId) : undefined;
