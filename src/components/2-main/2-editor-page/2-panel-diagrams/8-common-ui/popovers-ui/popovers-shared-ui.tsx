@@ -1,0 +1,1 @@
+export const popoverMainGridClasses = "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center";

@@ -1,5 +1,6 @@
 import { type ReactNode, Suspense, use, useId } from "react";
 import { useSnapshot } from "valtio";
+import { classNames } from "@/utils";
 import { Settings2Icon } from "lucide-react";
 import { Button } from "@/ui/shadcn/button";
 import { Label } from "@/ui/shadcn/label";
@@ -12,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/s
 import { DIAGRAM_FONTS, type DiagramTheme, mermaidSettings } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon, PreviewSelectItem, useSelectPreview } from "@/ui/local-ui";
 import { loadBeautifulMermaid } from "@/components/2-main/2-editor-page/1-panel-editor/8-lazy-modules";
+import { popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 export function RenderOptionsPopover() {
     return (
@@ -38,7 +40,7 @@ export function RenderOptionsPopover() {
                 </PopoverHeader>
 
                 <TooltipProvider delayDuration={500}>
-                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2 gap-y-2 items-center">
+                    <div className={classNames(popoverMainGridClasses, "gap-x-2 gap-y-2")}>
 
                         <Suspense fallback={<div className="py-6 col-span-full flex justify-center"><BarsLoaderIcon /></div>}>
                             <DiagramThemeSection />

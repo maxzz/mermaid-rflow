@@ -1,6 +1,8 @@
 import { type ReactNode, useId } from "react";
 import { useSnapshot } from "valtio";
+import { classNames } from "@/utils";
 import { WorkflowIcon } from "lucide-react";
+
 import { Button } from "@/ui/shadcn/button";
 import { Label } from "@/ui/shadcn/label";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/ui/shadcn/popover";
@@ -8,6 +10,8 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from "@/ui/shadcn/s
 import { Slider } from "@/ui/shadcn/slider";
 import { Switch } from "@/ui/shadcn/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/shadcn/tooltip";
+import { popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
+
 import {
     type ConsiderModelOrder,
     type CycleBreakingStrategy,
@@ -54,7 +58,7 @@ export function SvgLayoutEnginePopover() {
                 </PopoverHeader>
 
                 <TooltipProvider delayDuration={500}>
-                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2 gap-y-2 items-center">
+                    <div className={classNames(popoverMainGridClasses, "gap-x-2 gap-y-2")}>
                         <SvgElkOptions />
                     </div>
                 </TooltipProvider>
@@ -144,6 +148,7 @@ function Row({ label, hint, children }: { label: string; hint: string; children:
             <HintLabel htmlFor={id} hint={hint}>
                 {label}
             </HintLabel>
+            
             <div id={id} className="justify-self-end col-span-2">
                 {children}
             </div>
