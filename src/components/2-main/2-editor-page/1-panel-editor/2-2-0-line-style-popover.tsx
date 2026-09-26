@@ -63,7 +63,7 @@ export function LineStylePopover() {
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 onInteractOutside={keepOpenForSelect}
             >
-                <LineStyleBody current={current} />
+                <PopoverBody current={current} />
             </PopoverContent>
         </Popover>
     );
@@ -71,57 +71,53 @@ export function LineStylePopover() {
 
 type CurrentDirective = NonNullable<ReturnType<typeof readStyleDirectiveAt>> & { lineNumber: number; };
 
-function LineStyleBody({ current }: { current: CurrentDirective | null; }) {
+function PopoverBody({ current }: { current: CurrentDirective | null; }) {
     const fields = current ? fieldsForKind(current.parsed.kind) : [];
     const extras = current ? extraStyleDecls(current.parsed, fields) : [];
 
-    return (
-        <>
-            <PopoverHeader>
-                <PopoverTitle className="-mx-3 px-3 pt-3 pb-2 text-xs font-medium bg-muted border-b border-border shadow-xs flex items-center justify-between gap-2">
-                    {current?.resolved.heading ?? 'Line properties'}
-                    {current && (
-                        <span className="font-mono text-[0.65rem] text-muted-foreground">
-                            {current.parsed.kind}
-                        </span>
-                    )}
-                </PopoverTitle>
-                <PopoverDescription className="pt-1 text-[0.65rem] text-muted-foreground">
-                    {current
-                        ? current.resolved.summary
-                        : 'Place the caret on a style or linkStyle line to inspect its properties.'}
-                </PopoverDescription>
-            </PopoverHeader>
+    return (<>
+        <PopoverHeader>
+            <PopoverTitle className="-mx-3 px-3 pt-3 pb-2 text-xs font-medium bg-muted border-b border-border shadow-xs flex items-center justify-between gap-2">
+                {current?.resolved.heading ?? 'Line properties'}
+                {current && (
+                    <span className="font-mono text-[0.65rem] text-muted-foreground">
+                        {current.parsed.kind}
+                    </span>
+                )}
+            </PopoverTitle>
+            <PopoverDescription className="pt-1 text-[0.65rem] text-muted-foreground">
+                {current
+                    ? current.resolved.summary
+                    : 'Place the caret on a style or linkStyle line to inspect its properties.'}
+            </PopoverDescription>
+        </PopoverHeader>
 
-            {current && (
-                <TooltipProvider delayDuration={500}>
-                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2 gap-y-2 items-center">
-                        {current.parsed.kind === 'linkStyle' && (
-                            <InterpolateRow value={current.parsed.interpolate} />
-                        )}
-                        {fields.map((field) => (
-                            <FieldRow key={field.key} field={field} value={current.parsed.decls[field.key]} />
-                        ))}
-                        {extras.map(([key, value]) => (
-                            <TextRow key={key} label={key} hint="Custom declaration on this line." value={value} onCommit={(next) => patchDecl(key, next)} />
-                        ))}
-                    </div>
-                </TooltipProvider>
-            )}
-        </>
-    );
+        {current && (
+            <TooltipProvider delayDuration={500}>
+                <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2 gap-y-2 items-center">
+                    {current.parsed.kind === 'linkStyle' && (
+                        <InterpolateRow value={current.parsed.interpolate} />
+                    )}
+                    {fields.map(
+                        (field) => <FieldRow key={field.key} field={field} value={current.parsed.decls[field.key]} />
+
+                    )}
+                    {extras.map(
+                        ([key, value]) => <TextRow key={key} label={key} hint="Custom declaration on this line." value={value} onCommit={(next) => patchDecl(key, next)} />
+
+                    )}
+                </div>
+            </TooltipProvider>
+        )}
+    </>);
 }
 
 function FieldRow({ field, value }: { field: StyleFieldSpec; value: string | undefined; }) {
     switch (field.kind) {
-        case 'color':
-            return <ColorRow label={field.label} hint={field.hint} value={value} onCommit={(next) => patchDecl(field.key, next)} />;
-        case 'width':
-            return <WidthRow label={field.label} hint={field.hint} value={value} />;
-        case 'dash':
-            return <DashRow label={field.label} hint={field.hint} value={value} />;
-        default:
-            return <TextRow label={field.label} hint={field.hint} value={value ?? ''} onCommit={(next) => patchDecl(field.key, next)} />;
+        case 'color': return <ColorRow label={field.label} hint={field.hint} value={value} onCommit={(next) => patchDecl(field.key, next)} />;
+        case 'width': return <WidthRow label={field.label} hint={field.hint} value={value} />;
+        case 'dash': return <DashRow label={field.label} hint={field.hint} value={value} />;
+        default: return <TextRow label={field.label} hint={field.hint} value={value ?? ''} onCommit={(next) => patchDecl(field.key, next)} />;
     }
 }
 
@@ -129,7 +125,10 @@ function ColorRow({ label, hint, value, onCommit }: { label: string; hint: strin
     const hex = toHexColor(value);
     return (
         <div className={optionRowClasses}>
-            <HintLabel hint={hint}>{label}</HintLabel>
+            <HintLabel hint={hint}>
+                {label}
+            </HintLabel>
+
             <div className="justify-self-end col-span-2 flex items-center gap-1.5">
                 <input
                     type="color"
@@ -149,7 +148,10 @@ function WidthRow({ label, hint, value }: { label: string; hint: string; value: 
     const width = parseWidth(value) ?? 2;
     return (
         <div className={optionRowClasses}>
-            <HintLabel hint={hint}>{label}</HintLabel>
+            <HintLabel hint={hint}>
+                {label}
+            </HintLabel>
+
             <Slider
                 className="min-w-0"
                 min={1}
@@ -169,31 +171,40 @@ function WidthRow({ label, hint, value }: { label: string; hint: string; value: 
     );
 }
 
+function parseWidth(raw: string | undefined): number | null {
+    if (!raw) {
+        return null;
+    }
+    const n = Number.parseFloat(raw);
+    return Number.isFinite(n) ? n : null;
+}
+
 function DashRow({ label, hint, value }: { label: string; hint: string; value: string | undefined; }) {
     const preset = dashPreset(value);
-    return (
-        <>
-            <div className={optionRowClasses}>
-                <HintLabel hint={hint}>{label}</HintLabel>
-                <div className="justify-self-end col-span-2 grid grid-cols-3 gap-1">
-                    {DASHES.map((item) => (
-                        <Button
-                            key={item.value}
-                            type="button"
-                            variant={preset === item.value ? 'secondary' : 'ghost'}
-                            size="xs"
-                            onClick={() => patchDecl('stroke-dasharray', item.pattern)}
-                        >
-                            {item.label}
-                        </Button>
-                    ))}
-                </div>
+    return (<>
+        <div className={optionRowClasses}>
+            <HintLabel hint={hint}>
+                {label}
+            </HintLabel>
+
+            <div className="justify-self-end col-span-2 grid grid-cols-3 gap-1">
+                {DASHES.map((item) => (
+                    <Button
+                        key={item.value}
+                        type="button"
+                        variant={preset === item.value ? 'secondary' : 'ghost'}
+                        size="xs"
+                        onClick={() => patchDecl('stroke-dasharray', item.pattern)}
+                    >
+                        {item.label}
+                    </Button>
+                ))}
             </div>
-            {preset === 'custom' && (
-                <TextRow label="Dash array" hint="Raw stroke-dasharray value." value={value ?? ''} onCommit={(next) => patchDecl('stroke-dasharray', next)} />
-            )}
-        </>
-    );
+        </div>
+        {preset === 'custom' && (
+            <TextRow label="Dash array" hint="Raw stroke-dasharray value." value={value ?? ''} onCommit={(next) => patchDecl('stroke-dasharray', next)} />
+        )}
+    </>);
 }
 
 function InterpolateRow({ value }: { value: string | undefined; }) {
@@ -209,19 +220,18 @@ function InterpolateRow({ value }: { value: string | undefined; }) {
             <HintLabel hint="d3 curve used to draw the link. Combined with CSS on the same linkStyle line.">
                 Interpolate
             </HintLabel>
+
             <div className="justify-self-end col-span-2">
-                <Select
-                    value={current}
-                    onValueChange={(next) => patchCurrent((line) => setStyleInterpolate(line, next === NONE ? undefined : next))}
-                >
+                <Select value={current} onValueChange={(next) => patchCurrent((line) => setStyleInterpolate(line, next === NONE ? undefined : next))}>
                     <SelectTrigger size="sm" className="w-36">
                         <SelectValue>{value ?? 'Unset'}</SelectValue>
                     </SelectTrigger>
+
                     <SelectContent position="popper" align="end">
                         <SelectItem value={NONE}>Unset</SelectItem>
-                        {options.map((item) => (
-                            <SelectItem key={item} value={item}>{item}</SelectItem>
-                        ))}
+                        {options.map(
+                            (item) => <SelectItem key={item} value={item}>{item}</SelectItem>
+                        )}
                     </SelectContent>
                 </Select>
             </div>
@@ -232,7 +242,10 @@ function InterpolateRow({ value }: { value: string | undefined; }) {
 function TextRow({ label, hint, value, onCommit }: { label: string; hint: string; value: string; onCommit: (value: string | undefined) => void; }) {
     return (
         <div className={optionRowClasses}>
-            <HintLabel hint={hint}>{label}</HintLabel>
+            <HintLabel hint={hint}>
+                {label}
+            </HintLabel>
+
             <div className="justify-self-end col-span-2">
                 <DeclText value={value} placeholder="unset" className="w-36" onCommit={onCommit} />
             </div>
@@ -240,27 +253,19 @@ function TextRow({ label, hint, value, onCommit }: { label: string; hint: string
     );
 }
 
-function DeclText({
-    value,
-    placeholder,
-    className,
-    onCommit,
-}: {
-    value: string;
-    placeholder?: string;
-    className?: string;
-    onCommit: (value: string | undefined) => void;
-}) {
+function DeclText({ value, placeholder, className, onCommit }: { value: string; placeholder?: string; className?: string; onCommit: (value: string | undefined) => void; }) {
     const [draft, setDraft] = useState(value);
-    useEffect(() => { setDraft(value); }, [value]);
+
+    useEffect(
+        () => { setDraft(value); },
+        [value]);
 
     function commit() {
         const next = draft.trim();
         const current = value.trim();
-        if (next === current) {
-            return;
+        if (next !== current) {
+            onCommit(next || undefined);
         }
-        onCommit(next || undefined);
     }
 
     return (
@@ -287,6 +292,7 @@ function HintLabel({ hint, children }: { hint: string; children: ReactNode; }) {
                     {children}
                 </Label>
             </TooltipTrigger>
+
             <TooltipContent side="left" sideOffset={8} className="max-w-56 text-left whitespace-normal z-100">
                 {hint}
             </TooltipContent>
@@ -294,7 +300,7 @@ function HintLabel({ hint, children }: { hint: string; children: ReactNode; }) {
     );
 }
 
-let activeStyleLine: number | null = null;
+//---------------------------------------------------------------------------
 
 function readDirective(source: string, lineNumber: number): CurrentDirective | null {
     const read = readStyleDirectiveAt(source, lineNumber);
@@ -304,8 +310,10 @@ function readDirective(source: string, lineNumber: number): CurrentDirective | n
     return { lineNumber, ...read };
 }
 
-function currentLineNumber(): number | null {
-    return activeStyleLine ?? sourceLink.focusLine ?? getMonacoCursorLine();
+//---------------------------------------------------------------------------
+
+function patchDecl(key: string, value: string | undefined) {
+    patchCurrent((line) => setStyleDecl(line, key, value));
 }
 
 function patchCurrent(mutator: (line: StyleDirectiveLine) => StyleDirectiveLine) {
@@ -319,9 +327,13 @@ function patchCurrent(mutator: (line: StyleDirectiveLine) => StyleDirectiveLine)
     }
 }
 
-function patchDecl(key: string, value: string | undefined) {
-    patchCurrent((line) => setStyleDecl(line, key, value));
+function currentLineNumber(): number | null {
+    return activeStyleLine ?? sourceLink.focusLine ?? getMonacoCursorLine();
 }
+
+let activeStyleLine: number | null = null;
+
+//---------------------------------------------------------------------------
 
 function toHexColor(raw: string | undefined): string | null {
     if (!raw) {
@@ -339,13 +351,7 @@ function toHexColor(raw: string | undefined): string | null {
     return null;
 }
 
-function parseWidth(raw: string | undefined): number | null {
-    if (!raw) {
-        return null;
-    }
-    const n = Number.parseFloat(raw);
-    return Number.isFinite(n) ? n : null;
-}
+//---------------------------------------------------------------------------
 
 function dashPreset(value: string | undefined): 'solid' | 'dashed' | 'dotted' | 'custom' {
     if (!value || value === 'none' || value === '0') {
@@ -366,6 +372,8 @@ const DASHES: { value: 'solid' | 'dashed' | 'dotted'; label: string; pattern: st
     { value: 'dashed', label: 'Dashed', pattern: DASH_DASHED },
     { value: 'dotted', label: 'Dotted', pattern: DASH_DOTTED },
 ];
+
+//---------------------------------------------------------------------------
 
 const NONE = '__none__';
 const optionRowClasses = 'col-span-full grid grid-cols-subgrid items-center min-h-6';
