@@ -6,6 +6,7 @@ import { reconnectEdge } from '../3-catalog/2-source-patch';
 import { catalogEdgeKey, parseCatalogEdgeKey } from '../3-catalog/3-catalog-mmd';
 import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
 import { clientPointInOverlay, type MmdEdgeHit } from './8-mmd-layout-math';
+import { watchDrag } from './8-watch-drag';
 import { mmdPanModeAtom } from '../8-store/3-mmd-ui-atoms';
 
 const EDGE_HANDLE_SIZE = 14;
@@ -22,62 +23,72 @@ export function MmdEdgeEndpoints({ edge, hostRef, setConnect }: { edge: MmdEdgeH
     const start = selected.points[0]!;
     const end = selected.points[selected.points.length - 1]!;
 
-    function onEndpointPointerDown(e: ReactPointerEvent<HTMLButtonElement>, which: 'from' | 'to') {
-        if (e.button !== 0) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-
-        const host = hostRef.current;
-        if (!host) {
-            return;
-        }
-
-        const anchor = which === 'from' ? end : start;
-        const parsed = parseCatalogEdgeKey(selected.key);
-        const overlayHost = host;
-        setConnect({ x1: anchor.x, y1: anchor.y, x2: anchor.x, y2: anchor.y });
-        try {
-            e.currentTarget.setPointerCapture(e.pointerId);
-        }
-        catch {
-            // window listeners below still receive the drag
-        }
-
-        function move(ev: PointerEvent | MouseEvent) {
-            const pt = clientPointInOverlay(overlayHost, ev.clientX, ev.clientY);
-            setConnect({ x1: anchor.x, y1: anchor.y, x2: pt.x, y2: pt.y });
-        }
-
-        function up(ev: PointerEvent | MouseEvent) {
-            setConnect(null);
-            const hit = nodeIdFromPoint(ev.clientX, ev.clientY, which === 'from' ? selected.to : selected.from);
-            if (!hit || !parsed) {
-                return;
-            }
-            const nextFrom = which === 'from' ? hit : selected.from;
-            const nextTo = which === 'to' ? hit : selected.to;
-            if (applyMmdPatchResult(reconnectEdge(mermaidSettings.source, selected.from, selected.to, nextFrom, nextTo, parsed.label))) {
-                selectFromDiagram([catalogEdgeKey(nextFrom, nextTo, parsed.label)]);
-            }
-        }
-
-        watchDrag(move, up);
-    }
-
     return (<>
         <EndpointHandle
             pt={start}
             label={`Move start of ${selected.from} → ${selected.to}`}
-            onPointerDown={(e) => onEndpointPointerDown(e, 'from')}
+            onPointerDown={(e) => onEndpointPointerDown(e, 'from', { edge: selected, hostRef, setConnect })}
         />
         <EndpointHandle
             pt={end}
             label={`Move end of ${selected.from} → ${selected.to}`}
-            onPointerDown={(e) => onEndpointPointerDown(e, 'to')}
+            onPointerDown={(e) => onEndpointPointerDown(e, 'to', { edge: selected, hostRef, setConnect })}
         />
     </>);
+}
+
+function onEndpointPointerDown(
+    e: ReactPointerEvent<HTMLButtonElement>,
+    which: 'from' | 'to',
+    { edge, hostRef, setConnect }: {
+        edge: MmdEdgeHit;
+        hostRef: RefObject<HTMLElement | null>;
+        setConnect: Dispatch<SetStateAction<DragLine | null>>;
+    },
+) {
+    if (e.button !== 0) {
+        return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    const host = hostRef.current;
+    if (!host || edge.points.length < 2) {
+        return;
+    }
+
+    const start = edge.points[0]!;
+    const end = edge.points[edge.points.length - 1]!;
+    const anchor = which === 'from' ? end : start;
+    const parsed = parseCatalogEdgeKey(edge.key);
+    const overlayHost = host;
+    setConnect({ x1: anchor.x, y1: anchor.y, x2: anchor.x, y2: anchor.y });
+    try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+    }
+    catch {
+        // window listeners below still receive the drag
+    }
+
+    function move(ev: PointerEvent | MouseEvent) {
+        const pt = clientPointInOverlay(overlayHost, ev.clientX, ev.clientY);
+        setConnect({ x1: anchor.x, y1: anchor.y, x2: pt.x, y2: pt.y });
+    }
+
+    function up(ev: PointerEvent | MouseEvent) {
+        setConnect(null);
+        const hit = nodeIdFromPoint(ev.clientX, ev.clientY, which === 'from' ? edge.to : edge.from);
+        if (!hit || !parsed) {
+            return;
+        }
+        const nextFrom = which === 'from' ? hit : edge.from;
+        const nextTo = which === 'to' ? hit : edge.to;
+        if (applyMmdPatchResult(reconnectEdge(mermaidSettings.source, edge.from, edge.to, nextFrom, nextTo, parsed.label))) {
+            selectFromDiagram([catalogEdgeKey(nextFrom, nextTo, parsed.label)]);
+        }
+    }
+
+    watchDrag(move, up);
 }
 
 function EndpointHandle({ pt, label, onPointerDown }: { pt: { x: number; y: number; }; label: string; onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => void; }) {
@@ -118,37 +129,3 @@ export function nodeIdFromPoint(clientX: number, clientY: number, fromId: string
     return null;
 }
 
-export function watchDrag(move: (ev: PointerEvent | MouseEvent) => void, up: (ev: PointerEvent | MouseEvent) => void) {
-    let done = false;
-    let sawPointerMove = false;
-
-    function onMove(ev: PointerEvent | MouseEvent) {
-        if (ev.type === 'pointermove') {
-            sawPointerMove = true;
-        }
-        else if (sawPointerMove) {
-            return;
-        }
-        move(ev);
-    }
-
-    function onUp(ev: PointerEvent | MouseEvent) {
-        if (done) {
-            return;
-        }
-        if (ev.type === 'mouseup' && sawPointerMove) {
-            return;
-        }
-        done = true;
-
-        abortController.abort();
-        up(ev);
-    }
-
-    const abortController = new AbortController();
-    window.addEventListener('pointermove', onMove, { signal: abortController.signal });
-    window.addEventListener('pointerup', onUp, { signal: abortController.signal });
-    window.addEventListener('pointercancel', onUp, { signal: abortController.signal });
-    window.addEventListener('mousemove', onMove, { signal: abortController.signal });
-    window.addEventListener('mouseup', onUp, { signal: abortController.signal });
-}

@@ -10,7 +10,7 @@ import { mermaidIdFromDomId } from '../3-catalog/3-catalog-mmd';
 import { alignDragBox } from '../3-catalog/7-drag-guides';
 import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
 import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPanModeAtom } from '../8-store/3-mmd-ui-atoms';
-import { watchDrag } from './5-mmd-edge-endpoints';
+import { watchDrag } from './8-watch-drag';
 
 const DRAG_SLOP_PX = 4;
 const HIT_PAD = 2;
@@ -24,105 +24,6 @@ export function MmdNodeHits({ boxes, selectedId, hostRef, contentRef, draggingRe
 }) {
     const panMode = useAtomValue(mmdPanModeAtom);
     const setInline = useSetAtom(mmdInlineEditAtom);
-
-    function onNodePointerDown(e: ReactPointerEvent<HTMLButtonElement>, id: string) {
-        if (e.button !== 0 || panMode) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-
-        selectFromDiagram([`node:${id}`]);
-        const root = contentRef.current;
-        const overlayHost = hostRef.current;
-        const svgEl = root?.querySelector('svg');
-        const nodeEl = root ? nodeElementById(root, id) : null;
-        if (!root || !overlayHost || !(svgEl instanceof SVGSVGElement) || !(nodeEl instanceof Element)) {
-            return;
-        }
-
-        const liveRoot = root;
-        const board = overlayHost;
-        const liveSvg = svgEl;
-        const handle = e.currentTarget;
-        const startBox = boxes.find((box) => box.id === id);
-        const peerBoxes = boxes.filter((box) => box.id !== id).map(visualBox);
-        const nodes = { ...mmdLayout.nodes };
-        const start = {
-            x: e.clientX,
-            y: e.clientY,
-            pos: nodes[id] ?? originOfNode(nodeEl),
-            scale: clientDeltaToSvg(liveSvg, 1, 1),
-            overlay: overlayScale(board),
-        };
-        let moved = false;
-        let lastPos: MmdNodePos = start.pos;
-        try {
-            handle.setPointerCapture(e.pointerId);
-        }
-        catch {
-            // window listeners below still receive the drag
-        }
-        const store = getDefaultStore();
-
-        function move(event: PointerEvent | MouseEvent) {
-            const dx = event.clientX - start.x;
-            const dy = event.clientY - start.y;
-
-            if (!moved) {
-                if (dx * dx + dy * dy < DRAG_SLOP_PX * DRAG_SLOP_PX) {
-                    return;
-                }
-                moved = true;
-                draggingRef.current = true;
-                board.classList.add('is-mmd-dragging');
-                store.set(mmdNodeDraggingAtom, true);
-            }
-
-            let snapDx = 0;
-            let snapDy = 0;
-            let guides: { x1: number; y1: number; x2: number; y2: number; }[] = [];
-            if (startBox) {
-                const visual = visualBox({
-                    x: startBox.x + dx / start.overlay.x,
-                    y: startBox.y + dy / start.overlay.y,
-                    w: startBox.w,
-                    h: startBox.h,
-                });
-                const aligned = alignDragBox(visual, peerBoxes);
-                snapDx = aligned.box.x - visual.x;
-                snapDy = aligned.box.y - visual.y;
-                guides = aligned.guides;
-            }
-            const snap = clientDeltaToSvg(liveSvg, snapDx * start.overlay.x, snapDy * start.overlay.y);
-            lastPos = {
-                x: start.pos.x + dx * start.scale.dx + snap.dx,
-                y: start.pos.y + dy * start.scale.dy + snap.dy,
-            };
-            applyMmdNodeDrag(liveRoot, id, lastPos, nodes);
-            if (startBox) {
-                handle.style.left = `${startBox.x + dx / start.overlay.x + snapDx}px`;
-                handle.style.top = `${startBox.y + dy / start.overlay.y + snapDy}px`;
-            }
-            store.set(mmdDragOverlayAtom, {
-                links: mmdDragLinkPreviews(liveRoot, board),
-                guides,
-            });
-        }
-
-        function up() {
-            draggingRef.current = false;
-            board.classList.remove('is-mmd-dragging');
-            store.set(mmdNodeDraggingAtom, false);
-            store.set(mmdDragOverlayAtom, null);
-            if (moved) {
-                bakeMmdDragEdges(liveRoot, { ...nodes, [id]: lastPos });
-                setMmdNodePos(id, lastPos);
-            }
-        }
-
-        watchDrag(move, up);
-    }
 
     function onDoubleClick(id: string, box: MmdHitBox) {
         setInline({
@@ -158,7 +59,7 @@ export function MmdNodeHits({ boxes, selectedId, hostRef, contentRef, draggingRe
                             height: box.h,
                             boxShadow: selectedBox ? '0 0 0 2px var(--primary)' : undefined,
                         }}
-                        onPointerDown={(e) => onNodePointerDown(e, box.id)}
+                        onPointerDown={(e) => onNodePointerDown(e, box.id, { panMode, boxes, hostRef, contentRef, draggingRef })}
                         onDoubleClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -169,6 +70,115 @@ export function MmdNodeHits({ boxes, selectedId, hostRef, contentRef, draggingRe
             }
         )}
     </>);
+}
+
+function onNodePointerDown(
+    e: ReactPointerEvent<HTMLButtonElement>,
+    id: string,
+    { panMode, boxes, hostRef, contentRef, draggingRef }: {
+        panMode: boolean;
+        boxes: MmdHitBox[];
+        hostRef: RefObject<HTMLElement | null>;
+        contentRef: RefObject<HTMLElement | null>;
+        draggingRef: RefObject<boolean>;
+    },
+) {
+    if (e.button !== 0 || panMode) {
+        return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    selectFromDiagram([`node:${id}`]);
+    const root = contentRef.current;
+    const overlayHost = hostRef.current;
+    const svgEl = root?.querySelector('svg');
+    const nodeEl = root ? nodeElementById(root, id) : null;
+    if (!root || !overlayHost || !(svgEl instanceof SVGSVGElement) || !(nodeEl instanceof Element)) {
+        return;
+    }
+
+    const liveRoot = root;
+    const board = overlayHost;
+    const liveSvg = svgEl;
+    const handle = e.currentTarget;
+    const startBox = boxes.find((box) => box.id === id);
+    const peerBoxes = boxes.filter((box) => box.id !== id).map(visualBox);
+    const nodes = { ...mmdLayout.nodes };
+    const start = {
+        x: e.clientX,
+        y: e.clientY,
+        pos: nodes[id] ?? originOfNode(nodeEl),
+        scale: clientDeltaToSvg(liveSvg, 1, 1),
+        overlay: overlayScale(board),
+    };
+    let moved = false;
+    let lastPos: MmdNodePos = start.pos;
+    try {
+        handle.setPointerCapture(e.pointerId);
+    }
+    catch {
+        // window listeners below still receive the drag
+    }
+    const store = getDefaultStore();
+
+    function move(event: PointerEvent | MouseEvent) {
+        const dx = event.clientX - start.x;
+        const dy = event.clientY - start.y;
+
+        if (!moved) {
+            if (dx * dx + dy * dy < DRAG_SLOP_PX * DRAG_SLOP_PX) {
+                return;
+            }
+            moved = true;
+            draggingRef.current = true;
+            board.classList.add('is-mmd-dragging');
+            store.set(mmdNodeDraggingAtom, true);
+        }
+
+        let snapDx = 0;
+        let snapDy = 0;
+        let guides: { x1: number; y1: number; x2: number; y2: number; }[] = [];
+        if (startBox) {
+            const visual = visualBox({
+                x: startBox.x + dx / start.overlay.x,
+                y: startBox.y + dy / start.overlay.y,
+                w: startBox.w,
+                h: startBox.h,
+            });
+            const aligned = alignDragBox(visual, peerBoxes);
+            snapDx = aligned.box.x - visual.x;
+            snapDy = aligned.box.y - visual.y;
+            guides = aligned.guides;
+        }
+        const snap = clientDeltaToSvg(liveSvg, snapDx * start.overlay.x, snapDy * start.overlay.y);
+        lastPos = {
+            x: start.pos.x + dx * start.scale.dx + snap.dx,
+            y: start.pos.y + dy * start.scale.dy + snap.dy,
+        };
+        applyMmdNodeDrag(liveRoot, id, lastPos, nodes);
+        if (startBox) {
+            handle.style.left = `${startBox.x + dx / start.overlay.x + snapDx}px`;
+            handle.style.top = `${startBox.y + dy / start.overlay.y + snapDy}px`;
+        }
+        store.set(mmdDragOverlayAtom, {
+            links: mmdDragLinkPreviews(liveRoot, board),
+            guides,
+        });
+    }
+
+    function up() {
+        draggingRef.current = false;
+        board.classList.remove('is-mmd-dragging');
+        store.set(mmdNodeDraggingAtom, false);
+        store.set(mmdDragOverlayAtom, null);
+        if (moved) {
+            bakeMmdDragEdges(liveRoot, { ...nodes, [id]: lastPos });
+            setMmdNodePos(id, lastPos);
+        }
+    }
+
+    watchDrag(move, up);
 }
 
 function visualBox(box: { x: number; y: number; w: number; h: number; }) {
