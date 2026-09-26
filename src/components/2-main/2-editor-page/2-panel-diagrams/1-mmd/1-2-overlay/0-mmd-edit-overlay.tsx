@@ -1,38 +1,29 @@
-import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { getDefaultStore, useAtom, useAtomValue } from 'jotai';
+import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
 import { subscribe, useSnapshot } from 'valtio';
-import { classNames } from '@/utils';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 
-import { selectFromDiagram, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
-import { classifyMermaidSource, isFlowchartDiagramType, readNodeLabel } from '../3-catalog/1-flowchart-source';
-import { addNode, connectNodes, deleteEdge, deleteNode, renameNode } from '../3-catalog/2-source-patch';
+import { sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
+import { classifyMermaidSource, isFlowchartDiagramType } from '../3-catalog/1-flowchart-source';
+import { deleteEdge, deleteNode, renameNode } from '../3-catalog/2-source-patch';
 import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
-import { mermaidIdFromDomId, parseCatalogEdgeKey } from '../3-catalog/3-catalog-mmd';
+import { parseCatalogEdgeKey } from '../3-catalog/3-catalog-mmd';
 import {
     type MmdEdgeHit,
     type MmdHitBox,
-    type MmdNodePos,
     applyMmdLayout,
-    applyMmdNodeDrag,
-    bakeMmdDragEdges,
-    clientDeltaToSvg,
-    clientPointInOverlay,
     measureMmdEdges,
     measureMmdNodeBoxes,
-    originOfNode,
-    mmdDragLinkPreviews,
-    overlayScale,
 } from './8-mmd-layout-math';
-import { alignDragBox, type GuideBox } from '../3-catalog/7-drag-guides';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
-import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
+import { mmdLayout } from '../8-store/4-mmd-layout';
 import { mmdSettings } from '../8-store/2-mmd-settings';
-import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
-import { type DragLine, MmdEdgeEndpoints, nodeIdFromPoint, watchDrag } from './1-mmd-edge-endpoints';
+import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
+import { MmdEdgeHits } from './3-mmd-edge-hits';
+import { MmdNodeHits } from './4-mmd-node-hits';
+import { type DragLine, MmdEdgeEndpoints } from './5-mmd-edge-endpoints';
+import { MmdNodeHandles } from './6-mmd-node-handles';
 
-const DRAG_SLOP_PX = 4;
-const HANDLE_SIZE = 14;
 const HIT_PAD = 2;
 
 export type MmdEditOverlayProps = {
@@ -50,8 +41,6 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
     const link = useSnapshot(sourceLink);
 
     const zoom = useAtomValue(mmdZoomAtom);
-    const panMode = useAtomValue(mmdPanModeAtom);
-    const shape = useAtomValue(mmdPaletteShapeAtom);
     const [inline, setInline] = useAtom(mmdInlineEditAtom);
 
     const [boxes, setBoxes] = useState<MmdHitBox[]>([]);
@@ -128,6 +117,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
             const unsubLayout = subscribe(mmdLayout, () => {
                 syncBoxes();
             });
+
             void document.fonts?.ready.then(() => {
                 if (!cancelled) {
                     observe();
@@ -171,8 +161,10 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                 e.preventDefault();
                 applyMmdPatchResult(deleteNode(mermaidSettings.source, selectedId));
             }
-            window.addEventListener('keydown', onKeyDown);
-            return () => window.removeEventListener('keydown', onKeyDown);
+
+            const abortController = new AbortController();
+            window.addEventListener('keydown', onKeyDown, { signal: abortController.signal });
+            return () => abortController.abort();
         },
         [inline, interactive, selectedEdgeKey, selectedId]);
 
@@ -185,256 +177,21 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
     const selected = selectedId ? boxes.find((box) => box.id === selectedId) : undefined;
     const selectedEdge = selectedEdgeKey ? edges.find((edge) => edge.key === selectedEdgeKey) : undefined;
 
-    function onEdgePointerDown(e: ReactPointerEvent<SVGPolylineElement>, key: string) {
-        if (e.button !== 0 || panMode) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        selectFromDiagram([key]);
-    }
-
-    function onNodePointerDown(e: ReactPointerEvent<HTMLButtonElement>, id: string) {
-        if (e.button !== 0 || panMode) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        selectFromDiagram([`node:${id}`]);
-        const root = contentRef.current;
-        const overlayHost = hostRef.current;
-        const svgEl = root?.querySelector('svg');
-        const nodeEl = root ? nodeElementById(root, id) : null;
-        if (!root || !overlayHost || !(svgEl instanceof SVGSVGElement) || !(nodeEl instanceof Element)) {
-            return;
-        }
-        const liveRoot = root;
-        const board = overlayHost;
-        const liveSvg = svgEl;
-        const handle = e.currentTarget;
-        const startBox = boxes.find((box) => box.id === id);
-        const peerBoxes = boxes.filter((box) => box.id !== id).map(visualBox);
-        const nodes = { ...mmdLayout.nodes };
-        const start = {
-            x: e.clientX,
-            y: e.clientY,
-            pos: nodes[id] ?? originOfNode(nodeEl),
-            scale: clientDeltaToSvg(liveSvg, 1, 1),
-            overlay: overlayScale(board),
-        };
-        let moved = false;
-        let lastPos: MmdNodePos = start.pos;
-        try {
-            handle.setPointerCapture(e.pointerId);
-        }
-        catch {
-            // window listeners below still receive the drag
-        }
-        const store = getDefaultStore();
-
-        function move(ev: PointerEvent | MouseEvent) {
-            const dx = ev.clientX - start.x;
-            const dy = ev.clientY - start.y;
-            if (!moved) {
-                if (dx * dx + dy * dy < DRAG_SLOP_PX * DRAG_SLOP_PX) {
-                    return;
-                }
-                moved = true;
-                draggingRef.current = true;
-                board.classList.add('is-mmd-dragging');
-                store.set(mmdNodeDraggingAtom, true);
-            }
-            let snapDx = 0;
-            let snapDy = 0;
-            let guides: { x1: number; y1: number; x2: number; y2: number; }[] = [];
-            if (startBox) {
-                const visual = visualBox({
-                    x: startBox.x + dx / start.overlay.x,
-                    y: startBox.y + dy / start.overlay.y,
-                    w: startBox.w,
-                    h: startBox.h,
-                });
-                const aligned = alignDragBox(visual, peerBoxes);
-                snapDx = aligned.box.x - visual.x;
-                snapDy = aligned.box.y - visual.y;
-                guides = aligned.guides;
-            }
-            const snap = clientDeltaToSvg(liveSvg, snapDx * start.overlay.x, snapDy * start.overlay.y);
-            lastPos = {
-                x: start.pos.x + dx * start.scale.dx + snap.dx,
-                y: start.pos.y + dy * start.scale.dy + snap.dy,
-            };
-            applyMmdNodeDrag(liveRoot, id, lastPos, nodes);
-            if (startBox) {
-                handle.style.left = `${startBox.x + dx / start.overlay.x + snapDx}px`;
-                handle.style.top = `${startBox.y + dy / start.overlay.y + snapDy}px`;
-            }
-            store.set(mmdDragOverlayAtom, {
-                links: mmdDragLinkPreviews(liveRoot, board),
-                guides,
-            });
-        }
-
-        function up() {
-            draggingRef.current = false;
-            board.classList.remove('is-mmd-dragging');
-            store.set(mmdNodeDraggingAtom, false);
-            store.set(mmdDragOverlayAtom, null);
-            if (moved) {
-                bakeMmdDragEdges(liveRoot, { ...nodes, [id]: lastPos });
-                setMmdNodePos(id, lastPos);
-            }
-        }
-
-        watchDrag(move, up);
-    }
-
-    function onHandlePointerDown(e: ReactPointerEvent<HTMLButtonElement>, fromId: string, box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
-        if (panMode) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        const host = hostRef.current;
-        if (!host) {
-            return;
-        }
-        const origin = handleCenter(box, side);
-        const overlayHost = host;
-        setConnect({ x1: origin.x, y1: origin.y, x2: origin.x, y2: origin.y });
-        const handle = e.currentTarget;
-        try {
-            handle.setPointerCapture(e.pointerId);
-        }
-        catch {
-            // window listeners below still receive the drag
-        }
-
-        function move(ev: PointerEvent | MouseEvent) {
-            const pt = clientPointInOverlay(overlayHost, ev.clientX, ev.clientY);
-            setConnect({ x1: origin.x, y1: origin.y, x2: pt.x, y2: pt.y });
-        }
-
-        function up(ev: PointerEvent | MouseEvent) {
-            setConnect(null);
-            const pt = clientPointInOverlay(overlayHost, ev.clientX, ev.clientY);
-            const dx = pt.x - origin.x;
-            const dy = pt.y - origin.y;
-            if (dx * dx + dy * dy < 64) {
-                applyMmdPatchResult(addNode(mermaidSettings.source, { shape, fromId }));
-                return;
-            }
-            const toId = nodeIdFromPoint(ev.clientX, ev.clientY, fromId);
-            if (toId) {
-                applyMmdPatchResult(connectNodes(mermaidSettings.source, fromId, toId));
-            }
-        }
-
-        watchDrag(move, up);
-    }
-
-    function onDoubleClick(id: string, box: MmdHitBox) {
-        setInline({
-            id,
-            text: readNodeLabel(mermaidSettings.source, id),
-            x: box.x,
-            y: box.y,
-            w: Math.max(box.w, 72),
-        });
-    }
-
     const lineLen = connect ? Math.hypot(connect.x2 - connect.x1, connect.y2 - connect.y1) : 0;
     const lineAngle = connect ? Math.atan2(connect.y2 - connect.y1, connect.x2 - connect.x1) : 0;
 
     return (<>
-        <svg className="absolute inset-0 z-4 overflow-visible pointer-events-none" width="100%" height="100%">
-            {edges.map(
-                (edge) => {
-                    const selectedLine = edge.key === selectedEdgeKey;
-                    return (
-                        <g key={edge.key}>
-                            <polyline
-                                data-mmd-edge={edge.key}
-                                className="hover:stroke-primary/45 cursor-pointer [pointer-events:stroke]"
-                                points={pointsAttr(edge.points)}
-                                fill="none"
-                                stroke="transparent"
-                                strokeWidth={14}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                pointerEvents={panMode ? 'none' : 'stroke'}
-                                onPointerDown={(e) => onEdgePointerDown(e, edge.key)}
-                            />
-                            {selectedLine && (
-                                <polyline
-                                    className="mmd-edge-selected"
-                                    points={pointsAttr(edge.points)}
-                                    fill="none"
-                                    stroke="var(--primary)"
-                                    strokeWidth={3.5}
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    pointerEvents="none"
-                                />
-                            )}
-                        </g>
-                    );
-                }
-            )}
-        </svg>
+        <MmdEdgeHits edges={edges} selectedEdgeKey={selectedEdgeKey} />
 
-        {boxes.map(
-            (box) => {
-                const selectedBox = box.id === selectedId;
-                return (
-                    <button
-                        key={box.id}
-                        type="button"
-                        data-mmd-hit=""
-                        data-mmd-id={box.id}
-                        aria-label={`Select ${box.id}`}
-                        aria-pressed={selectedBox}
-                        title="Drag to move. Double-click to rename."
-                        className={classNames(
-                            'absolute z-5 rounded-sm bg-transparent hover:shadow-[0_0_0_2px_color-mix(in_oklab,var(--primary)_50%,transparent)] touch-none cursor-grab active:cursor-grabbing',
-                            panMode ? 'pointer-events-none' : 'pointer-events-auto',
-                        )}
-                        style={{
-                            left: box.x,
-                            top: box.y,
-                            width: box.w,
-                            height: box.h,
-                            boxShadow: selectedBox ? '0 0 0 2px var(--primary)' : undefined,
-                        }}
-                        onPointerDown={(e) => onNodePointerDown(e, box.id)}
-                        onDoubleClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onDoubleClick(box.id, box);
-                        }}
-                    />
-                );
-            }
-        )}
+        <MmdNodeHits
+            boxes={boxes}
+            selectedId={selectedId}
+            hostRef={hostRef}
+            contentRef={contentRef}
+            draggingRef={draggingRef}
+        />
 
-        {selected && !selectedEdge && !panMode && HANDLES.map(
-            ({ side }) => {
-                const pos = handleStyle(selected, side);
-                return (
-                    <button
-                        key={side}
-                        type="button"
-                        data-mmd-chrome=""
-                        data-mmd-add-handle=""
-                        className="absolute z-10 rounded-full bg-primary shadow-[0_0_0_2px_var(--background)] pointer-events-auto"
-                        style={{ left: pos.x, top: pos.y, width: HANDLE_SIZE, height: HANDLE_SIZE }}
-                        title="Drag to another block to connect, or click to add a block"
-                        onPointerDown={(e) => onHandlePointerDown(e, selected.id, selected, side)}
-                        onDoubleClick={(e) => e.stopPropagation()}
-                    />
-                );
-            }
-        )}
+        <MmdNodeHandles box={selectedEdge ? undefined : selected} hostRef={hostRef} setConnect={setConnect} />
 
         <MmdEdgeEndpoints edge={selectedEdge} hostRef={hostRef} setConnect={setConnect} />
 
@@ -453,13 +210,6 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
         )}
     </>);
 }
-
-const HANDLES: { side: 'top' | 'right' | 'bottom' | 'left'; }[] = [
-    { side: 'top' },
-    { side: 'right' },
-    { side: 'bottom' },
-    { side: 'left' },
-];
 
 function InlineLabelEditor({ onClose }: { onClose: () => void; }) {
     const [inline, setInline] = useAtom(mmdInlineEditAtom);
@@ -542,15 +292,6 @@ function MmdDragOverlay() {
     );
 }
 
-function visualBox(box: { x: number; y: number; w: number; h: number; }): GuideBox {
-    return {
-        x: box.x + HIT_PAD,
-        y: box.y + HIT_PAD,
-        w: Math.max(1, box.w - HIT_PAD * 2),
-        h: Math.max(1, box.h - HIT_PAD * 2),
-    };
-}
-
 function padHitBox(box: MmdHitBox): MmdHitBox {
     return {
         ...box,
@@ -583,38 +324,6 @@ function selectionFromKeys(keys: string[]): { nodeId: string | null; edge: { fro
     } else {
         return { nodeId, edge: nodeId ? null : edge };
     }
-}
-
-function pointsAttr(points: { x: number; y: number; }[]): string {
-    return points.map((pt) => `${pt.x},${pt.y}`).join(' ');
-}
-
-//---------------------------------------------------------------------------
-
-
-function handleStyle(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
-    const c = handleCenter(box, side);
-    return { x: c.x - HANDLE_SIZE / 2, y: c.y - HANDLE_SIZE / 2 };
-}
-
-function handleCenter(box: MmdHitBox, side: 'top' | 'right' | 'bottom' | 'left') {
-    switch (side) {
-        case 'top': return { x: box.x + box.w / 2, y: box.y };
-        case 'right': return { x: box.x + box.w, y: box.y + box.h / 2 };
-        case 'left': return { x: box.x, y: box.y + box.h / 2 };
-        default: return { x: box.x + box.w / 2, y: box.y + box.h };
-    }
-}
-
-//---------------------------------------------------------------------------
-
-function nodeElementById(root: Element, id: string): Element | null {
-    for (const el of root.querySelectorAll('g.node')) {
-        if (mermaidIdFromDomId(el.id) === id) {
-            return el;
-        }
-    }
-    return null;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
