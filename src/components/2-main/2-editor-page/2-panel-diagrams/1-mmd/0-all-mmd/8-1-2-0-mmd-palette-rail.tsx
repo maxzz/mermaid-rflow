@@ -11,7 +11,7 @@ import { Label } from '@/ui/shadcn/label';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
 import { classifyMermaidSource, FLOW_SHAPE_ITEMS, type NodeShape } from '../3-catalog/1-flowchart-source';
 import { insertMmdPaletteNode, selectedMmdNodeId } from '../3-catalog/4-apply-patch';
-import { mmdPaletteShapeAtom } from '../8-store/3-mmd-ui';
+import { mmdPaletteShapeAtom } from '../8-store/3-mmd-ui-atoms';
 import { MmdStylePopover } from './8-1-2-1-mmd-style-panel';
 
 export function MmdPaletteRail() {

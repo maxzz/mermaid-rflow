@@ -6,7 +6,7 @@ import { HandIcon } from 'lucide-react';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@/store/2-mermaid-settings';
 import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from '../../4-common/8-zoom-bar';
-import { mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
+import { mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
 import { fitMmdToView, setMmdZoom } from './8-3-2-mmd-zoom-utils';
 
 export function ZoomControls_Mmd({ viewportRef, contentRef }: { viewportRef: RefObject<HTMLDivElement | null>; contentRef: RefObject<HTMLDivElement | null>; }) {

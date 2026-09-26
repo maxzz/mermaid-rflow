@@ -2,7 +2,7 @@ import { type RefObject, useLayoutEffect } from 'react';
 import { getDefaultStore } from 'jotai';
 import { subscribe } from 'valtio';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { mmdPanAtom } from '../8-store/3-mmd-ui';
+import { mmdPanAtom } from '../8-store/3-mmd-ui-atoms';
 import {
     buildSourceIndex,
     clearSelection,

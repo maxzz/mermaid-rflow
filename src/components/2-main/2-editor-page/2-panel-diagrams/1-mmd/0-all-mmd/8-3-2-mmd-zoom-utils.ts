@@ -1,6 +1,6 @@
 import { getDefaultStore } from 'jotai';
 import { ZOOM_MAX, ZOOM_MIN } from '@/store/2-mermaid-settings';
-import { mmdPanAtom, mmdZoomAtom, type MmdPan } from '../8-store/3-mmd-ui';
+import { mmdPanAtom, mmdZoomAtom, type MmdPan } from '../8-store/3-mmd-ui-atoms';
 
 export const MMD_FIT_PADDING = 48;
 
