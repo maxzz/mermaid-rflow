@@ -7,7 +7,7 @@ import { isThemeDark } from '@/utils/theme-utils';
 import { appSettings } from '@/store/1-ui-settings';
 
 import { ZOOM_STEP } from '@/store/2-mermaid-settings';
-import { bindLastMermaidFunctions } from '../1-render/2-render-official';
+import { bindLastMermaidFunctions } from '../1-2-render/2-render-official';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
