@@ -9,8 +9,8 @@ import { copyText } from "@/components/4-dialogs/2-export/8-export-utils";
 import { isOpenExportDialogAtom } from "@/components/4-dialogs/2-export/a-types-export";
 import { DropdownMenuItem } from "@/ui/shadcn/dropdown-menu";
 import { TabDropdownMenu } from "../../../../../../ui/local-ui/8-tab-dropdown-menu";
-import { RenderOptionsPopover } from "../../0-all-panels/6-render-options-popover";
 import { SvgLayoutEnginePopover } from "./8-1-1-svg-layout-popover";
+import { RenderOptionsPopover } from "./8-1-2-render-options-popover";
 
 export function PreviewToolbar_Bm() {
     const { outputFormat } = useSnapshot(mermaidSettings);

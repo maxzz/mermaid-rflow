@@ -43,9 +43,9 @@ export function RenderOptionsPopover() {
                         <Suspense fallback={<div className="py-6 col-span-full flex justify-center"><BarsLoaderIcon /></div>}>
                             <DiagramThemeSection />
                         </Suspense>
+
                         <SvgLayoutSection />
                         <TextOutputSection />
-
                     </div>
                 </TooltipProvider>
             </PopoverContent>
