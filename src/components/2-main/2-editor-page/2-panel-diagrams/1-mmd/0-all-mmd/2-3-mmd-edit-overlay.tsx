@@ -27,7 +27,7 @@ import { alignDragBox, type GuideBox } from '../3-catalog/7-drag-guides';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
 import { mmdSettings } from '../8-store/2-mmd-settings';
-import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
+import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
 
 const DRAG_SLOP_PX = 4;
 const HANDLE_SIZE = 14;
@@ -735,17 +735,14 @@ function watchDrag(move: (ev: PointerEvent | MouseEvent) => void, up: (ev: Point
         }
         done = true;
         
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        window.removeEventListener('pointercancel', onUp);
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
+        abortController.abort();
         up(ev);
     }
 
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', onUp);
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    const abortController = new AbortController(); 
+    window.addEventListener('pointermove', onMove, { signal: abortController.signal });
+    window.addEventListener('pointerup', onUp, { signal: abortController.signal });
+    window.addEventListener('pointercancel', onUp, { signal: abortController.signal });
+    window.addEventListener('mousemove', onMove, { signal: abortController.signal });
+    window.addEventListener('mouseup', onUp, { signal: abortController.signal });
 }
