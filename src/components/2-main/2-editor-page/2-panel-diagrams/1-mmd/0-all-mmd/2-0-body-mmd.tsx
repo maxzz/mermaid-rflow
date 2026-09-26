@@ -14,7 +14,7 @@ import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-ato
 import { MmdPaletteRail } from './8-1-2-0-mmd-palette-rail';
 import { ZoomControls_Mmd } from './8-3-1-zoom-controls-mmd';
 import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from './8-3-2-mmd-zoom-utils';
-import { MmdEditOverlay } from './2-3-mmd-edit-overlay';
+import { MmdEditOverlay } from '../1-1-overlay/2-3-mmd-edit-overlay';
 import { useMmdLayout } from './2-1-use-mmd-layout';
 import { useMmdSourceLink } from './2-2-use-mmd-source-link';
 import { usePanToTranslate } from './use-pan-to-translate';
@@ -24,6 +24,7 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
     const boardRef = useRef<HTMLDivElement>(null);
     const hostRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+
     const { svg, error } = useSnapshot(mmdDiagram);
     const { autofit } = useSnapshot(mmdSettings);
     const { theme } = useSnapshot(appSettings);
@@ -32,6 +33,7 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
     const panMode = useAtomValue(mmdPanModeAtom);
     const dark = isThemeDark(theme);
     const enabled = !!svg && !error;
+
     const [natural, setNatural] = useState({ w: 0, h: 0 });
 
     useLayoutEffect(
@@ -131,9 +133,7 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
         <div className="relative size-full overflow-hidden">
             <div
                 ref={viewportRef}
-                className={classNames(
-                    'absolute inset-0 overflow-hidden touch-none',
-                    'bg-size-[22px_22px]',
+                className={classNames('absolute inset-0 overflow-hidden touch-none bg-size-[22px_22px]',
                     dark
                         ? 'bg-[radial-gradient(circle,color-mix(in_oklab,var(--foreground)_18%,transparent)_1.15px,transparent_1.15px)]'
                         : 'bg-[radial-gradient(circle,color-mix(in_oklab,var(--foreground)_12%,transparent)_1.15px,transparent_1.15px)]',
@@ -203,7 +203,7 @@ left-0 \
 [&.is-mmd-dragging_[data-mmd-hit]]:cursor-grabbing \
 [&.is-mmd-dragging_[data-mmd-add-handle]]:hidden \
 [&.is-mmd-dragging_[data-mmd-edge-handle]]:hidden \
-"
+";
 
 const containerClasses = "\
 [&_svg]:max-w-none [&_svg]:block \
