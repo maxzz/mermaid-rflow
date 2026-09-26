@@ -11,20 +11,23 @@ import { catalogEdgeKey, mermaidIdFromDomId, parseCatalogEdgeKey } from '../3-ca
 import {
     applyMmdLayout,
     applyMmdNodeDrag,
+    bakeMmdDragEdges,
     clientDeltaToSvg,
     clientPointInOverlay,
     measureMmdEdges,
     measureMmdNodeBoxes,
     originOfNode,
+    mmdDragLinkPreviews,
     overlayScale,
     type MmdEdgeHit,
     type MmdHitBox,
     type MmdNodePos,
 } from '../3-catalog/5-mmd-layout';
+import { alignDragBox, type GuideBox } from '../3-catalog/7-drag-guides';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
 import { mmdSettings } from '../8-store/2-mmd-settings';
-import { mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
+import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui';
 
 const DRAG_SLOP_PX = 4;
 const HANDLE_SIZE = 14;
@@ -257,6 +260,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
         const liveSvg = svgEl;
         const handle = e.currentTarget;
         const startBox = boxes.find((box) => box.id === id);
+        const peerBoxes = boxes.filter((box) => box.id !== id).map(visualBox);
         const nodes = { ...mmdLayout.nodes };
         const start = {
             x: e.clientX,
@@ -287,22 +291,44 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                 board.classList.add('is-mmd-dragging');
                 store.set(mmdNodeDraggingAtom, true);
             }
+            let snapDx = 0;
+            let snapDy = 0;
+            let guides: { x1: number; y1: number; x2: number; y2: number; }[] = [];
+            if (startBox) {
+                const visual = visualBox({
+                    x: startBox.x + dx / start.overlay.x,
+                    y: startBox.y + dy / start.overlay.y,
+                    w: startBox.w,
+                    h: startBox.h,
+                });
+                const aligned = alignDragBox(visual, peerBoxes);
+                snapDx = aligned.box.x - visual.x;
+                snapDy = aligned.box.y - visual.y;
+                guides = aligned.guides;
+            }
+            const snap = clientDeltaToSvg(liveSvg, snapDx * start.overlay.x, snapDy * start.overlay.y);
             lastPos = {
-                x: start.pos.x + dx * start.scale.dx,
-                y: start.pos.y + dy * start.scale.dy,
+                x: start.pos.x + dx * start.scale.dx + snap.dx,
+                y: start.pos.y + dy * start.scale.dy + snap.dy,
             };
             applyMmdNodeDrag(liveRoot, id, lastPos, nodes);
             if (startBox) {
-                handle.style.left = `${startBox.x + dx / start.overlay.x}px`;
-                handle.style.top = `${startBox.y + dy / start.overlay.y}px`;
+                handle.style.left = `${startBox.x + dx / start.overlay.x + snapDx}px`;
+                handle.style.top = `${startBox.y + dy / start.overlay.y + snapDy}px`;
             }
+            store.set(mmdDragOverlayAtom, {
+                links: mmdDragLinkPreviews(liveRoot, board),
+                guides,
+            });
         }
 
         function up() {
             draggingRef.current = false;
             board.classList.remove('is-mmd-dragging');
             store.set(mmdNodeDraggingAtom, false);
+            store.set(mmdDragOverlayAtom, null);
             if (moved) {
+                bakeMmdDragEdges(liveRoot, { ...nodes, [id]: lastPos });
                 setMmdNodePos(id, lastPos);
             }
         }
@@ -469,6 +495,8 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
                 />
             </>)}
 
+            <MmdDragOverlay />
+
             {connect && (
                 <div
                     className="absolute z-10 h-0.5 origin-[0_50%] bg-primary pointer-events-none"
@@ -521,6 +549,57 @@ function InlineLabelEditor({ onClose }: { onClose: () => void; }) {
             }}
         />
     );
+}
+
+function MmdDragOverlay() {
+    const drag = useAtomValue(mmdDragOverlayAtom);
+    if (!drag || (!drag.links.length && !drag.guides.length)) {
+        return null;
+    }
+
+    return (
+        <svg className="absolute inset-0 overflow-visible pointer-events-none z-6" width="100%" height="100%">
+            <defs>
+                <marker id="mmd-drag-arrow" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="8" refY="5" orient="auto">
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="context-stroke" />
+                </marker>
+            </defs>
+            {drag.links.map((link, index) => (
+                <polyline
+                    key={`${link.key}-${index}`}
+                    points={link.points.map((pt) => `${pt.x},${pt.y}`).join(' ')}
+                    fill="none"
+                    stroke={link.color}
+                    strokeWidth={1.75}
+                    strokeDasharray="7 5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    markerEnd="url(#mmd-drag-arrow)"
+                />
+            ))}
+            {drag.guides.map((guide, index) => (
+                <line
+                    key={`${guide.x1}-${guide.y1}-${guide.x2}-${guide.y2}-${index}`}
+                    x1={guide.x1}
+                    y1={guide.y1}
+                    x2={guide.x2}
+                    y2={guide.y2}
+                    stroke="var(--primary)"
+                    strokeWidth={1.25}
+                    shapeRendering="crispEdges"
+                />
+            ))}
+        </svg>
+    );
+}
+
+function visualBox(box: { x: number; y: number; w: number; h: number; }): GuideBox {
+    return {
+        x: box.x + HIT_PAD,
+        y: box.y + HIT_PAD,
+        w: Math.max(1, box.w - HIT_PAD * 2),
+        h: Math.max(1, box.h - HIT_PAD * 2),
+    };
 }
 
 function padHitBox(box: MmdHitBox): MmdHitBox {
