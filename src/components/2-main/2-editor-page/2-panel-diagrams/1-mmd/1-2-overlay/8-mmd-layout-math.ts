@@ -1,11 +1,14 @@
 import { SOURCE_LINK_HIT_ATTR, SOURCE_LINK_KEY_ATTR } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
-import { edgeEndpointsFromDomId, mermaidIdFromDomId } from './3-catalog-mmd';
+import { edgeEndpointsFromDomId, mermaidIdFromDomId } from '../3-catalog/3-catalog-mmd';
+import { orthogonalRoute, pointsToPathD, type GuideBox } from '../3-catalog/7-drag-guides';
 
 export type MmdNodePos = { x: number; y: number; };
 export type MmdNodeOffset = { dx: number; dy: number; };
 
 export const MMD_ORIGIN_TRANSFORM = 'data-mmd-ot';
 export const MMD_ORIGIN_D = 'data-mmd-od';
+const MMD_DRAG_LINK = 'data-mmd-drag-link';
+const MMD_DRAG_LABEL = 'data-mmd-drag-label';
 
 export function parseTranslateAttr(transform: string): MmdNodePos {
     const match = transform.match(/translate\(\s*(-?[\d.eE+-]+)(?:[,\s]+|\s+)(-?[\d.eE+-]+)/);
@@ -235,33 +238,37 @@ export function applyMmdLayout(root: Element, nodes: Record<string, MmdNodePos>)
     if (livePaths.length !== labels.length) {
         return;
     }
-    livePaths.forEach((path, i) => {
-        const label = labels[i];
-        if (!(label instanceof Element)) {
-            return;
+
+    livePaths.forEach(
+        (path, i) => {
+            const label = labels[i];
+            if (!(label instanceof Element)) {
+                return;
+            }
+            snapshotOriginTransform(label);
+            restoreOrigin(label);
+            const pair = edgeEndpointsFromDomId(path.id || path.parentElement?.id || '', knownIds);
+            if (!pair) {
+                return;
+            }
+            const from = offsetOf(pair.from, nodes, originById);
+            const to = offsetOf(pair.to, nodes, originById);
+            const dx = (from.dx + to.dx) / 2;
+            const dy = (from.dy + to.dy) / 2;
+            if (dx === 0 && dy === 0) {
+                return;
+            }
+            const ot = label.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '';
+            label.setAttribute('transform', joinTransform(ot, dx, dy));
         }
-        snapshotOriginTransform(label);
-        restoreOrigin(label);
-        const pair = edgeEndpointsFromDomId(path.id || path.parentElement?.id || '', knownIds);
-        if (!pair) {
-            return;
-        }
-        const from = offsetOf(pair.from, nodes, originById);
-        const to = offsetOf(pair.to, nodes, originById);
-        const dx = (from.dx + to.dx) / 2;
-        const dy = (from.dy + to.dy) / 2;
-        if (dx === 0 && dy === 0) {
-            return;
-        }
-        const ot = label.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '';
-        label.setAttribute('transform', joinTransform(ot, dx, dy));
-    });
+    );
 }
 
-/** Move one node and its incident edges without resetting the rest of the graph. */
+/** Move one node and preview its connections as the orthogonal route they will take on release. */
 export function applyMmdNodeDrag(root: Element, dragId: string, pos: MmdNodePos, nodes: Record<string, MmdNodePos>): void {
     const originById: Record<string, MmdNodePos> = {};
     const knownIds: string[] = [];
+    const nodeEl: Record<string, Element> = {};
     const liveNodes = { ...nodes, [dragId]: pos };
 
     for (const el of root.querySelectorAll('g.node')) {
@@ -270,11 +277,14 @@ export function applyMmdNodeDrag(root: Element, dragId: string, pos: MmdNodePos,
         if (!id) {
             continue;
         }
+
         knownIds.push(id);
+        nodeEl[id] = el;
         originById[id] = parseTranslateAttr(el.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '');
         if (id !== dragId) {
             continue;
         }
+
         const origin = originById[id];
         const dx = pos.x - origin.x;
         const dy = pos.y - origin.y;
@@ -300,6 +310,17 @@ export function applyMmdNodeDrag(root: Element, dragId: string, pos: MmdNodePos,
         if (!pair || (pair.from !== dragId && pair.to !== dragId)) {
             continue;
         }
+
+        const routed = path instanceof SVGPathElement ? orthogonalEdgeD(path, nodeEl[pair.from], nodeEl[pair.to]) : null;
+        if (routed) {
+            path.setAttribute('d', routed);
+            path.setAttribute(MMD_DRAG_LINK, '');
+            if (!path.hasAttribute(SOURCE_LINK_HIT_ATTR) && path instanceof SVGElement) {
+                path.style.visibility = 'hidden';
+            }
+            continue;
+        }
+
         const d0 = path.getAttribute(MMD_ORIGIN_D) ?? path.getAttribute('d') ?? '';
         path.setAttribute('d', shiftPathD(d0, offsetOf(pair.from, liveNodes, originById), offsetOf(pair.to, liveNodes, originById)));
     }
@@ -308,27 +329,164 @@ export function applyMmdNodeDrag(root: Element, dragId: string, pos: MmdNodePos,
     if (livePaths.length !== labels.length) {
         return;
     }
-    livePaths.forEach((path, i) => {
-        const label = labels[i];
-        if (!(label instanceof Element)) {
-            return;
+
+    livePaths.forEach(
+        (path, i) => {
+            const label = labels[i];
+            if (!(label instanceof Element)) {
+                return;
+            }
+            const pair = edgeEndpointsFromDomId(path.id || path.parentElement?.id || '', knownIds);
+            if (!pair || (pair.from !== dragId && pair.to !== dragId)) {
+                return;
+            }
+            if (label instanceof SVGElement) {
+                label.style.visibility = 'hidden';
+                label.setAttribute(MMD_DRAG_LABEL, '');
+            }
+            snapshotOriginTransform(label);
+            restoreOrigin(label);
+            const from = offsetOf(pair.from, liveNodes, originById);
+            const to = offsetOf(pair.to, liveNodes, originById);
+            const dx = (from.dx + to.dx) / 2;
+            const dy = (from.dy + to.dy) / 2;
+            if (dx === 0 && dy === 0) {
+                return;
+            }
+            const ot = label.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '';
+            label.setAttribute('transform', joinTransform(ot, dx, dy));
+        }
+    );
+}
+
+/** Keep the dragged orthogonal routes after the pointer is released. */
+export function bakeMmdDragEdges(root: Element, nodes: Record<string, MmdNodePos>): void {
+    const originById: Record<string, MmdNodePos> = {};
+    const knownIds: string[] = [];
+    
+    for (const el of root.querySelectorAll('g.node')) {
+        snapshotOriginTransform(el);
+        const id = mermaidIdFromDomId(el.id);
+        if (!id) {
+            continue;
+        }
+        knownIds.push(id);
+        originById[id] = parseTranslateAttr(el.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '');
+    }
+
+    for (const path of root.querySelectorAll('path.flowchart-link')) {
+        if (!path.hasAttribute(MMD_DRAG_LINK)) {
+            continue;
         }
         const pair = edgeEndpointsFromDomId(path.id || path.parentElement?.id || '', knownIds);
-        if (!pair || (pair.from !== dragId && pair.to !== dragId)) {
-            return;
+        const visual = path.getAttribute('d') ?? '';
+        if (pair) {
+            const from = offsetOf(pair.from, nodes, originById);
+            const to = offsetOf(pair.to, nodes, originById);
+            path.setAttribute(MMD_ORIGIN_D, shiftPathD(visual, { dx: -from.dx, dy: -from.dy }, { dx: -to.dx, dy: -to.dy }));
         }
-        snapshotOriginTransform(label);
-        restoreOrigin(label);
-        const from = offsetOf(pair.from, liveNodes, originById);
-        const to = offsetOf(pair.to, liveNodes, originById);
-        const dx = (from.dx + to.dx) / 2;
-        const dy = (from.dy + to.dy) / 2;
-        if (dx === 0 && dy === 0) {
-            return;
+        if (path instanceof SVGElement) {
+            path.style.visibility = '';
         }
-        const ot = label.getAttribute(MMD_ORIGIN_TRANSFORM) ?? '';
-        label.setAttribute('transform', joinTransform(ot, dx, dy));
-    });
+        path.removeAttribute(MMD_DRAG_LINK);
+    }
+
+    for (const label of root.querySelectorAll(`[${MMD_DRAG_LABEL}]`)) {
+        if (label instanceof SVGElement) {
+            label.style.visibility = '';
+        }
+        label.removeAttribute(MMD_DRAG_LABEL);
+    }
+}
+
+export type MmdDragLinkPreview = {
+    key: string;
+    color: string;
+    points: OverlayPt[];
+};
+
+/** Dashed overlay geometry for connections hidden while a block is dragged. */
+export function mmdDragLinkPreviews(root: Element, host: HTMLElement): MmdDragLinkPreview[] {
+    const previews: MmdDragLinkPreview[] = [];
+    for (const path of root.querySelectorAll('path.flowchart-link')) {
+        if (!path.hasAttribute(MMD_DRAG_LINK) || path.hasAttribute(SOURCE_LINK_HIT_ATTR) || !(path instanceof SVGPathElement)) {
+            continue;
+        }
+        const points = pathPointsInOverlay(path, host);
+        if (points.length < 2) {
+            continue;
+        }
+        previews.push({
+            key: path.getAttribute(SOURCE_LINK_KEY_ATTR) || path.id || `link-${previews.length}`,
+            color: edgeStroke(path),
+            points,
+        });
+    }
+    return previews;
+}
+
+function pathPointsInOverlay(path: SVGPathElement, host: HTMLElement): OverlayPt[] {
+    const ctm = path.getScreenCTM();
+    if (!ctm) {
+        return [];
+    }
+    const points: OverlayPt[] = [];
+    const re = /[ML]\s*(-?[\d.eE+-]+)(?:[,\s]+)(-?[\d.eE+-]+)/gi;
+    const d = path.getAttribute('d') ?? '';
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(d))) {
+        const x = Number(match[1]);
+        const y = Number(match[2]);
+        const screen = new DOMPoint(x, y).matrixTransform(ctm);
+        points.push(clientPointInOverlay(host, screen.x, screen.y));
+    }
+    return points;
+}
+
+function edgeStroke(path: SVGPathElement): string {
+    const stroke = getComputedStyle(path).stroke;
+    if (!stroke || stroke === 'none') {
+        return 'var(--foreground)';
+    }
+    return stroke;
+}
+
+function orthogonalEdgeD(path: SVGPathElement, fromEl: Element | undefined, toEl: Element | undefined): string | null {
+    if (!fromEl || !toEl) {
+        return null;
+    }
+    const from = boxInPathSpace(fromEl, path);
+    const to = boxInPathSpace(toEl, path);
+    if (!from || !to) {
+        return null;
+    }
+    const points = orthogonalRoute(from, to);
+    if (points.length < 2) {
+        return null;
+    }
+    return pointsToPathD(points);
+}
+
+function boxInPathSpace(node: Element, path: SVGPathElement): GuideBox | null {
+    const ctm = path.getScreenCTM();
+    if (!ctm) {
+        return null;
+    }
+    const rect = node.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) {
+        return null;
+    }
+    try {
+        const inv = ctm.inverse();
+        const a = new DOMPoint(rect.left, rect.top).matrixTransform(inv);
+        const b = new DOMPoint(rect.right, rect.bottom).matrixTransform(inv);
+        const x = Math.min(a.x, b.x);
+        const y = Math.min(a.y, b.y);
+        return { x, y, w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) };
+    }
+    catch {
+        return null;
+    }
 }
 
 function offsetOf(id: string, nodes: Record<string, MmdNodePos>, originById: Record<string, MmdNodePos>): MmdNodeOffset {
