@@ -1,5 +1,5 @@
 import { useSnapshot } from "valtio";
-import { StatusBarFrame } from "../../4-common/5-status-bar-frame";
+import { StatusBarFrame } from "../../8-common-ui/5-status-bar-frame";
 import { mmdDiagram } from "../8-store/1-mmd-diagram";
 
 export function StatusBar_Mmd() {

@@ -1,5 +1,5 @@
 import { useSnapshot } from "valtio";
-import { StatusBarFrame } from "../../4-common/5-status-bar-frame";
+import { StatusBarFrame } from "../../8-common-ui/5-status-bar-frame";
 import { rf_Diagram } from "../8-store/a-0-flow-diagram";
 
 export function StatusBar_Rflow() {

@@ -5,7 +5,7 @@ import { classNames } from "@/utils";
 import { HandIcon } from "lucide-react";
 
 import { mermaidSettings, setZoom, zoomIn, zoomOut, ZOOM_MAX, ZOOM_MIN } from "@/store/2-mermaid-settings";
-import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from "../../4-common/8-zoom-bar";
+import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from "../../8-common-ui/8-zoom-bar";
 
 export function ZoomControls_Bm({ scrollRef, className, ...rest }: ComponentProps<'div'> & { scrollRef: RefObject<HTMLDivElement | null> }) {
     const { zoom } = useSnapshot(mermaidSettings);

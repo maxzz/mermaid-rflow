@@ -2,7 +2,7 @@ import { useAtom } from 'jotai';
 import { useReactFlow, useStore } from 'reactflow';
 import { HandIcon } from 'lucide-react';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@/store/2-mermaid-settings';
-import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from '../../4-common/8-zoom-bar';
+import { ZoomBar, ZoomBarToggle, zoomBarPositionClass } from '../../8-common-ui/8-zoom-bar';
 import { rf_PanModeAtom } from '../8-store/a-1-rflow-ui-atoms';
 
 export function ZoomControls_Rflow() {

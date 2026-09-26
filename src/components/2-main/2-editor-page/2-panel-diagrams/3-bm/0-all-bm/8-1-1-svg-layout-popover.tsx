@@ -9,38 +9,16 @@ import { Slider } from "@/ui/shadcn/slider";
 import { Switch } from "@/ui/shadcn/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/shadcn/tooltip";
 import {
+    type ConsiderModelOrder,
+    type CycleBreakingStrategy,
+    type NodePlacementStrategy,
     CONSIDER_MODEL_ORDERS,
     CYCLE_BREAKING_STRATEGIES,
     mermaidSettings,
     NODE_PLACEMENT_STRATEGIES,
     resetSvgElkLayout,
-    type ConsiderModelOrder,
-    type CycleBreakingStrategy,
-    type NodePlacementStrategy,
 } from "@/store/2-mermaid-settings";
 import { PreviewSelectItem, useSelectPreview } from "@/ui/local-ui";
-
-const NODE_PLACEMENT_LABELS: Record<NodePlacementStrategy, string> = {
-    SIMPLE: "Simple",
-    NETWORK_SIMPLEX: "Network simplex",
-    LINEAR_SEGMENTS: "Linear segments",
-    BRANDES_KOEPF: "Brandes-Koepf",
-};
-
-const CYCLE_BREAKING_LABELS: Record<CycleBreakingStrategy, string> = {
-    GREEDY: "Greedy",
-    DEPTH_FIRST: "Depth first",
-    INTERACTIVE: "Interactive",
-    MODEL_ORDER: "Model order",
-    GREEDY_MODEL_ORDER: "Greedy model order",
-};
-
-const MODEL_ORDER_LABELS: Record<ConsiderModelOrder, string> = {
-    NONE: "None",
-    NODES_AND_EDGES: "Nodes and edges",
-    PREFER_EDGES: "Prefer edges",
-    PREFER_NODES: "Prefer nodes",
-};
 
 export function SvgLayoutEnginePopover() {
     return (
@@ -131,6 +109,28 @@ function SvgElkOptions() {
         />
     </>);
 }
+
+const NODE_PLACEMENT_LABELS: Record<NodePlacementStrategy, string> = {
+    SIMPLE: "Simple",
+    NETWORK_SIMPLEX: "Network simplex",
+    LINEAR_SEGMENTS: "Linear segments",
+    BRANDES_KOEPF: "Brandes-Koepf",
+};
+
+const CYCLE_BREAKING_LABELS: Record<CycleBreakingStrategy, string> = {
+    GREEDY: "Greedy",
+    DEPTH_FIRST: "Depth first",
+    INTERACTIVE: "Interactive",
+    MODEL_ORDER: "Model order",
+    GREEDY_MODEL_ORDER: "Greedy model order",
+};
+
+const MODEL_ORDER_LABELS: Record<ConsiderModelOrder, string> = {
+    NONE: "None",
+    NODES_AND_EDGES: "Nodes and edges",
+    PREFER_EDGES: "Prefer edges",
+    PREFER_NODES: "Prefer nodes",
+};
 
 //---------------------------------------------------------------------------
 // Components
