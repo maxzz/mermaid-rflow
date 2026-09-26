@@ -6,9 +6,9 @@ import { mermaidSettings } from '@/store/2-mermaid-settings';
 
 import { selectFromDiagram, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { classifyMermaidSource, isFlowchartDiagramType, readNodeLabel } from '../3-catalog/1-flowchart-source';
-import { addNode, connectNodes, deleteEdge, deleteNode, reconnectEdge, renameNode } from '../3-catalog/2-source-patch';
+import { addNode, connectNodes, deleteEdge, deleteNode, renameNode } from '../3-catalog/2-source-patch';
 import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
-import { catalogEdgeKey, mermaidIdFromDomId, parseCatalogEdgeKey } from '../3-catalog/3-catalog-mmd';
+import { mermaidIdFromDomId, parseCatalogEdgeKey } from '../3-catalog/3-catalog-mmd';
 import {
     type MmdEdgeHit,
     type MmdHitBox,
@@ -29,10 +29,10 @@ import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdLayout, setMmdNodePos } from '../8-store/4-mmd-layout';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 import { mmdDragOverlayAtom, mmdInlineEditAtom, mmdNodeDraggingAtom, mmdPaletteShapeAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
+import { type DragLine, MmdEdgeEndpoints, nodeIdFromPoint, watchDrag } from './1-mmd-edge-endpoints';
 
 const DRAG_SLOP_PX = 4;
 const HANDLE_SIZE = 14;
-const EDGE_HANDLE_SIZE = 14;
 const HIT_PAD = 2;
 
 export type MmdEditOverlayProps = {
@@ -42,8 +42,6 @@ export type MmdEditOverlayProps = {
     active?: boolean;
     layoutKey?: string;
 };
-
-type DragLine = { x1: number; y1: number; x2: number; y2: number; };
 
 export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, layoutKey = '' }: MmdEditOverlayProps) {
     const { source } = useSnapshot(mermaidSettings);
@@ -194,48 +192,6 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
         e.preventDefault();
         e.stopPropagation();
         selectFromDiagram([key]);
-    }
-
-    function onEndpointPointerDown(e: ReactPointerEvent<HTMLButtonElement>, edge: MmdEdgeHit, which: 'from' | 'to') {
-        if (e.button !== 0 || panMode) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        const host = hostRef.current;
-        if (!host || edge.points.length < 2) {
-            return;
-        }
-        const anchor = which === 'from' ? edge.points[edge.points.length - 1]! : edge.points[0]!;
-        const parsed = parseCatalogEdgeKey(edge.key);
-        const overlayHost = host;
-        setConnect({ x1: anchor.x, y1: anchor.y, x2: anchor.x, y2: anchor.y });
-        try {
-            e.currentTarget.setPointerCapture(e.pointerId);
-        }
-        catch {
-            // window listeners below still receive the drag
-        }
-
-        function move(ev: PointerEvent | MouseEvent) {
-            const pt = clientPointInOverlay(overlayHost, ev.clientX, ev.clientY);
-            setConnect({ x1: anchor.x, y1: anchor.y, x2: pt.x, y2: pt.y });
-        }
-
-        function up(ev: PointerEvent | MouseEvent) {
-            setConnect(null);
-            const hit = nodeIdFromPoint(ev.clientX, ev.clientY, which === 'from' ? edge.to : edge.from);
-            if (!hit || !parsed) {
-                return;
-            }
-            const nextFrom = which === 'from' ? hit : edge.from;
-            const nextTo = which === 'to' ? hit : edge.to;
-            if (applyMmdPatchResult(reconnectEdge(mermaidSettings.source, edge.from, edge.to, nextFrom, nextTo, parsed.label))) {
-                selectFromDiagram([catalogEdgeKey(nextFrom, nextTo, parsed.label)]);
-            }
-        }
-
-        watchDrag(move, up);
     }
 
     function onNodePointerDown(e: ReactPointerEvent<HTMLButtonElement>, id: string) {
@@ -480,18 +436,7 @@ export function MmdEditOverlay({ hostRef, contentRef, enabled, active = true, la
             }
         )}
 
-        {selectedEdge && !panMode && (<>
-            <EndpointHandle
-                pt={selectedEdge.points[0]!}
-                label={`Move start of ${selectedEdge.from} → ${selectedEdge.to}`}
-                onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'from')}
-            />
-            <EndpointHandle
-                pt={selectedEdge.points[selectedEdge.points.length - 1]!}
-                label={`Move end of ${selectedEdge.from} → ${selectedEdge.to}`}
-                onPointerDown={(e) => onEndpointPointerDown(e, selectedEdge, 'to')}
-            />
-        </>)}
+        <MmdEdgeEndpoints edge={selectedEdge} hostRef={hostRef} setConnect={setConnect} />
 
         <MmdDragOverlay />
 
@@ -644,27 +589,6 @@ function pointsAttr(points: { x: number; y: number; }[]): string {
     return points.map((pt) => `${pt.x},${pt.y}`).join(' ');
 }
 
-function EndpointHandle({ pt, label, onPointerDown, }: { pt: { x: number; y: number; }; label: string; onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => void; }) {
-    return (
-        <button
-            type="button"
-            data-mmd-chrome=""
-            data-mmd-edge-handle=""
-            className="absolute z-10 rounded-full bg-background border-2 border-primary shadow-[0_0_0_1px_var(--background)] cursor-grab active:cursor-grabbing pointer-events-auto"
-            style={{
-                left: pt.x - EDGE_HANDLE_SIZE / 2,
-                top: pt.y - EDGE_HANDLE_SIZE / 2,
-                width: EDGE_HANDLE_SIZE,
-                height: EDGE_HANDLE_SIZE,
-            }}
-            title={label}
-            aria-label={label}
-            onPointerDown={onPointerDown}
-            onDoubleClick={(e) => e.stopPropagation()}
-        />
-    );
-}
-
 //---------------------------------------------------------------------------
 
 
@@ -693,25 +617,6 @@ function nodeElementById(root: Element, id: string): Element | null {
     return null;
 }
 
-function nodeIdFromPoint(clientX: number, clientY: number, fromId: string): string | null {
-    const stack = document.elementsFromPoint(clientX, clientY);
-
-    for (const el of stack) {
-        if (!(el instanceof Element)) {
-            continue;
-        }
-        const hit = el.closest('[data-mmd-id]');
-        const id = hit?.getAttribute('data-mmd-id');
-        if (id && id !== fromId) {
-            return id;
-        }
-    }
-
-    return null;
-}
-
-//---------------------------------------------------------------------------
-
 function isTypingTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) {
         return false;
@@ -719,37 +624,3 @@ function isTypingTarget(target: EventTarget | null): boolean {
     return Boolean(target.closest('input, textarea, select, [contenteditable], .monaco-editor'));
 }
 
-function watchDrag(move: (ev: PointerEvent | MouseEvent) => void, up: (ev: PointerEvent | MouseEvent) => void) {
-    let done = false;
-    let sawPointerMove = false;
-
-    function onMove(ev: PointerEvent | MouseEvent) {
-        if (ev.type === 'pointermove') {
-            sawPointerMove = true;
-        }
-        else if (sawPointerMove) {
-            return;
-        }
-        move(ev);
-    }
-
-    function onUp(ev: PointerEvent | MouseEvent) {
-        if (done) {
-            return;
-        }
-        if (ev.type === 'mouseup' && sawPointerMove) {
-            return;
-        }
-        done = true;
-
-        abortController.abort();
-        up(ev);
-    }
-
-    const abortController = new AbortController();
-    window.addEventListener('pointermove', onMove, { signal: abortController.signal });
-    window.addEventListener('pointerup', onUp, { signal: abortController.signal });
-    window.addEventListener('pointercancel', onUp, { signal: abortController.signal });
-    window.addEventListener('mousemove', onMove, { signal: abortController.signal });
-    window.addEventListener('mouseup', onUp, { signal: abortController.signal });
-}
