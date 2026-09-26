@@ -196,6 +196,7 @@ function Row({ label, hint, children }: { label: string; hint: string; children:
             <HintLabel htmlFor={id} hint={hint}>
                 {label}
             </HintLabel>
+            
             <div id={id} className="justify-self-end col-span-2">
                 {children}
             </div>

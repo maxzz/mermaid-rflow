@@ -11,7 +11,7 @@ import { bindLastMermaidFunctions } from '../1-1-render/2-render-official';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
-import { MmdPaletteRail } from './8-1-2-0-mmd-palette-rail';
+import { MmdPaletteRail } from '../2-rail-side-popover/8-1-2-0-mmd-palette-rail';
 import { ZoomControls_Mmd } from './8-3-1-zoom-controls-mmd';
 import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from './8-3-2-mmd-zoom-utils';
 import { MmdEditOverlay } from '../1-2-overlay/0-mmd-edit-overlay';

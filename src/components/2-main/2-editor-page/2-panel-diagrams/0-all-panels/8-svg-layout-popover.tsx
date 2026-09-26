@@ -153,19 +153,7 @@ function Row({ label, hint, children }: { label: string; hint: string; children:
 
 type SelectPreview = ReturnType<typeof useSelectPreview>;
 
-function SelectRow<T extends string>({
-    label,
-    hint,
-    select,
-    values,
-    labels,
-}: {
-    label: string;
-    hint: string;
-    select: SelectPreview;
-    values: readonly T[];
-    labels: Record<T, string>;
-}) {
+function SelectRow<T extends string>({ label, hint, select, values, labels }: { label: string; hint: string; select: SelectPreview; values: readonly T[]; labels: Record<T, string>; }) {
     return (
         <Row label={label} hint={hint}>
             <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange}>
@@ -174,6 +162,7 @@ function SelectRow<T extends string>({
                         {labels[select.listValue as T] ?? select.listValue}
                     </SelectValue>
                 </SelectTrigger>
+                
                 <SelectContent position="popper" align="end">
                     {values.map(
                         (value) => (
