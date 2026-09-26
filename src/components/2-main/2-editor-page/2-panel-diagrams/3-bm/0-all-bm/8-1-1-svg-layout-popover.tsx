@@ -1,16 +1,14 @@
-import { type ReactNode, useId } from "react";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 import { WorkflowIcon } from "lucide-react";
 
 import { Button } from "@/ui/shadcn/button";
-import { Label } from "@/ui/shadcn/label";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/ui/shadcn/popover";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
 import { Slider } from "@/ui/shadcn/slider";
 import { Switch } from "@/ui/shadcn/switch";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/shadcn/tooltip";
-import { popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
+import { TooltipProvider } from "@/ui/shadcn/tooltip";
+import { HintLabel, Row, popoverRowSubGridClasses, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 import {
     type ConsiderModelOrder,
@@ -139,23 +137,6 @@ const MODEL_ORDER_LABELS: Record<ConsiderModelOrder, string> = {
 //---------------------------------------------------------------------------
 // Components
 
-const optionRowClasses = "col-span-full grid grid-cols-subgrid items-center min-h-6";
-
-function Row({ label, hint, children }: { label: string; hint: string; children: ReactNode; }) {
-    const id = useId();
-    return (
-        <div className={optionRowClasses}>
-            <HintLabel htmlFor={id} hint={hint}>
-                {label}
-            </HintLabel>
-            
-            <div id={id} className="justify-self-end col-span-2">
-                {children}
-            </div>
-        </div>
-    );
-}
-
 type SelectPreview = ReturnType<typeof useSelectPreview>;
 
 function SelectRow<T extends string>({ label, hint, select, values, labels }: { label: string; hint: string; select: SelectPreview; values: readonly T[]; labels: Record<T, string>; }) {
@@ -194,27 +175,11 @@ type SliderRowProps = {
 
 function SliderRow({ label, hint, value, min, max, step, onChange }: SliderRowProps) {
     return (
-        <div className={optionRowClasses}>
+        <div className={popoverRowSubGridClasses}>
             <HintLabel hint={hint}>{label}</HintLabel>
             <Slider className="min-w-0" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
             <span className="min-w-9 font-mono tabular-nums text-[.7rem] text-right text-muted-foreground">{value}</span>
         </div>
-    );
-}
-
-function HintLabel({ htmlFor, hint, children }: { htmlFor?: string; hint: string; children: ReactNode; }) {
-    return (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <Label htmlFor={htmlFor} className="font-normal whitespace-nowrap cursor-help">
-                    {children}
-                </Label>
-            </TooltipTrigger>
-
-            <TooltipContent side="left" sideOffset={8} className="max-w-56 text-left whitespace-normal z-100">
-                {hint}
-            </TooltipContent>
-        </Tooltip>
     );
 }
 
