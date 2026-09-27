@@ -42,11 +42,11 @@ export function RenderOptionsPopover() {
                     <div className={classNames(popoverMainGridClasses, "gap-x-2 gap-y-2")}>
 
                         <Suspense fallback={<div className="py-6 col-span-full flex justify-center"><BarsLoaderIcon /></div>}>
-                            <DiagramThemeSection />
+                            <Select_DiagramTheme />
                         </Suspense>
 
-                        <SvgLayoutSection />
-                        <TextOutputSection />
+                        <Section_SvgLayout />
+                        <Section_TextOutput />
                     </div>
                 </TooltipProvider>
             </PopoverContent>
@@ -54,7 +54,7 @@ export function RenderOptionsPopover() {
     );
 }
 
-function DiagramThemeSection() {
+function Select_DiagramTheme() {
     const bm = use(loadBeautifulMermaid());
     const { diagramTheme } = useSnapshot(mermaidSettings);
     const themeNames = Object.keys(bm.THEMES);
@@ -87,7 +87,7 @@ function DiagramThemeSection() {
     );
 }
 
-function SvgLayoutSection() {
+function Section_SvgLayout() {
     const { svg } = useSnapshot(mermaidSettings);
     const select = useSelectPreview(svg.font, (v) => { mermaidSettings.svg.font = v; });
 
@@ -143,7 +143,7 @@ function SvgLayoutSection() {
     );
 }
 
-function TextOutputSection() {
+function Section_TextOutput() {
     const { ascii } = useSnapshot(mermaidSettings);
 
     return (
