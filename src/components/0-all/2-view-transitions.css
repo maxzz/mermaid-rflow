@@ -57,11 +57,14 @@
     animation: 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both vt-scale-in;
 }
 
-/* Shared-element logo: morph position/size between the pages */
+/* Shared-element logo: morph position/size between the pages.
+   The group sits above the page snapshots so the incoming page fade cannot cover it.
+   Timing is slow, then fast, then a slow settle — not a linear size change. */
 
 ::view-transition-group(.vt-logo-share) {
-    animation-duration: 420ms;
-    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 1;
+    animation-duration: 520ms;
+    animation-timing-function: cubic-bezier(0.77, 0, 0.23, 1);
 }
 
 ::view-transition-old(.vt-logo-share),
