@@ -7,7 +7,7 @@ import { Button } from "@/ui/shadcn/button";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
 import { Section3_Footer } from "@/components/3-footer";
-import { AppLogo, APP_NAME } from "./0-app-logo";
+import { AppLogo, APP_NAME } from "./2-app-logo";
 
 export function WelcomePage() {
     const navigate = useNavigateToPage();
@@ -23,7 +23,7 @@ export function WelcomePage() {
             <div className="px-6 py-12 text-center flex flex-col items-center justify-center gap-6">
                 <AppLogo className="size-40 text-primary" />
 
-                <h1 className="text-4xl font-heading font-semibold tracking-tight">
+                <h1 className="text-4xl font-heading font-semibold tracking-tight text-green-800 uppercase">
                     {APP_NAME}
                 </h1>
 
