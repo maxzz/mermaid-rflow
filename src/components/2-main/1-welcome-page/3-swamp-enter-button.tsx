@@ -6,7 +6,9 @@ import { classNames } from "@/utils";
 import { bubbleIdsAtom, puddleHoverAtom, SWAMP_VIEW } from "./3-swamp-atoms";
 import { SwampBubble } from "./3-swamp-bubble";
 
-const LABEL = "Enter Laboratory";
+const LABEL = "Enter Labs";
+// const LABEL = "Enter Laboratory";
+//const LABEL = "Welcome to the labs!";
 
 /**
  * A swamp puddle on the asphalt, seen at an angle from ~1.7 m high and ~7 m away (the octopus' habitat).
@@ -62,7 +64,7 @@ export function SwampEnterButton({ className }: { className?: string; }) {
                 <path
                     d={PUDDLE_PATH}
                     fill="url(#swamp-water)"
-                    className="stroke-lime-700/70 group-hover:stroke-lime-400 group-focus-visible:stroke-lime-300 transition-colors"
+                    className="stroke-lime-600/20 group-hover:stroke-lime-400 group-focus-visible:stroke-lime-300 transition-colors"
                     strokeWidth={2}
                 />
 
@@ -76,7 +78,7 @@ export function SwampEnterButton({ className }: { className?: string; }) {
                     x={220}
                     y={284}
                     textAnchor="middle"
-                    className="text-lg font-heading font-semibold tracking-widest fill-lime-50 group-hover:fill-white uppercase select-none"
+                    className="text-lg font-heading font-semibold 1tracking-widest fill-lime-50 group-hover:fill-white uppercase select-none"
                 >
                     {LABEL}
                 </text>
@@ -91,9 +93,9 @@ function SwampDefs() {
     return (
         <defs>
             <radialGradient id="swamp-water" cx="50%" cy="38%" r="65%">
-                <stop offset="0%" stopColor="#4d7c2f" />
-                <stop offset="55%" stopColor="#2f5320" />
-                <stop offset="100%" stopColor="#1a3312" />
+                <stop offset="0%" stopColor="#7CCF49D7" />
+                <stop offset="55%" stopColor="#38A60952" />
+                <stop offset="100%" stopColor="#61AF4751" />
             </radialGradient>
             <filter id="swamp-blur" x="-20%" y="-50%" width="140%" height="200%">
                 <feGaussianBlur stdDeviation="7" />
