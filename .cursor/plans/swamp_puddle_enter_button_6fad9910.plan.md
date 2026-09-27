@@ -4,19 +4,19 @@ overview: Replace the Welcome page "Open editor" button with an animated SVG swa
 todos:
   - id: atoms
     content: Create 3-swamp-atoms.ts with bubble ids, bubbleAtomFamily, respawnBubbleAtom, hover atom
-    status: pending
+    status: completed
   - id: bubble
     content: "Create 3-swamp-bubble.tsx: translucent green bubble with two white highlight arcs and Motion rise/wobble/fade, respawn on complete"
-    status: pending
+    status: completed
   - id: puddle
     content: "Create 3-swamp-enter-button.tsx: perspective puddle SVG path with gradients, 'Enter Laboratory' label, keyboard/click navigation, hover feedback, reduced-motion handling"
-    status: pending
+    status: completed
   - id: welcome
     content: "Update 1-welcome-page.tsx: relative hero wrapper with SVG layer behind logo and title, puddle spacer, remove old Button"
-    status: pending
+    status: completed
   - id: verify
     content: Check tsc and lints, then verify visually in light and dark mode in the browser
-    status: pending
+    status: completed
 isProject: false
 ---
 
