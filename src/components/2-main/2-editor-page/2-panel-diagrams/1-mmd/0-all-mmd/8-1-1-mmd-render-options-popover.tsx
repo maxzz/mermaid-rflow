@@ -1,14 +1,15 @@
-import { type ReactNode, useId } from 'react';
+import { type ReactNode } from 'react';
 import { useSnapshot } from 'valtio';
+import { classNames } from '@/utils';
 import { Settings2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
-import { Label } from '@/ui/shadcn/label';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Switch } from '@/ui/shadcn/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/shadcn/tooltip';
+import { TooltipProvider } from '@/ui/shadcn/tooltip';
 import { PreviewSelectItem, useSelectPreview } from '@/ui/local-ui';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
+import { Row, popoverMainGridClasses } from '../../8-common-ui/popovers-ui/popovers-shared-ui';
 
 import { classifyMermaidSource, readDirection, type FlowDirection } from '../3-catalog/1-flowchart-source';
 import { setDirection } from '../3-catalog/2-source-patch';
@@ -42,7 +43,7 @@ export function MmdOptionsPopover() {
                 </PopoverHeader>
 
                 <TooltipProvider delayDuration={500}>
-                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2 gap-y-2 items-center">
+                    <div className={classNames(popoverMainGridClasses, 'gap-x-2 gap-y-2')}>
                         <MmdViewOptions />
                     </div>
                 </TooltipProvider>
@@ -141,39 +142,6 @@ function PreviewSelect({ select, liveLabel, disabled, children }: { select: Sele
                 {children}
             </SelectContent>
         </Select>
-    );
-}
-
-const optionRowClasses = "col-span-full grid grid-cols-subgrid items-center min-h-6";
-
-function Row({ label, hint, children }: { label: string; hint: string; children: ReactNode; }) {
-    const id = useId();
-    return (
-        <div className={optionRowClasses}>
-            <HintLabel htmlFor={id} hint={hint}>
-                {label}
-            </HintLabel>
-
-            <div id={id} className="col-span-2 justify-self-end">
-                {children}
-            </div>
-        </div>
-    );
-}
-
-function HintLabel({ htmlFor, hint, children }: { htmlFor?: string; hint: string; children: ReactNode; }) {
-    return (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <Label htmlFor={htmlFor} className="whitespace-nowrap font-normal cursor-help">
-                    {children}
-                </Label>
-            </TooltipTrigger>
-            
-            <TooltipContent side="left" sideOffset={8} className="max-w-56 whitespace-normal text-left z-100">
-                {hint}
-            </TooltipContent>
-        </Tooltip>
     );
 }
 
