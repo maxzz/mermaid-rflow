@@ -1,4 +1,4 @@
-import { type ReactNode, Suspense, use } from "react";
+import { Suspense, use } from "react";
 import { useSnapshot } from "valtio";
 import { classNames } from "@/utils";
 import { Settings2Icon } from "lucide-react";
@@ -90,100 +90,98 @@ function Section_SvgLayout() {
     const { svg } = useSnapshot(mermaidSettings);
     const select = useSelectPreview(svg.font, (v) => { mermaidSettings.svg.font = v; });
 
-    return (
-        <Section title="SVG layout">
-            <Row label="Font" hint="Typeface used for node labels and other diagram text.">
-                <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange}>
-                    <SelectTrigger size="sm" className="w-40">
-                        <SelectValue>
-                            <FontLabel fontFamily={svg.font} />
-                        </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent position="popper" align="end">
-                        {DIAGRAM_FONTS.map(
-                            (font) => (
-                                <PreviewSelectItem key={font.value} value={font.value} onPreview={select.preview}>
-                                    <FontLabel fontFamily={font.value} />
-                                </PreviewSelectItem>
-                            )
-                        )}
-                    </SelectContent>
-                </Select>
-            </Row>
+    return (<>
+        <Section title="SVG layout" />
 
-            <SliderRow
-                label="X Padding"
-                hint="Empty space around the diagram inside the SVG canvas."
-                value={svg.padding}
-                min={0}
-                max={120}
-                step={4}
-                onChange={(v) => { mermaidSettings.svg.padding = v; }}
-            />
-            <SliderRow
-                label="Y Layer spacing"
-                hint="Vertical distance between successive layers of the diagram."
-                value={svg.layerSpacing}
-                min={4}
-                max={160}
-                step={4}
-                onChange={(v) => { mermaidSettings.svg.layerSpacing = v; }}
-            />
-            <SliderRow
-                label="Node spacing"
-                hint="Horizontal distance between sibling nodes in the same layer."
-                value={svg.nodeSpacing}
-                min={4}
-                max={120}
-                step={4}
-                onChange={(v) => { mermaidSettings.svg.nodeSpacing = v; }}
-            />
-        </Section>
-    );
+        <Row label="Font" hint="Typeface used for node labels and other diagram text.">
+            <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange}>
+                <SelectTrigger size="sm" className="w-40">
+                    <SelectValue>
+                        <FontLabel fontFamily={svg.font} />
+                    </SelectValue>
+                </SelectTrigger>
+
+                <SelectContent position="popper" align="end">
+                    {DIAGRAM_FONTS.map(
+                        (font) => (
+                            <PreviewSelectItem key={font.value} value={font.value} onPreview={select.preview}>
+                                <FontLabel fontFamily={font.value} />
+                            </PreviewSelectItem>
+                        )
+                    )}
+                </SelectContent>
+            </Select>
+        </Row>
+
+        <SliderRow
+            label="X Padding"
+            hint="Empty space around the diagram inside the SVG canvas."
+            value={svg.padding}
+            min={0}
+            max={120}
+            step={4}
+            onChange={(v) => { mermaidSettings.svg.padding = v; }}
+        />
+        <SliderRow
+            label="Y Layer spacing"
+            hint="Vertical distance between successive layers of the diagram."
+            value={svg.layerSpacing}
+            min={4}
+            max={160}
+            step={4}
+            onChange={(v) => { mermaidSettings.svg.layerSpacing = v; }}
+        />
+        <SliderRow
+            label="Node spacing"
+            hint="Horizontal distance between sibling nodes in the same layer."
+            value={svg.nodeSpacing}
+            min={4}
+            max={120}
+            step={4}
+            onChange={(v) => { mermaidSettings.svg.nodeSpacing = v; }}
+        />
+    </>);
 }
 
 function Section_TextOutput() {
     const { ascii } = useSnapshot(mermaidSettings);
 
-    return (
-        <Section title="Text output">
-            <Row label="Pure ASCII" hint="When on, the text diagram uses only ASCII characters. Off uses Unicode box-drawing characters.">
-                <Switch className="-mr-1 scale-65" checked={ascii.useAscii} onCheckedChange={(v) => { mermaidSettings.ascii.useAscii = v; }} />
-            </Row>
+    return (<>
+        <Section title="Text output" />
 
-            <SliderRow
-                label="Horizontal spacing"
-                hint="Horizontal padding between nodes in the text diagram."
-                value={ascii.paddingX}
-                min={1}
-                max={20}
-                step={1}
-                onChange={(v) => { mermaidSettings.ascii.paddingX = v; }}
-            />
-            <SliderRow
-                label="Vertical spacing"
-                hint="Vertical padding between nodes in the text diagram."
-                value={ascii.paddingY}
-                min={1}
-                max={20}
-                step={1}
-                onChange={(v) => { mermaidSettings.ascii.paddingY = v; }}
-            />
-        </Section>
-    );
+        <Row label="Pure ASCII" hint="When on, the text diagram uses only ASCII characters. Off uses Unicode box-drawing characters.">
+            <Switch className="-mr-1 scale-65" checked={ascii.useAscii} onCheckedChange={(v) => { mermaidSettings.ascii.useAscii = v; }} />
+        </Row>
+
+        <SliderRow
+            label="Horizontal spacing"
+            hint="Horizontal padding between nodes in the text diagram."
+            value={ascii.paddingX}
+            min={1}
+            max={20}
+            step={1}
+            onChange={(v) => { mermaidSettings.ascii.paddingX = v; }}
+        />
+        <SliderRow
+            label="Vertical spacing"
+            hint="Vertical padding between nodes in the text diagram."
+            value={ascii.paddingY}
+            min={1}
+            max={20}
+            step={1}
+            onChange={(v) => { mermaidSettings.ascii.paddingY = v; }}
+        />
+    </>);
 }
 
 //---------------------------------------------------------------------------
 // Components
 
-function Section({ title, children }: { title: string; children: ReactNode; }) {
+function Section({ title }: { title: string; }) {
     return (
-        <section className="col-span-full grid grid-cols-subgrid gap-y-1">
-            <h3 className="pb-1 font-semibold text-[0.7rem] border-b border-border col-span-full">
-                {title}
-            </h3>
-            {children}
-        </section>
+        <h3 className="pb-1 text-[0.7rem] font-semibold border-b border-border col-span-full">
+            {title}
+        </h3>
     );
 }
 
