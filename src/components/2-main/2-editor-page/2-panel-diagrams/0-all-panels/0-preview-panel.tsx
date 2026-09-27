@@ -1,7 +1,4 @@
 import { useSnapshot } from "valtio";
-import { Tabs } from "@/ui/shadcn/tabs";
-import { TabsListAnimated, TabsTriggerAnimated } from "@/ui/local-ui/5-tabs-animated";
-
 import { mermaidSettings, OutputFormat } from "@/store/2-mermaid-settings";
 
 import { Preview_Mmd } from "../1-mmd/0-all-mmd/1-view-mmd";
@@ -40,18 +37,7 @@ function Diagrams_Toolbar() {
     const { outputFormat } = useSnapshot(mermaidSettings);
 
     return (
-        <div className="px-3 h-9 bg-muted/30 border-b border-border overflow-x-auto flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3">
-                <Tabs value={outputFormat} onValueChange={(v) => { mermaidSettings.outputFormat = v as OutputFormat; }}>
-                    <TabsListAnimated layoutId="preview-output-format" className="p-0.5 h-6!">
-                        <TabsTriggerAnimated value={OutputFormat.mmd} selectedValue={outputFormat} className="px-2 text-[.7rem]">Mermaid</TabsTriggerAnimated>
-                        <TabsTriggerAnimated value={OutputFormat.flow} selectedValue={outputFormat} className="px-2 text-[.7rem]">Flow</TabsTriggerAnimated>
-                        <TabsTriggerAnimated value={OutputFormat.svg} selectedValue={outputFormat} className="px-2 text-[.7rem]">SVG</TabsTriggerAnimated>
-                        <TabsTriggerAnimated value={OutputFormat.text} selectedValue={outputFormat} className="px-2 text-[.7rem]">Text</TabsTriggerAnimated>
-                    </TabsListAnimated>
-                </Tabs>
-            </div>
-
+        <div className="px-3 h-9 bg-muted/30 border-b border-border overflow-x-auto flex items-center justify-end gap-2">
             <div className="flex items-center">
                 {
                     outputFormat === OutputFormat.mmd
