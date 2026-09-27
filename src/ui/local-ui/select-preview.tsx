@@ -8,11 +8,12 @@ const PREVIEW_VALUE_ATTR = "data-preview-value";
  * closing without a selection (Escape) restores the value from before open.
  */
 export function useSelectPreview<T extends string>(live: T, apply: (value: T) => void) {
+    const [open, setOpen] = useState(false);
+    
     const originRef = useRef(live);
     const didCommitRef = useRef(false);
     const liveRef = useRef(live);
     const applyRef = useRef(apply);
-    const [open, setOpen] = useState(false);
 
     liveRef.current = live;
     applyRef.current = apply;

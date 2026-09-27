@@ -44,7 +44,7 @@ export function MmdOptionsPopover() {
 
                 <TooltipProvider delayDuration={500}>
                     <div className={classNames(popoverMainGridClasses, 'gap-x-2 gap-y-2')}>
-                        <MmdViewOptions />
+                        <Body />
                     </div>
                 </TooltipProvider>
             </PopoverContent>
@@ -52,11 +52,13 @@ export function MmdOptionsPopover() {
     );
 }
 
-function MmdViewOptions() {
+function Body() {
     const { source } = useSnapshot(mermaidSettings);
     const { theme, adaptive, look, layout, autofit } = useSnapshot(mmdSettings);
+
     const flowchart = classifyMermaidSource(source) === 'flowchart';
     const direction = readDirection(source) ?? 'TD';
+
     const themeSelect = useSelectPreview(theme, (v) => { mmdSettings.theme = v as MmdTheme; });
     const lookSelect = useSelectPreview(look, (v) => { mmdSettings.look = v as MmdLook; });
     const layoutSelect = useSelectPreview(layout, (v) => { mmdSettings.layout = v as MmdLayout; });
@@ -135,7 +137,9 @@ function PreviewSelect({ select, liveLabel, disabled, children }: { select: Sele
     return (
         <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange} disabled={disabled}>
             <SelectTrigger size="sm" className="w-40" disabled={disabled}>
-                <SelectValue>{liveLabel}</SelectValue>
+                <SelectValue>
+                    {liveLabel}
+                </SelectValue>
             </SelectTrigger>
 
             <SelectContent position="popper" align="end">
