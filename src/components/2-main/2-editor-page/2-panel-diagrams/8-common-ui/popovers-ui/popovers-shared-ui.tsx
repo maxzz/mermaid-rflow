@@ -1,7 +1,9 @@
 import { type ReactNode, useId } from "react";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
 import { Label } from "@/ui/shadcn/label";
 import { Slider } from "@/ui/shadcn/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/shadcn/tooltip";
+import { useSelectPreview } from "@/ui/local-ui";
 
 export const popoverMainGridClasses = "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center";
 
@@ -38,7 +40,7 @@ export function SliderRow({ label, hint, value, min, max, step, onChange }: Slid
             <HintLabel hint={hint}>
                 {label}
             </HintLabel>
-            
+
             <Slider className="min-w-0" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
             <span className="min-w-9 text-[.7rem] font-mono tabular-nums text-right text-muted-foreground">{value}</span>
         </div>
@@ -58,5 +60,26 @@ export function HintLabel({ htmlFor, hint, children }: { htmlFor?: string; hint:
                 {hint}
             </TooltipContent>
         </Tooltip>
+    );
+}
+
+//---------------------------------------------------------------------------
+// Select with preview
+
+export type SelectPreview = ReturnType<typeof useSelectPreview>;
+
+export function PreviewSelect({ select, liveLabel, disabled, children }: { select: SelectPreview; liveLabel: string; disabled?: boolean; children: ReactNode; }) {
+    return (
+        <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange} disabled={disabled}>
+            <SelectTrigger size="sm" className="w-40" disabled={disabled}>
+                <SelectValue>
+                    {liveLabel}
+                </SelectValue>
+            </SelectTrigger>
+
+            <SelectContent position="popper" align="end">
+                {children}
+            </SelectContent>
+        </Select>
     );
 }

@@ -1,15 +1,13 @@
-import { type ReactNode } from 'react';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { Settings2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { Select, SelectContent, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Switch } from '@/ui/shadcn/switch';
 import { TooltipProvider } from '@/ui/shadcn/tooltip';
 import { PreviewSelectItem, useSelectPreview } from '@/ui/local-ui';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { Row, popoverMainGridClasses } from '../../8-common-ui/popovers-ui/popovers-shared-ui';
+import { PreviewSelect, Row, popoverMainGridClasses } from '../../8-common-ui/popovers-ui/popovers-shared-ui';
 
 import { classifyMermaidSource, readDirection, type FlowDirection } from '../3-catalog/1-flowchart-source';
 import { setDirection } from '../3-catalog/2-source-patch';
@@ -130,24 +128,6 @@ const DIRECTIONS: { value: FlowDirection; label: string; }[] = [
     { value: 'LR', label: 'Left to right' },
     { value: 'RL', label: 'Right to left' },
 ];
-
-type SelectPreview = ReturnType<typeof useSelectPreview>;
-
-function PreviewSelect({ select, liveLabel, disabled, children }: { select: SelectPreview; liveLabel: string; disabled?: boolean; children: ReactNode; }) {
-    return (
-        <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange} disabled={disabled}>
-            <SelectTrigger size="sm" className="w-40" disabled={disabled}>
-                <SelectValue>
-                    {liveLabel}
-                </SelectValue>
-            </SelectTrigger>
-
-            <SelectContent position="popper" align="end">
-                {children}
-            </SelectContent>
-        </Select>
-    );
-}
 
 function keepOpenForSelect(event: { target: EventTarget | null; preventDefault: () => void; }) {
     const el = event.target as HTMLElement | null;
