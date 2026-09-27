@@ -5,14 +5,13 @@ import { Settings2Icon } from "lucide-react";
 import { Button } from "@/ui/shadcn/button";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/ui/shadcn/popover";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
-import { Slider } from "@/ui/shadcn/slider";
 import { Switch } from "@/ui/shadcn/switch";
 import { TooltipProvider } from "@/ui/shadcn/tooltip";
 
 import { DIAGRAM_FONTS, type DiagramTheme, mermaidSettings } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon, PreviewSelectItem, useSelectPreview } from "@/ui/local-ui";
 import { loadBeautifulMermaid } from "@/components/2-main/1-welcome-page/8-lazy-modules";
-import { HintLabel, Row, popoverRowSubGridClasses, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
+import { Row, SliderRow, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 export function RenderOptionsPopover() {
     return (
@@ -185,26 +184,6 @@ function Section({ title, children }: { title: string; children: ReactNode; }) {
             </h3>
             {children}
         </section>
-    );
-}
-
-type SliderRowProps = {
-    label: string;
-    hint: string;
-    value: number;
-    min: number;
-    max: number;
-    step: number;
-    onChange: (value: number) => void;
-};
-
-function SliderRow({ label, hint, value, min, max, step, onChange }: SliderRowProps) {
-    return (
-        <div className={popoverRowSubGridClasses}>
-            <HintLabel hint={hint}>{label}</HintLabel>
-            <Slider className="min-w-0" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
-            <span className="min-w-9 font-mono tabular-nums text-right text-[.7rem] text-muted-foreground">{value}</span>
-        </div>
     );
 }
 

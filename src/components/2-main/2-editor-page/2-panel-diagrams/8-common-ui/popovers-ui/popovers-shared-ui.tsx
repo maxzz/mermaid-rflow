@@ -1,5 +1,6 @@
 import { type ReactNode, useId } from "react";
 import { Label } from "@/ui/shadcn/label";
+import { Slider } from "@/ui/shadcn/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/shadcn/tooltip";
 
 export const popoverMainGridClasses = "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center";
@@ -17,6 +18,29 @@ export function Row({ label, hint, children }: { label: string; hint: string; ch
             <div id={id} className="justify-self-end col-span-2">
                 {children}
             </div>
+        </div>
+    );
+}
+
+export type SliderRowProps = {
+    label: string;
+    hint: string;
+    value: number;
+    min: number;
+    max: number;
+    step: number;
+    onChange: (value: number) => void;
+};
+
+export function SliderRow({ label, hint, value, min, max, step, onChange }: SliderRowProps) {
+    return (
+        <div className={popoverRowSubGridClasses}>
+            <HintLabel hint={hint}>
+                {label}
+            </HintLabel>
+            
+            <Slider className="min-w-0" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
+            <span className="min-w-9 text-[.7rem] font-mono tabular-nums text-right text-muted-foreground">{value}</span>
         </div>
     );
 }
