@@ -27,6 +27,43 @@
     to { opacity: 0; transform: scale(0.96); }
 }
 
+/* Pulse on top of the size morph. Two widen-then-heighten beats, then a late
+   horizontal squeeze to ~80%, then the destination size. */
+@keyframes vt-logo-pulse {
+    0%,
+    12% {
+        scale: 1 1;
+    }
+
+    24% {
+        scale: 1.28 1;
+    }
+
+    38% {
+        scale: 1 1.2;
+    }
+
+    52% {
+        scale: 1.28 1;
+    }
+
+    66% {
+        scale: 1 1.2;
+    }
+
+    78% {
+        scale: 1 1;
+    }
+
+    92% {
+        scale: 0.8 1;
+    }
+
+    100% {
+        scale: 1 1;
+    }
+}
+
 /* Plain cross-fade (default) */
 
 ::view-transition-old(.vt-page-fade) {
@@ -57,11 +94,20 @@
     animation: 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both vt-scale-in;
 }
 
-/* Shared-element logo: morph position/size between the pages */
+/* Shared-element logo: morph position/size between the pages.
+   The group sits above the page snapshots so the incoming page fade cannot cover it.
+   Timing is slow, then fast, then a slow settle — not a linear size change. */
 
 ::view-transition-group(.vt-logo-share) {
-    animation-duration: 420ms;
-    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --vt-logo-duration: 520ms;
+    z-index: 1;
+    animation-duration: var(--vt-logo-duration);
+    animation-timing-function: cubic-bezier(0.77, 0, 0.23, 1);
+}
+
+::view-transition-image-pair(.vt-logo-share) {
+    transform-origin: center;
+    animation: var(--vt-logo-duration) ease-in-out both vt-logo-pulse;
 }
 
 ::view-transition-old(.vt-logo-share),
@@ -81,6 +127,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     ::view-transition-group(*),
+    ::view-transition-image-pair(*),
     ::view-transition-old(*),
     ::view-transition-new(*) {
         animation: none !important;
