@@ -62,7 +62,7 @@ function Select_DiagramTheme() {
     return (
         <Row label="Diagram theme" hint="Color palette for the diagram. Auto follows the app light or dark theme.">
             <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange}>
-                <SelectTrigger size="sm" className="w-40">
+                <SelectTrigger size="sm" className="w-40 h-5!">
                     <SelectValue>
                         <ThemeLabel name={diagramTheme} themes={bm.THEMES} />
                     </SelectValue>
@@ -95,7 +95,7 @@ function Section_SvgLayout() {
 
         <Row label="Font" hint="Typeface used for node labels and other diagram text.">
             <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange}>
-                <SelectTrigger size="sm" className="w-40">
+                <SelectTrigger size="sm" className="w-40 h-5!">
                     <SelectValue>
                         <FontLabel fontFamily={svg.font} />
                     </SelectValue>

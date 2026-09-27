@@ -7,7 +7,7 @@ import { useSelectPreview } from "@/ui/local-ui";
 
 export const popoverMainGridClasses = "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center";
 
-export const popoverRowSubGridClasses = "min-h-6 col-span-full grid grid-cols-subgrid items-center";
+export const popoverRowSubGridClasses = "h-5 grid grid-cols-subgrid items-center col-span-full";
 
 export function Row({ label, hint, children }: { label: string; hint: string; children: ReactNode; }) {
     const id = useId();
@@ -41,8 +41,8 @@ export function SliderRow({ label, hint, value, min, max, step, onChange }: Slid
                 {label}
             </HintLabel>
 
-            <Slider className="min-w-0" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
-            <span className="min-w-9 text-[.7rem] font-mono tabular-nums text-right text-muted-foreground">{value}</span>
+            <Slider className="min-w-0 h-3" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
+            <span className="min-w-9 text-[.7rem] leading-none font-mono tabular-nums text-right text-muted-foreground">{value}</span>
         </div>
     );
 }
@@ -71,7 +71,7 @@ export type SelectPreview = ReturnType<typeof useSelectPreview>;
 export function PreviewSelect({ select, liveLabel, disabled, children }: { select: SelectPreview; liveLabel: string; disabled?: boolean; children: ReactNode; }) {
     return (
         <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange} disabled={disabled}>
-            <SelectTrigger size="sm" className="w-40" disabled={disabled}>
+            <SelectTrigger size="sm" className="w-40 h-5!" disabled={disabled}>
                 <SelectValue>
                     {liveLabel}
                 </SelectValue>

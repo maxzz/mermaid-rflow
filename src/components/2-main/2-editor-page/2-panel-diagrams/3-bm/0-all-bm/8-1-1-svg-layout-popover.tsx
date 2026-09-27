@@ -142,7 +142,7 @@ function SelectRow<T extends string>({ label, hint, select, values, labels }: { 
     return (
         <Row label={label} hint={hint}>
             <Select value={select.listValue} open={select.open} onOpenChange={select.onOpenChange} onValueChange={select.onValueChange}>
-                <SelectTrigger size="sm" className="w-44">
+                <SelectTrigger size="sm" className="w-44 h-5!">
                     <SelectValue>
                         {labels[select.listValue as T] ?? select.listValue}
                     </SelectValue>
