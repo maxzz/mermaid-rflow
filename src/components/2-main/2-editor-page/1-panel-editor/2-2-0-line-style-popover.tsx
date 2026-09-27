@@ -28,10 +28,11 @@ import {
 } from './2-2-1-line-style';
 
 export function LineStylePopover() {
-    const { source } = useSnapshot(mermaidSettings);
-    useSnapshot(sourceLink);
     const [open, setOpen] = useState(false);
     const [lockedLine, setLockedLine] = useState<number | null>(null);
+    
+    const { source } = useSnapshot(mermaidSettings);
+    useSnapshot(sourceLink);
 
     const liveLine = sourceLink.focusLine ?? getMonacoCursorLine();
     const lineNumber = open ? lockedLine : liveLine;
