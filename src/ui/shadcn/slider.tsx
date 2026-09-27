@@ -43,11 +43,11 @@ grow \
 relative \
 bg-muted \
 \
-data-horizontal:h-0.75 \
+data-horizontal:h-0.5 \
 data-horizontal:w-full \
 \
 data-vertical:h-full \
-data-vertical:w-0.75 \
+data-vertical:w-0.5 \
 \
 rounded-full overflow-hidden \
 ";
