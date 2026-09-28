@@ -70,7 +70,7 @@ function DontShowAgainCheckbox() {
                 onCheckedChange={(checked) => { mermaidSettings.showWelcome = checked !== true; }}
             />
             <Label htmlFor={id} className="text-xs font-normal text-green-800 dark:text-lime-800 cursor-pointer">
-                Show welcome page on startup
+                Do not show the welcome page at startup
             </Label>
         </div>
     );
