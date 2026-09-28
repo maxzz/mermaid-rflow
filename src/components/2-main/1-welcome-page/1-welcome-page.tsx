@@ -7,6 +7,7 @@ import { Label } from "@/ui/shadcn/label";
 import { Section3_Footer } from "@/components/3-footer";
 import { SwampEnterButton } from "./3-swamp-enter-button";
 import { JumpingOctopusLogo, SwampTitle } from "./4-jumping-octopus-logo";
+import "./1-welcome-page.css";
 
 export function WelcomePage() {
     // Warm up Monaco and the renderer while the user reads the welcome text
@@ -15,7 +16,7 @@ export function WelcomePage() {
         []);
 
     return (
-        <div className="min-h-dvh text-foreground bg-background grid grid-rows-[1fr_auto]">
+        <div className="min-h-dvh text-foreground bg-background welcome-light-bg grid grid-rows-[1fr_auto]">
 
             <div className="px-6 py-12 text-center flex flex-col items-center justify-center gap-6">
                 <div className="relative pb-16 w-full max-w-md flex flex-col items-center gap-6" data-swamp-hero>
@@ -26,7 +27,7 @@ export function WelcomePage() {
                     <SwampTitle />
                 </div>
 
-                <p className="max-w-md text-sm text-muted-foreground leading-relaxed">
+                <p className="max-w-md text-sm text-foreground dark:text-muted-foreground leading-relaxed">
                     Write Mermaid in a Monaco editor and preview it as an editable React Flow canvas, official mermaid-js SVG with layout editing, or beautiful-mermaid SVG / Unicode text.
                     Switch light and dark mode, then copy or export the result.
                 </p>
@@ -34,7 +35,7 @@ export function WelcomePage() {
                 <DontShowAgainCheckbox />
             </div>
 
-            <Section3_Footer className="border-t-0" />
+            <Section3_Footer className="welcome-footer border-t-0" />
         </div>
     );
 }
@@ -50,7 +51,7 @@ function DontShowAgainCheckbox() {
                 checked={!showWelcome}
                 onCheckedChange={(checked) => { mermaidSettings.showWelcome = checked !== true; }}
             />
-            <Label htmlFor={id} className="text-xs text-muted-foreground cursor-pointer">
+            <Label htmlFor={id} className="text-xs text-foreground dark:text-muted-foreground cursor-pointer">
                 Don't show it again at start
             </Label>
         </div>
