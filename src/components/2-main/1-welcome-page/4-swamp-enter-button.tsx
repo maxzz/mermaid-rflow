@@ -6,6 +6,10 @@ import { classNames } from "@/utils";
 import { bubbleIdsAtom, puddleHoverAtom, SWAMP_COLORS, SWAMP_VIEW } from "./a-swamp-atoms";
 import { SwampBubble } from "./6-swamp-bubble";
 import { SwampSplash } from "./5-swamp-splash";
+import { SWAMP_SURFACE } from "./u-swamp-surface";
+
+/** Centered on the surface origin, so the label's perspective and tilt pivot there. */
+const LABEL_BOX = { width: 320, height: 72 } as const;
 
 const LABEL = "Enter Labs";
 // const LABEL = "Enter Laboratory";
@@ -77,11 +81,17 @@ export function SwampEnterButton({ className }: { className?: string; }) {
                 <Duckweed />
 
                 {/* SVG has no 3D transforms, so the label is HTML tilted back to lie on the water, like the Star Wars crawl */}
-                <foreignObject x={60} y={222} width={320} height={72} aria-hidden>
-                    <div className="size-full flex items-center justify-center" style={{ perspective: "120px" }}>
+                <foreignObject
+                    x={SWAMP_SURFACE.originX - LABEL_BOX.width / 2}
+                    y={SWAMP_SURFACE.originY - LABEL_BOX.height / 2}
+                    width={LABEL_BOX.width}
+                    height={LABEL_BOX.height}
+                    aria-hidden
+                >
+                    <div className="size-full flex items-center justify-center" style={{ perspective: `${SWAMP_SURFACE.perspective}px` }}>
                         <span
                             className="whitespace-nowrap select-none text-3xl font-heading font-bold 1tracking-widest text-lime-50 group-hover:text-white uppercase"
-                            style={{ transform: "rotateX(62deg)", textShadow: "0 1px 2px rgb(0 0 0 / 0.45)" }}
+                            style={{ transform: `rotateX(${SWAMP_SURFACE.tiltDeg}deg)`, textShadow: "0 1px 2px rgb(0 0 0 / 0.45)" }}
                         >
                             {LABEL}
                         </span>
@@ -104,10 +114,14 @@ function SwampDefs() {
                 <stop offset="55%" stopColor={SWAMP_COLORS.waterMiddle} />
                 <stop offset="100%" stopColor={SWAMP_COLORS.waterEdge} />
             </radialGradient>
-            
+
             <filter id="swamp-blur" x="-20%" y="-50%" width="140%" height="200%">
                 <feGaussianBlur stdDeviation="7" />
             </filter>
+
+            <clipPath id="swamp-puddle-clip">
+                <path d={PUDDLE_PATH} />
+            </clipPath>
         </defs>
     );
 }

@@ -1,5 +1,6 @@
 import { atom } from "jotai";
 import { atomFamily } from "jotai-family";
+import { surfaceDepthScale } from "./u-swamp-surface";
 
 export type SwampBubbleSpec = {
     seed: number;       // changes on every respawn so the bubble remounts and replays
@@ -104,22 +105,23 @@ export type SplashSpec = {
 
 export const splashAtom = atom<SplashSpec | null>(null);
 
-/** Inner drops fly higher and land closer, like a fountain; every value is jittered so no two splashes match. */
-function createSplashDrops(): SplashDropSpec[] {
-    const count = 9 + Math.floor(Math.random() * 5);
-
+/**
+ * Inner drops fly higher and land closer, like a fountain; every value is jittered so no two splashes match.
+ * Flight time follows sqrt(scale) as a real fall would; drops shrink less than the splash so they stay visible.
+ */
+function createSplashDrops(scale = 1, count = 9 + Math.floor(Math.random() * 5)): SplashDropSpec[] {
     return Array.from({ length: count }, (_, idx) => {
         const side = idx % 2 === 0 ? -1 : 1;
         const spread = rand(0.12, 1);
         const height = 55 + (1 - spread) * 85 + rand(-14, 14);
         return {
-            dx: side * (24 + spread * 116),
-            height,
-            startDx: rand(-5, 5),
+            dx: side * (24 + spread * 116) * scale,
+            height: height * scale,
+            startDx: rand(-5, 5) * scale,
             lean: rand(0.55, 0.95),
-            size: rand(1.6, 4.4),
+            size: rand(1.6, 4.4) * Math.sqrt(scale),
             stretch: rand(0.9, 2.2),
-            duration: 0.7 + height / 240 + rand(-0.08, 0.12),
+            duration: (0.7 + height / 240 + rand(-0.08, 0.12)) * Math.sqrt(scale),
             delay: rand(0, 0.1),
         };
     });
@@ -149,6 +151,71 @@ export const octopusLeavingWaterAtom = atom(
     }
 );
 
+//---------------------------------------------------------------------------
+
+export type SurfaceRingSpec = {
+    radius: number;     // final radius on the water plane
+    duration: number;   // seconds
+    delay: number;      // seconds
+};
+
+/** Something small plopped into the swamp; unrelated to the octopus. */
+export type AmbientSplashSpec = {
+    id: number;
+    x: number;          // impact point, in SWAMP_VIEW units
+    y: number;
+    scale: number;      // relative to the octopus splash, including distance from the viewer
+    drops: SplashDropSpec[];
+    rings: SurfaceRingSpec[];
+    lifetime: number;   // seconds until everything has faded
+};
+
+/** Ellipse inside the puddle outline; ambient splashes land within `AMBIENT_REACH` of it to stay clear of the edge. */
+const PUDDLE_ELLIPSE = { cx: 220, cy: 258, rx: 185, ry: 19 } as const;
+const AMBIENT_REACH = 0.7;
+
+let ambientSplashCounter = 0;
+
+function createAmbientSplash(): AmbientSplashSpec {
+    const angle = rand(0, 2 * Math.PI);
+    const reach = AMBIENT_REACH * Math.sqrt(Math.random());
+    const x = PUDDLE_ELLIPSE.cx + PUDDLE_ELLIPSE.rx * reach * Math.cos(angle);
+    const y = PUDDLE_ELLIPSE.cy + PUDDLE_ELLIPSE.ry * reach * Math.sin(angle);
+
+    const size = rand(0.2, 0.32);
+    const scale = size * surfaceDepthScale(y);
+    const drops = createSplashDrops(scale, 4 + Math.floor(Math.random() * 3));
+
+    const ringRadius = 58 * size; // on the water plane, so distance is applied by the projection
+    const rings = Array.from({ length: Math.random() < 0.5 ? 2 : 3 }, (_, idx) => ({
+        radius: ringRadius * (1 - idx * 0.2),
+        duration: 1.4 + idx * 0.2,
+        delay: idx * rand(0.18, 0.26),
+    }));
+
+    const lifetime = Math.max(...drops.map((d) => d.delay + d.duration), ...rings.map((r) => r.delay + r.duration)) + 0.1;
+
+    return { id: ++ambientSplashCounter, x, y, scale, drops, rings, lifetime };
+}
+
+export const ambientSplashesAtom = atom<AmbientSplashSpec[]>([]);
+
+export const addAmbientSplashAtom = atom(
+    null,
+    (_get, set) => {
+        set(ambientSplashesAtom, (prev) => [...prev, createAmbientSplash()]);
+    }
+);
+
+export const removeAmbientSplashAtom = atom(
+    null,
+    (_get, set, id: number) => {
+        set(ambientSplashesAtom, (prev) => prev.filter((splash) => splash.id !== id));
+    }
+);
+
+//---------------------------------------------------------------------------
+
 /** Back on shore: count the bubbles again before the next jump. */
 export const octopusEmergedAtom = atom(
     null,
@@ -177,5 +244,6 @@ export const resetSwampAtom = atom(
         set(risenBubblesAtom, 0);
         set(octopusPhaseAtom, OctopusPhase.onShore);
         set(splashAtom, null);
+        set(ambientSplashesAtom, []);
     }
 );
