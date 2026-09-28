@@ -29,7 +29,7 @@ export function WelcomePage() {
                     <SwampTitle />
                 </div>
 
-                <p className="max-w-md text-sm font-medium text-lime-900 dark:text-lime-700 leading-relaxed">
+                <p className="max-w-md text-sm font-medium text-green-800 dark:text-green-800 leading-relaxed">
                     One diagram source - different rendering engines, and each of them visualizes it in its own way.
                     Compare how <Link href={links.mermaid}>mermaid.ai</Link>, <Link href={links.reactflow}>reactflow.dev</Link>, and <Link href={links.beautifulmermaid}>beautiful-mermaid</Link> visualize the same Mermaid code.
                     In addition, <Link href={links.beautifulmermaid}>beautiful-mermaid</Link> offers a text-based representation that allows diagrams to be embedded in any text file without the need for plugins to display them.
@@ -45,7 +45,7 @@ export function WelcomePage() {
 
 function Link({ children, href }: { children: React.ReactNode, href: string; }) {
     return (
-        <a href={href} className={linksClasses} target="_blank" rel="noopener noreferrer">
+        <a href={href} className="text-lime-700 hover:text-lime-800 dark:text-lime-700 dark:hover:text-lime-600 hover:underline" target="_blank" rel="noopener noreferrer">
             {children}
         </a>
     );
@@ -57,8 +57,6 @@ const links = {
     beautifulmermaid: "https://github.com/lukilabs/beautiful-mermaid",
 };
 
-const linksClasses = "text-lime-700 hover:text-lime-800 hover:underline";
-
 function DontShowAgainCheckbox() {
     const { showWelcome } = useSnapshot(mermaidSettings);
     const id = useId();
@@ -66,12 +64,13 @@ function DontShowAgainCheckbox() {
     return (
         <div className="mx-4 flex items-center gap-2">
             <Checkbox
+                className="data-[state=checked]:bg-green-800 data-[state=checked]:hover:bg-green-900 dark:data-[state=checked]:bg-lime-700 dark:data-[state=checked]:hover:bg-lime-600"
                 id={id}
                 checked={!showWelcome}
                 onCheckedChange={(checked) => { mermaidSettings.showWelcome = checked !== true; }}
             />
-            <Label htmlFor={id} className="text-xs font-normal text-foreground dark:text-muted-foreground cursor-pointer">
-                Don't show it again at start
+            <Label htmlFor={id} className="text-xs font-normal text-green-800 dark:text-lime-800 cursor-pointer">
+                Show welcome page on startup
             </Label>
         </div>
     );
