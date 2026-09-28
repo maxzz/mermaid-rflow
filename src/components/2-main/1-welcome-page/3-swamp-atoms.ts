@@ -57,9 +57,44 @@ export const puddleHoverAtom = atom(false);
 /** Bubbles rise faster while the puddle is hovered or focused. */
 export const bubbleDurationScaleAtom = atom((get) => get(puddleHoverAtom) ? 0.55 : 1);
 
+export const OctopusPhase = {
+    onShore: 'onShore',
+    jumping: 'jumping',
+    submerged: 'submerged',
+} as const;
+
+export type OctopusPhase = typeof OctopusPhase[keyof typeof OctopusPhase];
+
+const BUBBLES_BEFORE_JUMP = 12;
+
+const risenBubblesAtom = atom(0);
+
+export const octopusPhaseAtom = atom<OctopusPhase>(OctopusPhase.onShore);
+
 export const respawnBubbleAtom = atom(
     null,
     (get, set, id: number) => {
         set(bubbleAtomFamily(id), createRandomBubble(1.5, get(bubbleDurationScaleAtom)));
+
+        set(risenBubblesAtom, (count) => count + 1);
+        if (get(risenBubblesAtom) >= BUBBLES_BEFORE_JUMP && get(octopusPhaseAtom) === OctopusPhase.onShore) {
+            set(octopusPhaseAtom, OctopusPhase.jumping);
+        }
+    }
+);
+
+/** The octopus hit the water: splash, then it stays in the swamp until the user enters the lab. */
+export const octopusLandedAtom = atom(
+    null,
+    (_get, set) => {
+        set(octopusPhaseAtom, OctopusPhase.submerged);
+    }
+);
+
+export const resetSwampAtom = atom(
+    null,
+    (_get, set) => {
+        set(risenBubblesAtom, 0);
+        set(octopusPhaseAtom, OctopusPhase.onShore);
     }
 );

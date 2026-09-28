@@ -5,8 +5,9 @@ import { preloadEditorPageModules } from "@/components/2-main/1-welcome-page/8-l
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
 import { Section3_Footer } from "@/components/3-footer";
-import { AppLogo, APP_NAME } from "./2-app-logo";
+import { APP_NAME } from "./2-app-logo";
 import { SwampEnterButton } from "./3-swamp-enter-button";
+import { JumpingOctopusLogo } from "./4-jumping-octopus-logo";
 
 export function WelcomePage() {
     // Warm up Monaco and the renderer while the user reads the welcome text
@@ -18,10 +19,10 @@ export function WelcomePage() {
         <div className="min-h-dvh text-foreground bg-background grid grid-rows-[1fr_auto]">
 
             <div className="px-6 py-12 text-center flex flex-col items-center justify-center gap-6">
-                <div className="relative pb-16 w-full max-w-md flex flex-col items-center gap-6">
+                <div className="relative pb-16 w-full max-w-md flex flex-col items-center gap-6" data-swamp-hero>
                     <SwampEnterButton className="absolute inset-0 size-full" />
 
-                    <AppLogo className="relative size-40 text-primary pointer-events-none z-10" />
+                    <JumpingOctopusLogo />
 
                     <h1 className="relative text-4xl font-heading font-semibold tracking-tight text-green-800 uppercase pointer-events-none z-10">
                         {APP_NAME}

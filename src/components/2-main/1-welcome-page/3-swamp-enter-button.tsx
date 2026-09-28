@@ -5,6 +5,7 @@ import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
 import { classNames } from "@/utils";
 import { bubbleIdsAtom, puddleHoverAtom, SWAMP_COLORS, SWAMP_VIEW } from "./3-swamp-atoms";
 import { SwampBubble } from "./3-swamp-bubble";
+import { SwampSplash } from "./4-swamp-splash";
 
 const LABEL = "Enter Labs";
 // const LABEL = "Enter Laboratory";
@@ -62,6 +63,7 @@ export function SwampEnterButton({ className }: { className?: string; }) {
                 onBlur={() => setHover(false)}
             >
                 <path
+                    data-swamp-puddle
                     d={PUDDLE_PATH}
                     fill="url(#swamp-water)"
                     className="stroke-lime-600/20 group-hover:stroke-lime-400 group-focus-visible:stroke-lime-300 transition-colors"
@@ -86,6 +88,8 @@ export function SwampEnterButton({ className }: { className?: string; }) {
                     </div>
                 </foreignObject>
             </motion.g>
+
+            <SwampSplash />
 
             {!reduceMotion && bubbleIds.map((id) => <SwampBubble key={id} id={id} />)}
         </svg>
