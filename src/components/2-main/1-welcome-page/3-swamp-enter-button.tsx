@@ -3,7 +3,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { motion, useReducedMotion } from "motion/react";
 import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
 import { classNames } from "@/utils";
-import { bubbleIdsAtom, puddleHoverAtom, SWAMP_VIEW } from "./3-swamp-atoms";
+import { bubbleIdsAtom, puddleHoverAtom, SWAMP_COLORS, SWAMP_VIEW } from "./3-swamp-atoms";
 import { SwampBubble } from "./3-swamp-bubble";
 
 const LABEL = "Enter Labs";
@@ -11,7 +11,7 @@ const LABEL = "Enter Labs";
 //const LABEL = "Welcome to the labs!";
 
 /**
- * A swamp puddle on the asphalt, seen at an angle from ~1.7 m high and ~7 m away (the octopus' habitat).
+ * A swamp puddle on the asphalt, seen at an angle from ~1.7 m high and ~15 m away (the octopus' habitat).
  * The puddle is the button; bubbles rise from it up to the top edge of the SVG.
  */
 export function SwampEnterButton({ className }: { className?: string; }) {
@@ -41,7 +41,7 @@ export function SwampEnterButton({ className }: { className?: string; }) {
             <SwampDefs />
 
             {/* wet asphalt around the puddle */}
-            <ellipse cx={220} cy={278} rx={212} ry={50} className="fill-stone-500/25 dark:fill-stone-400/15" filter="url(#swamp-blur)" />
+            <ellipse cx={220} cy={258} rx={214} ry={26} className="fill-stone-500/25 dark:fill-stone-400/15" filter="url(#swamp-blur)" />
 
             <motion.g
                 ref={buttonRef}
@@ -69,19 +69,22 @@ export function SwampEnterButton({ className }: { className?: string; }) {
                 />
 
                 {/* sky reflections on the water surface */}
-                <path d="M 96 256 C 130 246, 190 244, 232 247" className="fill-none stroke-white/25" strokeWidth={3} strokeLinecap="round" />
-                <path d="M 262 250 C 290 249, 330 253, 350 259" className="fill-none stroke-white/15" strokeWidth={2} strokeLinecap="round" />
+                <path d="M 96 245 C 130 243, 190 242, 232 243" className="fill-none stroke-white/25" strokeWidth={2} strokeLinecap="round" />
+                <path d="M 262 244 C 290 244, 330 246, 350 249" className="fill-none stroke-white/15" strokeWidth={1.5} strokeLinecap="round" />
 
                 <Duckweed />
 
-                <text
-                    x={220}
-                    y={284}
-                    textAnchor="middle"
-                    className="text-lg font-heading font-semibold 1tracking-widest fill-lime-50 group-hover:fill-white uppercase select-none"
-                >
-                    {LABEL}
-                </text>
+                {/* SVG has no 3D transforms, so the label is HTML tilted back to lie on the water, like the Star Wars crawl */}
+                <foreignObject x={60} y={222} width={320} height={72} aria-hidden>
+                    <div className="size-full flex items-center justify-center" style={{ perspective: "120px" }}>
+                        <span
+                            className="whitespace-nowrap select-none text-3xl font-heading font-bold 1tracking-widest text-lime-50 group-hover:text-white uppercase"
+                            style={{ transform: "rotateX(62deg)", textShadow: "0 1px 2px rgb(0 0 0 / 0.45)" }}
+                        >
+                            {LABEL}
+                        </span>
+                    </div>
+                </foreignObject>
             </motion.g>
 
             {!reduceMotion && bubbleIds.map((id) => <SwampBubble key={id} id={id} />)}
@@ -93,9 +96,9 @@ function SwampDefs() {
     return (
         <defs>
             <radialGradient id="swamp-water" cx="50%" cy="38%" r="65%">
-                <stop offset="0%" stopColor="#7CCF49D7" />
-                <stop offset="55%" stopColor="#38A60952" />
-                <stop offset="100%" stopColor="#61AF4751" />
+                <stop offset="0%" stopColor={SWAMP_COLORS.waterCenter} />
+                <stop offset="55%" stopColor={SWAMP_COLORS.waterMiddle} />
+                <stop offset="100%" stopColor={SWAMP_COLORS.waterEdge} />
             </radialGradient>
             <filter id="swamp-blur" x="-20%" y="-50%" width="140%" height="200%">
                 <feGaussianBlur stdDeviation="7" />
@@ -107,23 +110,23 @@ function SwampDefs() {
 function Duckweed() {
     return (
         <g className="fill-lime-500/80">
-            <ellipse cx={82} cy={282} rx={5} ry={1.8} />
-            <ellipse cx={92} cy={287} rx={3.5} ry={1.3} />
-            <ellipse cx={352} cy={290} rx={5} ry={1.8} />
-            <ellipse cx={340} cy={295} rx={3} ry={1.1} />
-            <ellipse cx={300} cy={301} rx={4} ry={1.4} />
+            <ellipse cx={62} cy={259} rx={5} ry={0.9} />
+            <ellipse cx={72} cy={263} rx={3.5} ry={0.7} />
+            <ellipse cx={372} cy={261} rx={5} ry={0.9} />
+            <ellipse cx={360} cy={266} rx={3} ry={0.6} />
+            <ellipse cx={330} cy={272} rx={4} ry={0.7} />
             {/* a lily pad with its notch */}
-            <path d="M 150 300 a 13 4.5 0 1 1 8 1.2 l -8 -1.2 z" className="fill-green-600" />
+            <path d="M 90 270 a 13 2.2 0 1 1 8 0.6 l -8 -0.6 z" className="fill-green-600" />
         </g>
     );
 }
 
-/** Irregular puddle outline; height/width ~0.26 to read as foreshortened ground. */
+/** Irregular puddle outline; height/width ~0.11 to read as ground seen from ~1.7 m high at ~15 m (about 6.5 degrees). */
 const PUDDLE_PATH = "\
-M 34 276 \
-C 30 252, 84 236, 138 240 \
-C 170 228, 246 228, 282 238 \
-C 336 232, 408 246, 404 270 \
-C 418 290, 374 312, 314 312 \
-C 268 320, 180 318, 130 312 \
-C 76 314, 22 300, 34 276 Z";
+M 34 259 \
+C 30 247, 84 240, 138 242 \
+C 170 236, 246 236, 282 241 \
+C 336 238, 408 245, 404 256 \
+C 418 266, 374 276, 314 276 \
+C 268 280, 180 279, 130 276 \
+C 76 277, 22 270, 34 259 Z";

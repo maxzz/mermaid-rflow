@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { motion } from "motion/react";
-import { bubbleAtomFamily, respawnBubbleAtom } from "./3-swamp-atoms";
+import { bubbleAtomFamily, respawnBubbleAtom, SWAMP_COLORS } from "./3-swamp-atoms";
 
 export function SwampBubble({ id }: { id: number; }) {
     const { seed, startX, startY, radius: r, duration, delay, driftX } = useAtomValue(bubbleAtomFamily(id));
@@ -26,7 +26,7 @@ export function SwampBubble({ id }: { id: number; }) {
             }}
             onAnimationComplete={() => respawn(id)}
         >
-            <circle r={r} className="fill-green-200/30 stroke-green-600" strokeWidth={1.2} />
+            <circle r={r} fill={SWAMP_COLORS.bubbleFill} stroke={SWAMP_COLORS.bubbleStroke} strokeWidth={1.2} />
 
             {/* light reflection: a long arc and a 1/4-sized one behind it */}
             <path d={arcPath(r * 0.72, 215, 265)} className="fill-none stroke-white" strokeWidth={r * 0.16} strokeLinecap="round" />

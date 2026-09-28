@@ -18,7 +18,7 @@ export function WelcomePage() {
         <div className="min-h-dvh text-foreground bg-background grid grid-rows-[1fr_auto]">
 
             <div className="px-6 py-12 text-center flex flex-col items-center justify-center gap-6">
-                <div className="relative pb-24 w-full max-w-md flex flex-col items-center gap-6">
+                <div className="relative pb-16 w-full max-w-md flex flex-col items-center gap-6">
                     <SwampEnterButton className="absolute inset-0 size-full" />
 
                     <AppLogo className="relative size-40 text-primary pointer-events-none z-10" />

@@ -12,10 +12,23 @@ export type SwampBubbleSpec = {
 };
 
 /** The SVG viewBox; its top edge is aligned with the top of the logo. */
-export const SWAMP_VIEW = { width: 440, height: 320 } as const;
+export const SWAMP_VIEW = { width: 440, height: 288 } as const;
 
 /** Area inside the puddle where bubbles surface. */
-const PUDDLE_SURFACE = { left: 120, right: 320, top: 252, bottom: 292 } as const;
+const PUDDLE_SURFACE = { left: 120, right: 320, top: 248, bottom: 270 } as const;
+
+const SWAMP_LIME = "#7CCF49";
+const SWAMP_GREEN = "#38A609";
+const SWAMP_MOSS = "#61AF47";
+
+/** Water and bubbles share these hues so the bubbles read as coming out of this swamp. */
+export const SWAMP_COLORS = {
+    waterCenter: `${SWAMP_LIME}D7`,
+    waterMiddle: `${SWAMP_GREEN}52`,
+    waterEdge: `${SWAMP_MOSS}51`,
+    bubbleFill: `${SWAMP_LIME}26`,
+    bubbleStroke: `${SWAMP_GREEN}B3`,
+} as const;
 
 let seedCounter = 0;
 
