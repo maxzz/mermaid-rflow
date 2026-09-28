@@ -28,8 +28,9 @@ export function WelcomePage() {
                 </div>
 
                 <p className="max-w-md text-sm text-foreground dark:text-muted-foreground leading-relaxed">
-                    Write Mermaid in a Monaco editor and preview it as an editable React Flow canvas, official mermaid-js SVG with layout editing, or beautiful-mermaid SVG / Unicode text.
-                    Switch light and dark mode, then copy or export the result.
+                    One diagram source code — different engines. Creating clear workflow diagrams is challenging, and each tool renders them differently.
+                    Compare how <span className="text-lime-600">mermaid.ai</span>, <span className="text-lime-600">react-flow</span>, and <span className="text-lime-600">Beautiful Mermaid</span> visualize the same Mermaid code.
+                    Additionally, <span className="text-lime-600">Beautiful Mermaid</span> offers a text-based rendering option, allowing you to easily insert clean diagrams directly into any text file without requiring plugins to display them.
                 </p>
 
                 <DontShowAgainCheckbox />
