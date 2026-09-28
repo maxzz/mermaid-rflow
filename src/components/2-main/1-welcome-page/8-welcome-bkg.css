@@ -3,8 +3,13 @@
     --s: 5px; /* control the size */
     --c1: #0F5A2315;
     --c2: #B0C1AFD1;
-    /* Painted above the pattern. Keep stops translucent so the pattern stays visible. */
-    --wash: linear-gradient(180deg, #f7fee7cc 0%, #0000 34%, #0000 66%, #0f5a2329 100%);
+    /* Light plateau is wide enough for the hero and the copy; darkening happens only outside that oval. */
+    --wash: radial-gradient(
+        ellipse 100rem 80rem at 50% 48% in oklab,
+        #f7fee7cc 0%,
+        #f7fee7cc 46%,
+        #0f5a2333 100%
+    );
 
     --_s: calc(2 * var(--s)) calc(2 * var(--s));
     --_g: 35.36% 35.36% at;
