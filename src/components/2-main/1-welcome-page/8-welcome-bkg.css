@@ -3,11 +3,14 @@
     --s: 5px; /* control the size */
     --c1: #0F5A2315;
     --c2: #B0C1AFD1;
+    /* Painted above the pattern. Keep stops translucent so the pattern stays visible. */
+    --wash: linear-gradient(180deg, #f7fee7cc 0%, #0000 34%, #0000 66%, #0f5a2329 100%);
 
     --_s: calc(2 * var(--s)) calc(2 * var(--s));
     --_g: 35.36% 35.36% at;
     --_c: #0000 66%, var(--c2) 68% 70%, #0000 72%;
     background:
+        var(--wash),
         radial-gradient(var(--_g) 100% 25%, var(--_c)) var(--s) var(--s) / var(--_s),
         radial-gradient(var(--_g) 0 75%, var(--_c)) var(--s) var(--s) / var(--_s),
         radial-gradient(var(--_g) 100% 25%, var(--_c)) 0 0 / var(--_s),
