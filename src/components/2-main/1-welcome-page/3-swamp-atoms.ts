@@ -63,6 +63,7 @@ export const OctopusPhase = {
     onShore: 'onShore',
     jumping: 'jumping',
     submerged: 'submerged',
+    emerging: 'emerging',
 } as const;
 
 export type OctopusPhase = typeof OctopusPhase[keyof typeof OctopusPhase];
@@ -85,11 +86,45 @@ export const respawnBubbleAtom = atom(
     }
 );
 
+/** Increments on every splash; 0 means no splash yet. Used as a key to replay the splash. */
+export const splashIdAtom = atom(0);
+
 /** The octopus hit the water: splash, then it stays in the swamp until the user enters the lab. */
 export const octopusLandedAtom = atom(
     null,
     (_get, set) => {
         set(octopusPhaseAtom, OctopusPhase.submerged);
+        set(splashIdAtom, (id) => id + 1);
+    }
+);
+
+/** The octopus leaves the water with a splash of its own. */
+export const octopusLeavingWaterAtom = atom(
+    null,
+    (_get, set) => {
+        set(splashIdAtom, (id) => id + 1);
+    }
+);
+
+/** Back on shore: count the bubbles again before the next jump. */
+export const octopusEmergedAtom = atom(
+    null,
+    (_get, set) => {
+        set(risenBubblesAtom, 0);
+        set(octopusPhaseAtom, OctopusPhase.onShore);
+    }
+);
+
+/** Clicking the title calls the octopus out of the swamp, or sends it in right away if it is on shore. */
+export const summonOctopusAtom = atom(
+    null,
+    (get, set) => {
+        const phase = get(octopusPhaseAtom);
+        if (phase === OctopusPhase.submerged) {
+            set(octopusPhaseAtom, OctopusPhase.emerging);
+        } else if (phase === OctopusPhase.onShore) {
+            set(octopusPhaseAtom, OctopusPhase.jumping);
+        }
     }
 );
 
@@ -98,5 +133,6 @@ export const resetSwampAtom = atom(
     (_get, set) => {
         set(risenBubblesAtom, 0);
         set(octopusPhaseAtom, OctopusPhase.onShore);
+        set(splashIdAtom, 0);
     }
 );

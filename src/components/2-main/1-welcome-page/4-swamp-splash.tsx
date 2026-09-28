@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai";
 import { motion } from "motion/react";
-import { OctopusPhase, octopusPhaseAtom, SWAMP_COLORS } from "./3-swamp-atoms";
+import { OctopusPhase, octopusPhaseAtom, splashIdAtom, SWAMP_COLORS } from "./3-swamp-atoms";
 
 const CENTER_X = 220;
 const SURFACE_Y = 257;
@@ -26,37 +26,48 @@ const EASE_IN_QUAD = [0.55, 0.085, 0.68, 0.53] as const;
 
 const surfaceEllipse = { style: { transformBox: "fill-box", transformOrigin: "center" } } as const;
 
-/** Splash when the octopus lands, then slow ripples showing where it hides. */
+/** A splash each time the octopus enters or leaves the water, and slow ripples while it hides there. */
 export function SwampSplash() {
     const phase = useAtomValue(octopusPhaseAtom);
-    if (phase !== OctopusPhase.submerged) {
-        return null;
-    }
+    const splashId = useAtomValue(splashIdAtom);
 
+    return (
+        <>
+            {phase === OctopusPhase.submerged && <HidingRipple />}
+            {splashId > 0 && <SplashBurst key={splashId} />}
+        </>
+    );
+}
+
+function SplashBurst() {
     return (
         <g>
             <Ripple delay={0} duration={0.9} />
             <Ripple delay={0.18} duration={1.1} />
 
-            {/* the octopus is still down there */}
-            <motion.ellipse
-                cx={CENTER_X}
-                cy={SURFACE_Y}
-                rx={60}
-                ry={7}
-                className="fill-none stroke-white/35"
-                strokeWidth={1.2}
-                vectorEffect="non-scaling-stroke"
-                {...surfaceEllipse}
-                initial={{ scale: 0.1, opacity: 0 }}
-                animate={{ scale: [0.1, 1], opacity: [0.7, 0] }}
-                transition={{ duration: 2.4, ease: "easeOut", delay: 1.4, repeat: Infinity, repeatDelay: 1.8 }}
-            />
-
             <Spout />
 
             {DROPS.map((drop, idx) => <SplashDrop key={idx} {...drop} />)}
         </g>
+    );
+}
+
+/** The octopus is still down there. */
+function HidingRipple() {
+    return (
+        <motion.ellipse
+            cx={CENTER_X}
+            cy={SURFACE_Y}
+            rx={60}
+            ry={7}
+            className="fill-none stroke-white/35"
+            strokeWidth={1.2}
+            vectorEffect="non-scaling-stroke"
+            {...surfaceEllipse}
+            initial={{ scale: 0.1, opacity: 0 }}
+            animate={{ scale: [0.1, 1], opacity: [0.7, 0] }}
+            transition={{ duration: 2.4, ease: "easeOut", delay: 1.4, repeat: Infinity, repeatDelay: 1.8 }}
+        />
     );
 }
 
