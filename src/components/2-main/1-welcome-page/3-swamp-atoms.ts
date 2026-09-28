@@ -86,15 +86,58 @@ export const respawnBubbleAtom = atom(
     }
 );
 
-/** Increments on every splash; 0 means no splash yet. Used as a key to replay the splash. */
-export const splashIdAtom = atom(0);
+export type SplashDropSpec = {
+    dx: number;         // horizontal distance from the impact point to where the drop falls back
+    height: number;     // apex height above the water
+    startDx: number;    // where it leaves the water, relative to the impact point
+    lean: number;       // how far out (0..1 of dx) the drop is before it turns over at the top
+    size: number;       // radius of the round part
+    stretch: number;    // tail length relative to size; ~1 is almost round
+    duration: number;   // seconds
+    delay: number;      // seconds
+};
+
+export type SplashSpec = {
+    id: number;         // new id replays the splash
+    drops: SplashDropSpec[];
+};
+
+export const splashAtom = atom<SplashSpec | null>(null);
+
+/** Inner drops fly higher and land closer, like a fountain; every value is jittered so no two splashes match. */
+function createSplashDrops(): SplashDropSpec[] {
+    const count = 9 + Math.floor(Math.random() * 5);
+
+    return Array.from({ length: count }, (_, idx) => {
+        const side = idx % 2 === 0 ? -1 : 1;
+        const spread = rand(0.12, 1);
+        const height = 55 + (1 - spread) * 85 + rand(-14, 14);
+        return {
+            dx: side * (24 + spread * 116),
+            height,
+            startDx: rand(-5, 5),
+            lean: rand(0.55, 0.95),
+            size: rand(1.6, 4.4),
+            stretch: rand(0.9, 2.2),
+            duration: 0.7 + height / 240 + rand(-0.08, 0.12),
+            delay: rand(0, 0.1),
+        };
+    });
+}
+
+const startSplashAtom = atom(
+    null,
+    (_get, set) => {
+        set(splashAtom, (prev) => ({ id: (prev?.id ?? 0) + 1, drops: createSplashDrops() }));
+    }
+);
 
 /** The octopus hit the water: splash, then it stays in the swamp until the user enters the lab. */
 export const octopusLandedAtom = atom(
     null,
     (_get, set) => {
         set(octopusPhaseAtom, OctopusPhase.submerged);
-        set(splashIdAtom, (id) => id + 1);
+        set(startSplashAtom);
     }
 );
 
@@ -102,7 +145,7 @@ export const octopusLandedAtom = atom(
 export const octopusLeavingWaterAtom = atom(
     null,
     (_get, set) => {
-        set(splashIdAtom, (id) => id + 1);
+        set(startSplashAtom);
     }
 );
 
@@ -133,6 +176,6 @@ export const resetSwampAtom = atom(
     (_get, set) => {
         set(risenBubblesAtom, 0);
         set(octopusPhaseAtom, OctopusPhase.onShore);
-        set(splashIdAtom, 0);
+        set(splashAtom, null);
     }
 );

@@ -1,25 +1,10 @@
+import { useEffect, useRef } from "react";
 import { useAtomValue } from "jotai";
-import { motion } from "motion/react";
-import { OctopusPhase, octopusPhaseAtom, splashIdAtom, SWAMP_COLORS } from "./3-swamp-atoms";
+import { animate, motion, motionValue } from "motion/react";
+import { OctopusPhase, octopusPhaseAtom, splashAtom, type SplashDropSpec, SWAMP_COLORS } from "./3-swamp-atoms";
 
 const CENTER_X = 220;
 const SURFACE_Y = 257;
-
-/** Offsets are in SWAMP_VIEW units; the middle drops fly highest, like a splash crown. */
-const DROPS = [
-    { dx: -92, height: 52, r: 2.2, delay: 0.04 },
-    { dx: -70, height: 74, r: 3.2, delay: 0 },
-    { dx: -48, height: 96, r: 2.4, delay: 0.02 },
-    { dx: -30, height: 112, r: 3.6, delay: 0 },
-    { dx: -14, height: 124, r: 2, delay: 0.05 },
-    { dx: -4, height: 132, r: 2.8, delay: 0.02 },
-    { dx: 8, height: 128, r: 3.4, delay: 0 },
-    { dx: 22, height: 116, r: 2.2, delay: 0.03 },
-    { dx: 38, height: 100, r: 3, delay: 0 },
-    { dx: 56, height: 84, r: 2.6, delay: 0.04 },
-    { dx: 76, height: 64, r: 3.2, delay: 0.01 },
-    { dx: 96, height: 46, r: 2, delay: 0.05 },
-] as const;
 
 const EASE_OUT_QUAD = [0.25, 0.46, 0.45, 0.94] as const;
 const EASE_IN_QUAD = [0.55, 0.085, 0.68, 0.53] as const;
@@ -29,17 +14,17 @@ const surfaceEllipse = { style: { transformBox: "fill-box", transformOrigin: "ce
 /** A splash each time the octopus enters or leaves the water, and slow ripples while it hides there. */
 export function SwampSplash() {
     const phase = useAtomValue(octopusPhaseAtom);
-    const splashId = useAtomValue(splashIdAtom);
+    const splash = useAtomValue(splashAtom);
 
     return (
         <>
             {phase === OctopusPhase.submerged && <HidingRipple />}
-            {splashId > 0 && <SplashBurst key={splashId} />}
+            {splash && <SplashBurst key={splash.id} drops={splash.drops} />}
         </>
     );
 }
 
-function SplashBurst() {
+function SplashBurst({ drops }: { drops: SplashDropSpec[]; }) {
     return (
         <g>
             <Ripple delay={0} duration={0.9} />
@@ -47,7 +32,7 @@ function SplashBurst() {
 
             <Spout />
 
-            {DROPS.map((drop, idx) => <SplashDrop key={idx} {...drop} />)}
+            {drops.map((drop, idx) => <SplashDrop key={idx} spec={drop} />)}
         </g>
     );
 }
@@ -72,31 +57,76 @@ function HidingRipple() {
 }
 
 /**
- * x moves at a constant speed while y decelerates to the peak and accelerates back down,
- * so each drop traces a parabola that rounds off at the top.
+ * The drop flies along a cubic Bezier shaped like a fountain jet: it leaves the water almost vertically,
+ * rounds off at the top, and falls steeply. Progress slows near the apex and speeds up on the way down.
  */
-function SplashDrop({ dx, height, r, delay }: typeof DROPS[number]) {
-    const duration = 0.55 + height / 220;
+function SplashDrop({ spec }: { spec: SplashDropSpec; }) {
+    const ref = useRef<SVGPathElement>(null);
+
+    useEffect(
+        () => {
+            const el = ref.current;
+            if (!el) {
+                return;
+            }
+
+            const curve = dropCurve(spec);
+            const place = (t: number) => el.setAttribute("transform", dropTransform(curve, t));
+            place(0);
+
+            const progress = motionValue(0);
+            const unsubscribe = progress.on("change", place);
+            const flight = animate(progress, [0, 0.5, 1], { duration: spec.duration, delay: spec.delay, times: [0, 0.5, 1], ease: [EASE_OUT_QUAD, EASE_IN_QUAD] });
+            const fade = animate(el, { opacity: [1, 1, 0] }, { duration: spec.duration, delay: spec.delay, times: [0, 0.8, 1] });
+
+            return () => {
+                unsubscribe();
+                flight.stop();
+                fade.stop();
+            };
+        },
+        [spec]);
 
     return (
-        <motion.circle
-            r={r}
+        <path
+            ref={ref}
+            d={teardropPath(spec.size, spec.stretch)}
             fill={SWAMP_COLORS.splashFill}
             stroke={SWAMP_COLORS.splashStroke}
             strokeWidth={0.8}
-            initial={{ x: CENTER_X, y: SURFACE_Y, opacity: 0 }}
-            animate={{
-                x: [CENTER_X + dx * 0.08, CENTER_X + dx],
-                y: [SURFACE_Y, SURFACE_Y - height, SURFACE_Y + 3],
-                opacity: [1, 1, 0],
-            }}
-            transition={{
-                x: { duration, delay, ease: "linear" },
-                y: { duration, delay, times: [0, 0.48, 1], ease: [EASE_OUT_QUAD, EASE_IN_QUAD] },
-                opacity: { duration, delay, times: [0, 0.88, 1] },
-            }}
+            opacity={0}
         />
     );
+}
+
+type Point = { x: number; y: number; };
+
+function dropCurve({ dx, height, startDx, lean }: SplashDropSpec): [Point, Point, Point, Point] {
+    const controlY = SURFACE_Y - height * 4 / 3; // puts the curve's apex at `height`
+    return [
+        { x: CENTER_X + startDx, y: SURFACE_Y },
+        { x: CENTER_X + startDx + dx * 0.04, y: controlY },
+        { x: CENTER_X + dx * lean, y: controlY },
+        { x: CENTER_X + dx, y: SURFACE_Y + 2 },
+    ];
+}
+
+/** Position on the curve, with the drop's tail trailing its direction of travel. */
+function dropTransform([p0, p1, p2, p3]: [Point, Point, Point, Point], t: number) {
+    const u = 1 - t;
+    const x = u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x;
+    const y = u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y;
+    const vx = 3 * u * u * (p1.x - p0.x) + 6 * u * t * (p2.x - p1.x) + 3 * t * t * (p3.x - p2.x);
+    const vy = 3 * u * u * (p1.y - p0.y) + 6 * u * t * (p2.y - p1.y) + 3 * t * t * (p3.y - p2.y);
+    const deg = Math.atan2(-vx, vy) * 180 / Math.PI;
+    return `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${deg.toFixed(1)})`;
+}
+
+/** Round bottom centered at the origin, tail pointing up (-y). */
+function teardropPath(size: number, stretch: number) {
+    const tip = size * (1 + stretch);
+    const s = size;
+    return `M 0 ${-tip} C ${s * 0.45} ${-tip * 0.5}, ${s} ${-s * 0.35}, ${s} 0 A ${s} ${s} 0 0 1 ${-s} 0 C ${-s} ${-s * 0.35}, ${-s * 0.45} ${-tip * 0.5}, 0 ${-tip} Z`;
 }
 
 /** A short column of water thrown straight up at the point of impact. */
