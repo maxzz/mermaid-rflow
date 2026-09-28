@@ -5,7 +5,7 @@ import { classNames } from "@/utils";
 import { AppLogo, APP_NAME } from "./2-app-logo";
 import { octopusEmergedAtom, octopusLandedAtom, octopusLeavingWaterAtom, OctopusPhase, octopusPhaseAtom, resetSwampAtom, summonOctopusAtom } from "./3-swamp-atoms";
 
-const HOP_Y = -36;
+const HOP_Y = -236;
 
 /**
  * Welcome page logo. When the swamp decides it is time (see respawnBubbleAtom), the octopus
@@ -19,6 +19,7 @@ export function JumpingOctopusLogo() {
     const leavingWater = useSetAtom(octopusLeavingWaterAtom);
     const emerged = useSetAtom(octopusEmergedAtom);
     const reset = useSetAtom(resetSwampAtom);
+
     const [scope, animate] = useAnimate<HTMLDivElement>();
 
     // The atoms are global: start over the next time the Welcome page is shown
@@ -38,7 +39,7 @@ export function JumpingOctopusLogo() {
             async function jump() {
                 const diveY = measureDiveY(logo);
                 // stretch up
-                await animate(logo, { scaleY: 1.12, scaleX: 0.94 }, { duration: 0.35, ease: "easeOut" });
+                await animate(logo, { scaleY: 1.12, scaleX: 0.54 }, { duration: 0.35, ease: "easeOut" });
                 // anticipation: crouch
                 await animate(logo, { scaleY: 0.86, scaleX: 1.07 }, { duration: 0.18, ease: "easeInOut" });
                 // hop
