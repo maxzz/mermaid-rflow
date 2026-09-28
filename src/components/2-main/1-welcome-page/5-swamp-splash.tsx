@@ -3,38 +3,15 @@ import { useAtomValue } from "jotai";
 import { animate, motion, motionValue } from "motion/react";
 import { OctopusPhase, octopusPhaseAtom, splashAtom, type SplashDropSpec, SWAMP_COLORS } from "./a-swamp-atoms";
 
-const CENTER_X = 220;
-const SURFACE_Y = 257;
-
-const EASE_OUT_QUAD = [0.25, 0.46, 0.45, 0.94] as const;
-const EASE_IN_QUAD = [0.55, 0.085, 0.68, 0.53] as const;
-
-const surfaceEllipse = { style: { transformBox: "fill-box", transformOrigin: "center" } } as const;
-
 /** A splash each time the octopus enters or leaves the water, and slow ripples while it hides there. */
 export function SwampSplash() {
     const phase = useAtomValue(octopusPhaseAtom);
     const splash = useAtomValue(splashAtom);
 
-    return (
-        <>
-            {phase === OctopusPhase.submerged && <HidingRipple />}
-            {splash && <SplashBurst key={splash.id} drops={splash.drops} />}
-        </>
-    );
-}
-
-function SplashBurst({ drops }: { drops: SplashDropSpec[]; }) {
-    return (
-        <g>
-            <Ripple delay={0} duration={0.9} />
-            <Ripple delay={0.18} duration={1.1} />
-
-            <Spout />
-
-            {drops.map((drop, idx) => <SplashDrop key={idx} spec={drop} />)}
-        </g>
-    );
+    return (<>
+        {phase === OctopusPhase.submerged && <HidingRipple />}
+        {splash && <SplashBurst key={splash.id} drops={splash.drops} />}
+    </>);
 }
 
 /** The octopus is still down there. */
@@ -52,6 +29,65 @@ function HidingRipple() {
             initial={{ scale: 0.1, opacity: 0 }}
             animate={{ scale: [0.1, 1], opacity: [0.7, 0] }}
             transition={{ duration: 2.4, ease: "easeOut", delay: 1.4, repeat: Infinity, repeatDelay: 1.8 }}
+        />
+    );
+}
+
+const CENTER_X = 220;
+const SURFACE_Y = 257;
+const surfaceEllipse = { style: { transformBox: "fill-box", transformOrigin: "center" } } as const;
+
+//---------------------------------------------------------------------------
+
+function SplashBurst({ drops }: { drops: SplashDropSpec[]; }) {
+    return (
+        <g>
+            <Ripple delay={0} duration={0.9} />
+            <Ripple delay={0.18} duration={1.1} />
+
+            <Spout />
+
+            {drops.map(
+                (drop, idx) => <SplashDrop key={idx} spec={drop} />
+            )}
+        </g>
+    );
+}
+
+function Ripple({ delay, duration }: { delay: number; duration: number; }) {
+    return (
+        <motion.ellipse
+            cx={CENTER_X}
+            cy={SURFACE_Y}
+            rx={110}
+            ry={12}
+            className="fill-none stroke-white/60"
+            strokeWidth={1.5}
+            vectorEffect="non-scaling-stroke"
+            {...surfaceEllipse}
+            initial={{ scale: 0.05, opacity: 0 }}
+            animate={{ scale: [0.05, 1], opacity: [0.9, 0] }}
+            transition={{ duration, delay, ease: "easeOut" }}
+        />
+    );
+}
+
+/** A short column of water thrown straight up at the point of impact. */
+function Spout() {
+    return (
+        <motion.ellipse
+            cx={CENTER_X}
+            cy={SURFACE_Y - 30}
+            rx={7}
+            ry={30}
+            fill={SWAMP_COLORS.splashFill}
+            stroke={SWAMP_COLORS.splashStroke}
+            strokeWidth={0.8}
+            vectorEffect="non-scaling-stroke"
+            style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
+            initial={{ scaleY: 0, scaleX: 0.6, opacity: 1 }}
+            animate={{ scaleY: [0, 1, 0.15], scaleX: [0.6, 1, 1.4], opacity: [1, 0.95, 0] }}
+            transition={{ duration: 0.7, times: [0, 0.35, 1], ease: ["easeOut", "easeIn"] }}
         />
     );
 }
@@ -99,6 +135,9 @@ function SplashDrop({ spec }: { spec: SplashDropSpec; }) {
     );
 }
 
+const EASE_OUT_QUAD = [0.25, 0.46, 0.45, 0.94] as const;
+const EASE_IN_QUAD = [0.55, 0.085, 0.68, 0.53] as const;
+
 type Point = { x: number; y: number; };
 
 function dropCurve({ dx, height, startDx, lean }: SplashDropSpec): [Point, Point, Point, Point] {
@@ -127,42 +166,4 @@ function teardropPath(size: number, stretch: number) {
     const tip = size * (1 + stretch);
     const s = size;
     return `M 0 ${-tip} C ${s * 0.45} ${-tip * 0.5}, ${s} ${-s * 0.35}, ${s} 0 A ${s} ${s} 0 0 1 ${-s} 0 C ${-s} ${-s * 0.35}, ${-s * 0.45} ${-tip * 0.5}, 0 ${-tip} Z`;
-}
-
-/** A short column of water thrown straight up at the point of impact. */
-function Spout() {
-    return (
-        <motion.ellipse
-            cx={CENTER_X}
-            cy={SURFACE_Y - 30}
-            rx={7}
-            ry={30}
-            fill={SWAMP_COLORS.splashFill}
-            stroke={SWAMP_COLORS.splashStroke}
-            strokeWidth={0.8}
-            vectorEffect="non-scaling-stroke"
-            style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
-            initial={{ scaleY: 0, scaleX: 0.6, opacity: 1 }}
-            animate={{ scaleY: [0, 1, 0.15], scaleX: [0.6, 1, 1.4], opacity: [1, 0.95, 0] }}
-            transition={{ duration: 0.7, times: [0, 0.35, 1], ease: ["easeOut", "easeIn"] }}
-        />
-    );
-}
-
-function Ripple({ delay, duration }: { delay: number; duration: number; }) {
-    return (
-        <motion.ellipse
-            cx={CENTER_X}
-            cy={SURFACE_Y}
-            rx={110}
-            ry={12}
-            className="fill-none stroke-white/60"
-            strokeWidth={1.5}
-            vectorEffect="non-scaling-stroke"
-            {...surfaceEllipse}
-            initial={{ scale: 0.05, opacity: 0 }}
-            animate={{ scale: [0.05, 1], opacity: [0.9, 0] }}
-            transition={{ duration, delay, ease: "easeOut" }}
-        />
-    );
 }

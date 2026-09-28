@@ -5,12 +5,12 @@ import { preloadEditorPageModules } from "@/components/0-all/8-lazy-modules";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
 import { Section3_Footer } from "@/components/3-footer";
-import { SwampEnterButton } from "./3-swamp-enter-button";
-import { JumpingOctopusLogo } from "./4-jumping-octopus-logo";
+import { SwampEnterButton } from "./4-swamp-enter-button";
+import { JumpingOctopusLogo } from "./3-jumping-octopus-logo";
 import "./8-welcome-bkg.css";
 import { summonOctopusAtom } from "./a-swamp-atoms";
 import { useSetAtom } from "jotai";
-import { APP_NAME } from "./2-app-logo";
+import { APP_NAME } from "./2-app-logo-transition";
 
 export function WelcomePage() {
     // Warm up Monaco and the renderer while the user reads the welcome text

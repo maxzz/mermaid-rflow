@@ -4,8 +4,8 @@ import { motion, useReducedMotion } from "motion/react";
 import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
 import { classNames } from "@/utils";
 import { bubbleIdsAtom, puddleHoverAtom, SWAMP_COLORS, SWAMP_VIEW } from "./a-swamp-atoms";
-import { SwampBubble } from "./3-swamp-bubble";
-import { SwampSplash } from "./4-swamp-splash";
+import { SwampBubble } from "./6-swamp-bubble";
+import { SwampSplash } from "./5-swamp-splash";
 
 const LABEL = "Enter Labs";
 // const LABEL = "Enter Laboratory";
@@ -104,6 +104,7 @@ function SwampDefs() {
                 <stop offset="55%" stopColor={SWAMP_COLORS.waterMiddle} />
                 <stop offset="100%" stopColor={SWAMP_COLORS.waterEdge} />
             </radialGradient>
+            
             <filter id="swamp-blur" x="-20%" y="-50%" width="140%" height="200%">
                 <feGaussianBlur stdDeviation="7" />
             </filter>

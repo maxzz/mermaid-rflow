@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { classNames } from "@/utils";
-import { AppLogo } from "./2-app-logo";
+import { AppLogo } from "./2-app-logo-transition";
 import { motion, useAnimate } from "motion/react";
 import { octopusEmergedAtom, octopusLandedAtom, octopusLeavingWaterAtom, OctopusPhase, octopusPhaseAtom, resetSwampAtom } from "./a-swamp-atoms";
 

@@ -3,7 +3,7 @@ import { SlidersHorizontalIcon } from "lucide-react";
 import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
 import { isOpenOptionsDialogAtom } from "@/components/4-dialogs/1-options/a-types-options";
 import { Button } from "@/ui/shadcn/button";
-import { AppLogo, APP_NAME } from "@/components/2-main/1-welcome-page/2-app-logo";
+import { AppLogo, APP_NAME } from "@/components/2-main/1-welcome-page/2-app-logo-transition";
 import { ButtonThemeToggle } from "./8-btn-theme-toggle";
 import { RenderEngineTabs } from "./1-render-engine-tabs";
 
