@@ -28,6 +28,8 @@ export const SWAMP_COLORS = {
     waterEdge: `${SWAMP_MOSS}51`,
     bubbleFill: `${SWAMP_LIME}26`,
     bubbleStroke: `${SWAMP_GREEN}B3`,
+    splashFill: "#F7FEE7",  // pale enough to stand out against the water
+    splashStroke: SWAMP_GREEN,
 } as const;
 
 let seedCounter = 0;
