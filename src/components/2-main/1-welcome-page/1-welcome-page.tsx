@@ -1,13 +1,13 @@
 import { useEffect, useId } from "react";
 import { useSnapshot } from "valtio";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
-import { preloadEditorPageModules } from "@/components/2-main/1-welcome-page/8-lazy-modules";
+import { preloadEditorPageModules } from "@/components/0-all/8-lazy-modules";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
 import { Section3_Footer } from "@/components/3-footer";
 import { SwampEnterButton } from "./3-swamp-enter-button";
 import { JumpingOctopusLogo, SwampTitle } from "./4-jumping-octopus-logo";
-import "./1-welcome-page.css";
+import "./8-welcome-bkg.css";
 
 export function WelcomePage() {
     // Warm up Monaco and the renderer while the user reads the welcome text
@@ -28,9 +28,9 @@ export function WelcomePage() {
                 </div>
 
                 <p className="max-w-md text-sm text-foreground dark:text-muted-foreground leading-relaxed">
-                    One diagram source code — different engines. Creating clear workflow diagrams is challenging, and each tool renders them differently.
-                    Compare how <span className="text-lime-600">mermaid.ai</span>, <span className="text-lime-600">react-flow</span>, and <span className="text-lime-600">Beautiful Mermaid</span> visualize the same Mermaid code.
-                    Additionally, <span className="text-lime-600">Beautiful Mermaid</span> offers a text-based rendering option, allowing you to easily insert clean diagrams directly into any text file without requiring plugins to display them.
+                    One diagram source - different rendering engines, and each of them visualizes it in its own way.
+                    Compare how <Link href={links.mermaid}>mermaid.ai</Link>, <Link href={links.reactflow}>react-flow</Link>, and <Link href={links.beautifulmermaid}>Beautiful Mermaid</Link> visualize the same Mermaid code.
+                    In addition, <Link href={links.beautifulmermaid}>Beautiful Mermaid</Link> offers a text-based representation that allows diagrams to be embedded in any text file without the need for plugins to display them.
                 </p>
 
                 <DontShowAgainCheckbox />
@@ -40,6 +40,22 @@ export function WelcomePage() {
         </div>
     );
 }
+
+function Link({ children, href }: { children: React.ReactNode, href: string }) {
+    return (
+        <a href={href} className={linksClasses} target="_blank" rel="noopener noreferrer">
+            {children}
+        </a>
+    );
+}
+
+const links = {
+    mermaid: "https://mermaid.ai",
+    reactflow: "https://reactflow.dev",
+    beautifulmermaid: "https://beautifulmermaid.com",
+}
+
+const linksClasses = "text-lime-600 hover:text-lime-700";
 
 function DontShowAgainCheckbox() {
     const { showWelcome } = useSnapshot(mermaidSettings);

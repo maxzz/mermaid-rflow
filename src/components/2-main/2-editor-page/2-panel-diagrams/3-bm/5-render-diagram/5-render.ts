@@ -1,6 +1,6 @@
 import { proxy } from 'valtio';
 import { type AsciiRenderOptions, type DiagramColors, type RenderOptions } from 'beautiful-mermaid'; // `import type` only: keep the lazy chunk lazy
-import { type BeautifulMermaidModule } from '@/components/2-main/1-welcome-page/8-lazy-modules';
+import { type BeautifulMermaidModule } from '@/components/0-all/8-lazy-modules';
 import { BmOutputFormat, type DiagramTheme, type MermaidSettings } from '../../../../../../store/2-mermaid-settings';
 import { resolveCssVar } from '@/components/4-dialogs/2-export/8-export-utils';
 import { processExportedSvg, type SvgExportProcess } from '@/components/4-dialogs/2-export/8-flatten-svg-colors';
