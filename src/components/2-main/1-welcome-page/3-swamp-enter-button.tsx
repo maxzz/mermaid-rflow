@@ -3,7 +3,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { motion, useReducedMotion } from "motion/react";
 import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
 import { classNames } from "@/utils";
-import { bubbleIdsAtom, puddleHoverAtom, SWAMP_COLORS, SWAMP_VIEW } from "./3-swamp-atoms";
+import { bubbleIdsAtom, puddleHoverAtom, SWAMP_COLORS, SWAMP_VIEW } from "./a-swamp-atoms";
 import { SwampBubble } from "./3-swamp-bubble";
 import { SwampSplash } from "./4-swamp-splash";
 

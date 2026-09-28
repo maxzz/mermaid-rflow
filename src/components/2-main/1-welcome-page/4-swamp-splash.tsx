@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useAtomValue } from "jotai";
 import { animate, motion, motionValue } from "motion/react";
-import { OctopusPhase, octopusPhaseAtom, splashAtom, type SplashDropSpec, SWAMP_COLORS } from "./3-swamp-atoms";
+import { OctopusPhase, octopusPhaseAtom, splashAtom, type SplashDropSpec, SWAMP_COLORS } from "./a-swamp-atoms";
 
 const CENTER_X = 220;
 const SURFACE_Y = 257;

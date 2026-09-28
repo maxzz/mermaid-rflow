@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { motion } from "motion/react";
-import { bubbleAtomFamily, respawnBubbleAtom, SWAMP_COLORS } from "./3-swamp-atoms";
+import { bubbleAtomFamily, respawnBubbleAtom, SWAMP_COLORS } from "./a-swamp-atoms";
 
 export function SwampBubble({ id }: { id: number; }) {
     const { seed, startX, startY, radius: r, duration, delay, driftX } = useAtomValue(bubbleAtomFamily(id));

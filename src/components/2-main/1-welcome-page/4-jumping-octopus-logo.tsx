@@ -1,11 +1,9 @@
 import { useEffect } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { motion, useAnimate } from "motion/react";
 import { classNames } from "@/utils";
-import { AppLogo, APP_NAME } from "./2-app-logo";
-import { octopusEmergedAtom, octopusLandedAtom, octopusLeavingWaterAtom, OctopusPhase, octopusPhaseAtom, resetSwampAtom, summonOctopusAtom } from "./3-swamp-atoms";
-
-const HOP_Y = -236;
+import { AppLogo } from "./2-app-logo";
+import { motion, useAnimate } from "motion/react";
+import { octopusEmergedAtom, octopusLandedAtom, octopusLeavingWaterAtom, OctopusPhase, octopusPhaseAtom, resetSwampAtom } from "./a-swamp-atoms";
 
 /**
  * Welcome page logo. When the swamp decides it is time (see respawnBubbleAtom), the octopus
@@ -81,28 +79,13 @@ export function JumpingOctopusLogo() {
         [phase, animate, landed, leavingWater, emerged, scope]);
 
     return (
-        <motion.div
-            ref={scope}
-            className={classNames("relative pointer-events-none", phase === OctopusPhase.onShore ? "z-10" : "z-20")}
-            style={{ originY: 1 }}
-        >
+        <motion.div ref={scope} className={classNames("relative pointer-events-none", phase === OctopusPhase.onShore ? "z-10" : "z-20")} style={{ originY: 1 }}>
             <AppLogo className="size-40 text-primary" />
         </motion.div>
     );
 }
 
-/** The app name; clicking it calls the octopus out of the swamp (or sends it in if it is on shore). */
-export function SwampTitle() {
-    const summon = useSetAtom(summonOctopusAtom);
-
-    return (
-        <h1 className="relative text-4xl font-heading font-semibold tracking-tight text-green-800 uppercase z-10">
-            <button className="uppercase cursor-pointer" type="button" onClick={() => summon()} title="Call the octopus">
-                {APP_NAME}
-            </button>
-        </h1>
-    );
-}
+const HOP_Y = -236;
 
 /** Distance from the logo's resting bottom edge to the middle of the puddle. */
 function measureDiveY(logo: HTMLElement) {

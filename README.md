@@ -176,7 +176,7 @@ pnpm preview
 
 Projects this app uses, plus others that are useful if you want to learn how diagrams are parsed, laid out, and drawn.
 
-### Used here
+### Inspired by
 
 - [albingcj/mermaid-reactflow-editor](https://github.com/albingcj/mermaid-reactflow-editor) — source of the flowchart converter and interactive canvas (MIT). Live demo: [diagram.albingcj.com](https://diagram.albingcj.com/)
 - [lukilabs/beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) — synchronous SVG and ASCII/Unicode renderer used by the SVG and Text tabs
