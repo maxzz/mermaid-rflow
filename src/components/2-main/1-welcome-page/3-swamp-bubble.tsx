@@ -15,7 +15,7 @@ export function SwampBubble({ id }: { id: number; }) {
             animate={{
                 x: [startX, startX + driftX, startX - driftX * 0.6, startX + driftX * 0.4],
                 y: [startY, r + 1],
-                scale: [0.3, 1, 1],
+                scale: [0.2, 0.5, 1],
                 opacity: [0, 1, 1, 0],
             }}
             transition={{
