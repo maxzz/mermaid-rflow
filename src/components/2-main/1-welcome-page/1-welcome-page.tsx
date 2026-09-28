@@ -55,7 +55,7 @@ const links = {
     beautifulmermaid: "https://beautifulmermaid.com",
 }
 
-const linksClasses = "text-lime-600 hover:text-lime-700";
+const linksClasses = "text-lime-700 hover:text-lime-800 hover:underline";
 
 function DontShowAgainCheckbox() {
     const { showWelcome } = useSnapshot(mermaidSettings);

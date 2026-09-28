@@ -68,7 +68,7 @@ export const OctopusPhase = {
 
 export type OctopusPhase = typeof OctopusPhase[keyof typeof OctopusPhase];
 
-const BUBBLES_BEFORE_JUMP = 5;
+const BUBBLES_BEFORE_JUMP = 3;
 
 const risenBubblesAtom = atom(0);
 

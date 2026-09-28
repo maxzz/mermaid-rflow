@@ -7,8 +7,8 @@
     --wash: radial-gradient(
         ellipse 100rem 80rem at 50% 48% in oklab,
         #f7fee7cc 0%,
-        #f7fee7cc 46%,
-        #0f5a2333 100%
+        #759F15CC 66%,
+        #84B513CC 100%
     );
 
     --_s: calc(2 * var(--s)) calc(2 * var(--s));
