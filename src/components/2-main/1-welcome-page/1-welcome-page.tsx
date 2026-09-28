@@ -1,17 +1,14 @@
 import { useEffect, useId } from "react";
 import { useSnapshot } from "valtio";
 import { mermaidSettings } from "@/store/2-mermaid-settings";
-import { AppPage, useNavigateToPage } from "@/store/4-ui-app-page-atoms";
 import { preloadEditorPageModules } from "@/components/2-main/1-welcome-page/8-lazy-modules";
-import { Button } from "@/ui/shadcn/button";
 import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Label } from "@/ui/shadcn/label";
 import { Section3_Footer } from "@/components/3-footer";
 import { AppLogo, APP_NAME } from "./2-app-logo";
+import { SwampEnterButton } from "./3-swamp-enter-button";
 
 export function WelcomePage() {
-    const navigate = useNavigateToPage();
-
     // Warm up Monaco and the renderer while the user reads the welcome text
     useEffect(
         () => preloadEditorPageModules(),
@@ -21,15 +18,15 @@ export function WelcomePage() {
         <div className="min-h-dvh text-foreground bg-background grid grid-rows-[1fr_auto]">
 
             <div className="px-6 py-12 text-center flex flex-col items-center justify-center gap-6">
-                <AppLogo className="size-40 text-primary" />
+                <div className="relative pb-16 w-full max-w-md flex flex-col items-center gap-6">
+                    <SwampEnterButton className="absolute inset-0 size-full" />
 
-                <h1 className="text-4xl font-heading font-semibold tracking-tight text-green-800 uppercase">
-                    {APP_NAME}
-                </h1>
+                    <AppLogo className="relative size-40 text-primary pointer-events-none z-10" />
 
-                <Button className="px-6 h-9 text-sm" onClick={() => navigate(AppPage.main)} autoFocus>
-                    Open editor
-                </Button>
+                    <h1 className="relative text-4xl font-heading font-semibold tracking-tight text-green-800 uppercase pointer-events-none z-10">
+                        {APP_NAME}
+                    </h1>
+                </div>
 
                 <p className="max-w-md text-sm text-muted-foreground leading-relaxed">
                     Write Mermaid in a Monaco editor and preview it as an editable React Flow canvas, official mermaid-js SVG with layout editing, or beautiful-mermaid SVG / Unicode text.
