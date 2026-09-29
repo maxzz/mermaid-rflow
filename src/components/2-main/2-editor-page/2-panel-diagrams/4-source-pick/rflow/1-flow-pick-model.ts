@@ -26,6 +26,7 @@ export type MeasuredEdge = {
     key: string;
     text: string;
     sourceId: string;
+    targetId: string;
     sourceHandle?: string | null;
 };
 
@@ -119,7 +120,14 @@ export function flowSourceMarkers(args: {
         if (!anchor) {
             continue;
         }
-        const pick: EdgePick = { key: edge.key, text: edge.text, ...anchor };
+        const target = nodeById.get(edge.targetId);
+        const pick: EdgePick = {
+            key: edge.key,
+            text: edge.text,
+            ...anchor,
+            towardX: target ? target.x + target.w / 2 : anchor.x + anchor.dx,
+            towardY: target ? target.y + target.h / 2 : anchor.y + anchor.dy,
+        };
         markers.push(placeEdgeMarker(pick, args.view, lane));
         lane += 1;
     }

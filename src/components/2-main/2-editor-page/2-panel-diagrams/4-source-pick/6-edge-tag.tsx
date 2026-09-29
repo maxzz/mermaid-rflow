@@ -1,5 +1,20 @@
 import { motion, useReducedMotion } from 'motion/react';
-import type { EdgeMarker } from './1-types';
+import { cn } from '@/utils';
+import type { EdgeLabelPlace, EdgeMarker } from './1-types';
+
+const CHIP = 'select-none whitespace-nowrap px-2 py-0.5 text-xs font-medium font-mono text-primary bg-background border-2 border-primary rounded-full shadow-sm pointer-events-none';
+
+/** Hang the caption off the anchor so the whole pill stays on one side of the stroke. */
+const PLACE: Record<EdgeLabelPlace, string> = {
+    'down-left': 'absolute right-2 top-0',
+    'down-right': 'absolute left-2 top-0',
+    'up-left': 'absolute right-2 bottom-0',
+    'up-right': 'absolute left-2 bottom-0',
+    'right-above': 'absolute bottom-2 left-0',
+    'right-below': 'absolute top-2 left-0',
+    'left-above': 'absolute bottom-2 right-0',
+    'left-below': 'absolute top-2 right-0',
+};
 
 export function EdgeTag({ marker }: { marker: EdgeMarker; }) {
     const reduceMotion = useReducedMotion() === true;
@@ -13,9 +28,10 @@ export function EdgeTag({ marker }: { marker: EdgeMarker; }) {
             transition={{ duration: 0.16, ease: 'easeOut' }}
         >
             <div
-                className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 select-none whitespace-nowrap px-2 py-0.5 text-xs font-medium font-mono text-primary bg-background border border-primary rounded-full shadow-sm pointer-events-none"
+                className={cn(PLACE[marker.place], CHIP)}
                 data-source-pick="edge"
                 data-source-pick-text={marker.text}
+                data-source-pick-place={marker.place}
                 title={marker.text}
             >
                 {marker.text}

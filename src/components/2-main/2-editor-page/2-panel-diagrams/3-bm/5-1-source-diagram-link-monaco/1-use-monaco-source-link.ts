@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { subscribe } from "valtio";
 import { monaco } from "@/components/2-main/2-editor-page/1-panel-editor/8-monaco-setup";
+import { setEditorFocused } from "@/components/2-main/2-editor-page/2-panel-diagrams/4-source-pick/8-editor-focus";
 import { clearReveal, selectFromEditor, sourceLink } from "@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links";
 import { setMonacoEditorInstance } from "./2-monaco-editor-handle";
 import "./8-highlight-monaco.css";
@@ -12,6 +13,24 @@ export function useMonacoSourceLink() {
         (editor: MonacoEditor) => {
             setMonacoEditorInstance(editor);
             const decorations = editor.createDecorationsCollection([]);
+
+            // Monaco's own blur events stay quiet when a click lands on the canvas.
+            // Read document focus after the focus transition settles.
+            let focusTimer = 0;
+            const syncFocus = () => {
+                const dom = editor.getDomNode();
+                const active = document.activeElement;
+                setEditorFocused(Boolean(dom && active && dom.contains(active)));
+            };
+            const scheduleFocus = () => {
+                window.clearTimeout(focusTimer);
+                focusTimer = window.setTimeout(syncFocus, 0);
+            };
+            document.addEventListener('focusin', scheduleFocus);
+            document.addEventListener('focusout', scheduleFocus);
+            document.addEventListener('pointerdown', scheduleFocus, true);
+            syncFocus();
+            window.setTimeout(syncFocus, 0);
 
             const cursorSub = editor.onDidChangeCursorPosition((e) => {
                 if (e.source === "api") {
@@ -42,6 +61,11 @@ export function useMonacoSourceLink() {
 
             editor.onDidDispose(() => {
                 cursorSub.dispose();
+                window.clearTimeout(focusTimer);
+                document.removeEventListener('focusin', scheduleFocus);
+                document.removeEventListener('focusout', scheduleFocus);
+                document.removeEventListener('pointerdown', scheduleFocus, true);
+                setEditorFocused(false);
                 unsub();
                 setMonacoEditorInstance(null);
             });

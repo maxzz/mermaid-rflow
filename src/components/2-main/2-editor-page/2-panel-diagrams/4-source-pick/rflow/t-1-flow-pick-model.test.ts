@@ -58,6 +58,7 @@ describe('flowSourceMarkers', () => {
         key: 'edge:A>C',
         text: 'A --> C',
         sourceId: 'A',
+        targetId: 'C',
         sourceHandle: 'bottom-source',
     }];
 
@@ -85,7 +86,7 @@ describe('flowSourceMarkers', () => {
             view: { tx: 0, ty: 0, zoom: 1 },
         });
         expect(markers.map((marker) => marker.kind)).toEqual(['edge']);
-        expect(markers[0]).toEqual(expect.objectContaining({ text: 'A --> C' }));
+        expect(markers[0]).toEqual(expect.objectContaining({ text: 'A --> C', place: 'down-left' }));
     });
 
     it('uses a pill when the node id is longer than one letter', () => {
