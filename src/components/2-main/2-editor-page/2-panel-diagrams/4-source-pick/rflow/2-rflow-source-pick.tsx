@@ -7,10 +7,12 @@ import { catalogKeyForEdge, catalogKeyForNode } from '@/components/2-main/2-edit
 import { mermaidIdFromEndpoint, mermaidIdOf } from '@/components/2-main/2-editor-page/2-panel-diagrams/2-rflow/2-converter/8-mermaid-ids';
 import { connectionCaption } from '../2-marker-shape';
 import { SourcePickLayer } from '../7-marker-layer';
+import { editorFocus } from '../8-editor-focus';
 import { flowSourceMarkers, type FlowHandle, type MeasuredEdge, type MeasuredNode } from './1-flow-pick-model';
 
 export function RflowSourcePick() {
     const exporting = useAtomValue(rf_ExportingAtom);
+    const focused = useSnapshot(editorFocus).focused;
     const link = useSnapshot(sourceLink);
     const transform = useStore((state) => state.transform);
     const nodeInternals = useStore((state) => state.nodeInternals);
@@ -21,15 +23,12 @@ export function RflowSourcePick() {
     }
 
     const keys = link.keys as string[];
-    const editor = link.origin === 'editor' && keys.length > 0;
+    const editor = focused && link.origin === 'editor' && keys.length > 0;
     const selectionKey = editor ? `${link.focusLine ?? ''}:${keys.join('|')}` : '';
     const [tx, ty, zoom] = transform;
-    const index = sourceLink.index;
     const markers = editor
         ? flowSourceMarkers({
             keys,
-            line: link.focusLine,
-            hitsFor: (key) => index?.keyToHits.get(key),
             nodes: measuredNodes(nodeInternals),
             edges: measuredEdges(edges),
             view: { tx, ty, zoom },

@@ -14,22 +14,15 @@ const node = (id: string, extra: Partial<MeasuredNode> = {}): MeasuredNode => ({
 });
 
 describe('keysToMark', () => {
-    it('marks a declared block and ignores endpoint mentions on a connection line', () => {
-        expect(keysToMark(['node:A', 'node:B', 'edge:A>B'], new Set(['node:A']))).toEqual({
-            blocks: ['node:A'],
+    it('marks the connection and both endpoint blocks', () => {
+        expect(keysToMark(['node:A', 'node:B', 'edge:A>B'])).toEqual({
+            blocks: ['node:A', 'node:B'],
             edges: ['edge:A>B'],
         });
     });
 
-    it('marks only the connection when neither endpoint is declared on the line', () => {
-        expect(keysToMark(['node:A', 'node:B', 'edge:A>B'], new Set())).toEqual({
-            blocks: [],
-            edges: ['edge:A>B'],
-        });
-    });
-
-    it('marks a block line even when the index has not flagged a definition', () => {
-        expect(keysToMark(['node:C'], new Set())).toEqual({
+    it('marks a block line', () => {
+        expect(keysToMark(['node:C'])).toEqual({
             blocks: ['node:C'],
             edges: [],
         });
@@ -64,8 +57,6 @@ describe('flowSourceMarkers', () => {
     it('places a circle on a one-letter declaration', () => {
         const markers = flowSourceMarkers({
             keys: ['node:C'],
-            line: 4,
-            hitsFor: () => [{ line: 4, isDefinition: true }],
             nodes,
             edges,
             view: { tx: 0, ty: 0, zoom: 1 },
@@ -75,24 +66,20 @@ describe('flowSourceMarkers', () => {
         ]);
     });
 
-    it('places the connection caption at the start of the line and skips endpoint blocks', () => {
+    it('places the connection caption on the left and badges both endpoints', () => {
         const markers = flowSourceMarkers({
             keys: ['node:A', 'node:C', 'edge:A>C'],
-            line: 7,
-            hitsFor: () => [{ line: 7, isDefinition: false }],
             nodes,
             edges,
             view: { tx: 0, ty: 0, zoom: 1 },
         });
-        expect(markers.map((marker) => marker.kind)).toEqual(['edge']);
-        expect(markers[0]).toEqual(expect.objectContaining({ text: 'A --> C' }));
+        expect(markers.map((marker) => marker.kind === 'node' ? marker.name : marker.kind)).toEqual(['A', 'C', 'edge']);
+        expect(markers[2]).toEqual(expect.objectContaining({ text: 'A --> C', place: 'down-left' }));
     });
 
     it('uses a pill when the node id is longer than one letter', () => {
         const markers = flowSourceMarkers({
             keys: ['node:StartNode'],
-            line: 2,
-            hitsFor: () => undefined,
             nodes,
             edges: [],
             view: { tx: 0, ty: 0, zoom: 1 },
