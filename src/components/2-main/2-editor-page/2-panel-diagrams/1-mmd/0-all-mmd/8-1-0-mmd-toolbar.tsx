@@ -7,7 +7,7 @@ import { TabDropdownMenu } from '../../../../../../ui/local-ui/8-tab-dropdown-me
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { MmdOptionsPopover } from './8-1-1-mmd-render-options-popover';
 
-export function PreviewToolbar_Mmd() {
+export function Right_Toolbar_Mmd() {
     const { svg, error } = useSnapshot(mmdDiagram);
 
     return (

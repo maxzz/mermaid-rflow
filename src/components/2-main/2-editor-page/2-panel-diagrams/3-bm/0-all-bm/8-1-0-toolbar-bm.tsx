@@ -12,7 +12,7 @@ import { TabDropdownMenu } from "../../../../../../ui/local-ui/8-tab-dropdown-me
 import { SvgLayoutEnginePopover } from "./8-1-1-svg-layout-popover";
 import { RenderOptionsPopover } from "./8-1-2-render-options-popover";
 
-export function PreviewToolbar_Bm() {
+export function Right_Toolbar_Bm() {
     const { outputFormat } = useSnapshot(mermaidSettings);
     const isSvg = outputFormat === OutputFormat.svg;
     const copyLabel = isSvg ? "Copy SVG" : "Copy text";

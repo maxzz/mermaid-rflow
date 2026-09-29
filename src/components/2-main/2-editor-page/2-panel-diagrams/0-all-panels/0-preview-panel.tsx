@@ -6,9 +6,9 @@ import { MmdConverter } from "../1-mmd/1-1-render/1-mmd-converter";
 import { Preview_Rflow } from "../2-rflow/0-all-rflow/1-view-rflow";
 import { Preview_Bm } from "../3-bm/0-all-bm/1-view-bm";
 
-import { PreviewToolbar_Mmd } from "../1-mmd/0-all-mmd/8-1-0-mmd-toolbar";
-import { PreviewToolbar_Rflow } from "../2-rflow/0-all-rflow/8-1-2-toolbar-rflow";
-import { PreviewToolbar_Bm } from "../3-bm/0-all-bm/8-1-0-toolbar-bm";
+import { Right_Toolbar_Mmd } from "../1-mmd/0-all-mmd/8-1-0-mmd-toolbar";
+import { Right_Toolbar_Rflow } from "../2-rflow/0-all-rflow/8-1-2-0-toolbar-rflow";
+import { Right_Toolbar_Bm } from "../3-bm/0-all-bm/8-1-0-toolbar-bm";
 
 import { StatusBar_Mmd } from "../1-mmd/0-all-mmd/8-2-statusbar-mmd-";
 import { StatusBar_Rflow } from "../2-rflow/0-all-rflow/8-2-statusbar-rflow";
@@ -41,10 +41,10 @@ function Diagrams_Toolbar() {
             <div className="flex items-center">
                 {
                     outputFormat === OutputFormat.mmd
-                        ? <PreviewToolbar_Mmd />
+                        ? <Right_Toolbar_Mmd />
                         : outputFormat === OutputFormat.flow
-                            ? <PreviewToolbar_Rflow />
-                            : <PreviewToolbar_Bm />
+                            ? <Right_Toolbar_Rflow />
+                            : <Right_Toolbar_Bm />
                 }
             </div>
         </div>

@@ -9,7 +9,7 @@ import { appSettings } from "@/store/1-ui-settings";
 import { Row, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 export function RflowOptionsPopover() {
-    const { rflow } = useSnapshot(appSettings);
+    const { rflow: { focusSelection } } = useSnapshot(appSettings);
 
     return (
         <Popover>
@@ -38,7 +38,7 @@ export function RflowOptionsPopover() {
                         <Row label="Focus selection" hint="Zoom and pan to the node or edge selected in the editor. Off keeps the current scale and position.">
                             <Switch
                                 className="-mr-1 scale-65"
-                                checked={rflow.focusSelection}
+                                checked={focusSelection}
                                 onCheckedChange={(v) => { appSettings.rflow.focusSelection = v; }}
                             />
                         </Row>

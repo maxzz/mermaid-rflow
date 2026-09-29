@@ -8,7 +8,7 @@ import { copyFlowJson, exportFlowJson, saveCurrentFlow } from "../../3-bm/8-save
 import { rf_LoadDialogOpenAtom, rf_CanvasMethodsAtom } from "../8-store/a-1-rflow-ui-atoms";
 import { RflowOptionsPopover } from "./8-1-2-1-rflow-options-popover";
 
-export function PreviewToolbar_Rflow() {
+export function Right_Toolbar_Rflow() {
     const setLoadOpen = useSetAtom(rf_LoadDialogOpenAtom);
     const methods = useAtomValue(rf_CanvasMethodsAtom);
     const { rflow } = useSnapshot(appSettings);

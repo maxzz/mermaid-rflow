@@ -8,10 +8,9 @@ import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKey
 
 export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: ReactFlowInstance, enabled = true) {
     const { source } = useSnapshot(mermaidSettings);
-    const { rflow } = useSnapshot(appSettings);
+    const { rflow: { focusSelection } } = useSnapshot(appSettings);
     const link = useSnapshot(sourceLink);
     const lastFitSig = useRef('');
-    const focusSelection = rflow.focusSelection;
 
     const topologyKey = useMemo(
         () =>
