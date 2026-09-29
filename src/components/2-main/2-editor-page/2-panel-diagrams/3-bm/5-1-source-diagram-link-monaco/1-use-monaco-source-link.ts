@@ -14,11 +14,17 @@ export function useMonacoSourceLink() {
             setMonacoEditorInstance(editor);
             const decorations = editor.createDecorationsCollection([]);
 
-            // Monaco's own blur events stay quiet when a click lands on the canvas.
-            // Read document focus after the focus transition settles.
+            // A click on the canvas calls preventDefault, so the textarea can stay the
+            // active element. Treat a press outside the editor as blur until it is focused again.
             let focusTimer = 0;
+            let pressedOutside = false;
+            const editorDom = () => editor.getDomNode();
             const syncFocus = () => {
-                const dom = editor.getDomNode();
+                if (pressedOutside) {
+                    setEditorFocused(false);
+                    return;
+                }
+                const dom = editorDom();
                 const active = document.activeElement;
                 setEditorFocused(Boolean(dom && active && dom.contains(active)));
             };
@@ -26,9 +32,31 @@ export function useMonacoSourceLink() {
                 window.clearTimeout(focusTimer);
                 focusTimer = window.setTimeout(syncFocus, 0);
             };
-            document.addEventListener('focusin', scheduleFocus);
+            const onFocusIn = (event: FocusEvent) => {
+                const dom = editorDom();
+                if (dom && event.target instanceof Node && dom.contains(event.target)) {
+                    pressedOutside = false;
+                }
+                scheduleFocus();
+            };
+            const onPointerDown = (event: PointerEvent) => {
+                const dom = editorDom();
+                const target = event.target;
+                if (dom && target instanceof Node && dom.contains(target)) {
+                    pressedOutside = false;
+                    setEditorFocused(true);
+                    return;
+                }
+                pressedOutside = true;
+                setEditorFocused(false);
+                const active = document.activeElement;
+                if (active instanceof HTMLElement && dom?.contains(active)) {
+                    active.blur();
+                }
+            };
+            document.addEventListener('focusin', onFocusIn);
             document.addEventListener('focusout', scheduleFocus);
-            document.addEventListener('pointerdown', scheduleFocus, true);
+            document.addEventListener('pointerdown', onPointerDown, true);
             syncFocus();
             window.setTimeout(syncFocus, 0);
 
@@ -62,9 +90,9 @@ export function useMonacoSourceLink() {
             editor.onDidDispose(() => {
                 cursorSub.dispose();
                 window.clearTimeout(focusTimer);
-                document.removeEventListener('focusin', scheduleFocus);
+                document.removeEventListener('focusin', onFocusIn);
                 document.removeEventListener('focusout', scheduleFocus);
-                document.removeEventListener('pointerdown', scheduleFocus, true);
+                document.removeEventListener('pointerdown', onPointerDown, true);
                 setEditorFocused(false);
                 unsub();
                 setMonacoEditorInstance(null);
