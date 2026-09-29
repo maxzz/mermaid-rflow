@@ -11,9 +11,8 @@ import { bindLastMermaidFunctions } from '../1-1-render/2-render-official';
 import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { mmdSettings } from '../8-store/2-mmd-settings';
 import { mmdPanAtom, mmdPanModeAtom, mmdZoomAtom } from '../8-store/3-mmd-ui-atoms';
-import { MmdPaletteRail } from '../2-rail-side-popover/8-1-2-0-mmd-palette-rail';
 import { ZoomControls_Mmd } from './8-3-1-zoom-controls-mmd';
-import { fitMmdToView, measureMmdNaturalSize, normalizeMmdSvg, setMmdZoom } from './8-3-2-mmd-zoom-utils';
+import { fitMmdToView, measureMmdNaturalSize, mmdViewTouched, normalizeMmdSvg, noteMmdViewTouched, setMmdZoom } from './8-3-2-mmd-zoom-utils';
 import { MmdEditOverlay } from '../1-2-overlay/0-mmd-edit-overlay';
 import { useMmdLayout } from './2-1-use-mmd-layout';
 import { useMmdSourceLink } from './2-2-use-mmd-source-link';
@@ -35,6 +34,8 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
     const enabled = !!svg && !error;
 
     const [natural, setNatural] = useState({ w: 0, h: 0 });
+    /** Fit once when a diagram first becomes visible, even if Autofit is off. */
+    const didInitialFit = useRef(false);
 
     useLayoutEffect(
         () => {
@@ -80,9 +81,66 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
 
     useLayoutEffect(
         () => {
-            if (autofit && enabled && active) {
-                fitMmdToView(viewportRef.current, contentRef.current);
+            if (!active || !enabled) {
+                return;
             }
+            const initial = !didInitialFit.current;
+            if (!initial && !autofit) {
+                return;
+            }
+
+            let cancelled = false;
+            let frames = 0;
+
+            function attempt() {
+                if (cancelled) {
+                    return;
+                }
+                const viewport = viewportRef.current;
+                const content = contentRef.current;
+                const svgEl = content?.querySelector('svg');
+                const ready = !!viewport
+                    && !!content
+                    && viewport.clientWidth > 2
+                    && viewport.clientHeight > 2
+                    && svgEl instanceof SVGSVGElement
+                    && svgEl.getBoundingClientRect().width > 2
+                    && svgEl.getBoundingClientRect().height > 2;
+                if (!ready) {
+                    if (initial && frames < 45) {
+                        frames += 1;
+                        requestAnimationFrame(attempt);
+                    }
+                    return;
+                }
+                fitMmdToView(viewport, content);
+                // Wait until the board is sized; the first commit still has natural 0×0.
+                if (natural.w > 0 && natural.h > 0) {
+                    didInitialFit.current = true;
+                }
+                else if (initial && frames < 45) {
+                    frames += 1;
+                    requestAnimationFrame(attempt);
+                }
+            }
+
+            attempt();
+
+            if (initial) {
+                void document.fonts?.ready.then(() => {
+                    if (cancelled || mmdViewTouched() || !viewportRef.current || !contentRef.current) {
+                        return;
+                    }
+                    fitMmdToView(viewportRef.current, contentRef.current);
+                    if (natural.w > 0 && natural.h > 0) {
+                        didInitialFit.current = true;
+                    }
+                });
+            }
+
+            return () => {
+                cancelled = true;
+            };
         },
         [active, autofit, enabled, svg, natural.w, natural.h]);
 
@@ -111,6 +169,7 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
             }
             function onWheel(e: WheelEvent) {
                 e.preventDefault();
+                noteMmdViewTouched();
                 mmdSettings.autofit = false;
                 const store = getDefaultStore();
                 if (e.ctrlKey || e.metaKey) {
@@ -188,7 +247,6 @@ export function Body_Mmd({ active = true }: { active?: boolean; }) {
                 }
             </div>
 
-            <MmdPaletteRail />
             <ZoomControls_Mmd viewportRef={viewportRef} contentRef={contentRef} />
         </div>
     );

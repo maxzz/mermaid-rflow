@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CloudIcon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { insertMmdPaletteNode } from '../3-catalog/4-apply-patch';
+import { insertMmdPaletteNode } from '../../3-catalog/4-apply-patch';
 
 const ICONS: { icon: string; label: string; }[] = [
     { icon: 'fa:fa-star', label: 'Star' },
@@ -30,7 +30,7 @@ export function IconPopover({ enabled }: { enabled: boolean; }) {
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent side="right" align="center" className="p-2 w-52">
+            <PopoverContent side="bottom" align="start" className="p-2 w-52">
                 <PopoverHeader>
                     <PopoverTitle>Icons</PopoverTitle>
                     <PopoverDescription className="text-[0.65rem] text-muted-foreground">

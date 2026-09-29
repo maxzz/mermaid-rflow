@@ -6,7 +6,8 @@ import { MmdConverter } from "../1-mmd/1-1-render/1-mmd-converter";
 import { Preview_Rflow } from "../2-rflow/0-all-rflow/1-view-rflow";
 import { Preview_Bm } from "../3-bm/0-all-bm/1-view-bm";
 
-import { Right_Toolbar_Mmd } from "../1-mmd/0-all-mmd/8-1-0-mmd-toolbar";
+import { Right_Toolbar_Mmd } from "../1-mmd/0-all-mmd/1-toolbar/8-1-0-mmd-toolbar";
+import { MmdPaletteRail } from "../1-mmd/0-all-mmd/1-toolbar/8-1-2-0-mmd-palette-rail";
 import { Right_Toolbar_Rflow } from "../2-rflow/0-all-rflow/8-1-2-0-toolbar-rflow";
 import { Right_Toolbar_Bm } from "../3-bm/0-all-bm/8-1-0-toolbar-bm";
 
@@ -37,8 +38,9 @@ function Diagrams_Toolbar() {
     const { outputFormat } = useSnapshot(mermaidSettings);
 
     return (
-        <div className="px-3 h-9 bg-muted/30 border-b border-border overflow-x-auto flex items-center justify-end gap-2">
-            <div className="flex items-center">
+        <div className="px-3 h-9 bg-muted/30 border-b border-border overflow-x-auto flex items-center gap-2">
+            {outputFormat === OutputFormat.mmd && <MmdPaletteRail />}
+            <div className="ml-auto shrink-0 flex items-center">
                 {
                     outputFormat === OutputFormat.mmd
                         ? <Right_Toolbar_Mmd />

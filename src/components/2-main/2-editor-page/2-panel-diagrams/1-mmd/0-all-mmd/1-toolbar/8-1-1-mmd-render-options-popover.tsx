@@ -7,14 +7,14 @@ import { Switch } from '@/ui/shadcn/switch';
 import { TooltipProvider } from '@/ui/shadcn/tooltip';
 import { PreviewSelectItem, useSelectPreview } from '@/ui/local-ui';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { PreviewSelect, Row, popoverMainGridClasses } from '../../8-common-ui/popovers-ui/popovers-shared-ui';
+import { PreviewSelect, Row, popoverMainGridClasses } from '../../../8-common-ui/popovers-ui/popovers-shared-ui';
 
-import { classifyMermaidSource, readDirection, type FlowDirection } from '../3-catalog/1-flowchart-source';
-import { setDirection } from '../3-catalog/2-source-patch';
-import { applyMmdPatchResult } from '../3-catalog/4-apply-patch';
-import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../1-1-render/8-themes';
-import { type MmdLayout } from '../1-1-render/3-render-layout';
-import { mmdSettings } from '../8-store/2-mmd-settings';
+import { classifyMermaidSource, readDirection, type FlowDirection } from '../../3-catalog/1-flowchart-source';
+import { setDirection } from '../../3-catalog/2-source-patch';
+import { applyMmdPatchResult } from '../../3-catalog/4-apply-patch';
+import { MMD_LOOKS, MMD_THEME_LABELS, MMD_THEMES, type MmdLook, type MmdTheme } from '../../1-1-render/8-themes';
+import { type MmdLayout } from '../../1-1-render/3-render-layout';
+import { mmdSettings } from '../../8-store/2-mmd-settings';
 
 export function MmdOptionsPopover() {
     return (

@@ -3,8 +3,8 @@ import { toast } from 'sonner';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { copyText, downloadText } from '@/components/4-dialogs/2-export/8-export-utils';
 import { DropdownMenuItem } from '@/ui/shadcn/dropdown-menu';
-import { TabDropdownMenu } from '../../../../../../ui/local-ui/8-tab-dropdown-menu';
-import { mmdDiagram } from '../8-store/1-mmd-diagram';
+import { TabDropdownMenu } from '../../../../../../../ui/local-ui/8-tab-dropdown-menu';
+import { mmdDiagram } from '../../8-store/1-mmd-diagram';
 import { MmdOptionsPopover } from './8-1-1-mmd-render-options-popover';
 
 export function Right_Toolbar_Mmd() {

@@ -7,8 +7,8 @@ import { Button } from '@/ui/shadcn/button';
 import { Input } from '@/ui/shadcn/input';
 import { Label } from '@/ui/shadcn/label';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { classifyMermaidSource } from '../3-catalog/1-flowchart-source';
-import { insertMmdPaletteNode, selectedMmdNodeId } from '../3-catalog/4-apply-patch';
+import { classifyMermaidSource } from '../../3-catalog/1-flowchart-source';
+import { insertMmdPaletteNode, selectedMmdNodeId } from '../../3-catalog/4-apply-patch';
 import { MmdStylePopover } from './8-1-2-1-mmd-style-panel';
 import { ShapePopover } from './8-1-2-2-mmd-shape-popover';
 import { IconPopover } from './8-1-2-3-mmd-icon-popover';
@@ -22,12 +22,7 @@ export function MmdPaletteRail() {
     const applyTitle = selected ? `Change selected block (${selected})` : 'Add a shape';
 
     return (
-        <div
-            className="absolute left-3 top-1/2 z-20 -translate-y-1/2 p-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl shadow-md flex flex-col gap-0.5"
-            role="toolbar"
-            aria-label="Shapes"
-            data-mmd-chrome=""
-        >
+        <div className="flex items-center gap-0.5" role="toolbar" aria-label="Shapes">
             <ShapePopover enabled={enabled} selected={selected} applyTitle={applyTitle} />
             
             <MmdStylePopover enabled={enabled} />
@@ -95,7 +90,7 @@ function UrlPopover({ enabled, title, description, label, placeholder, triggerTi
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent side="right" align="center" className="p-3 w-64">
+            <PopoverContent side="bottom" align="start" className="p-3 w-64">
                 <PopoverHeader>
                     <PopoverTitle>{title}</PopoverTitle>
                     <PopoverDescription className="text-[0.65rem] text-muted-foreground">{description}</PopoverDescription>

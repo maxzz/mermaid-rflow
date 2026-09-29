@@ -7,10 +7,10 @@ import { Slider } from '@/ui/shadcn/slider';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
 import { PaintbrushIcon } from 'lucide-react';
 
-import { type LineDash } from '../3-catalog/6-mmd-style';
+import { type LineDash } from '../../3-catalog/6-mmd-style';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
-import { applySelectedStroke, readSelectedStroke, selectedMmdTarget } from '../3-catalog/4-apply-patch';
+import { applySelectedStroke, readSelectedStroke, selectedMmdTarget } from '../../3-catalog/4-apply-patch';
 
 export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
     useSnapshot(mermaidSettings);
@@ -36,7 +36,7 @@ export function MmdStylePopover({ enabled }: { enabled: boolean; }) {
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent side="right" align="center" className="p-3 w-56">
+            <PopoverContent side="bottom" align="start" className="p-3 w-56">
                 <PopoverHeader>
                     <PopoverTitle>{title}</PopoverTitle>
                     <PopoverDescription className="text-[0.65rem] text-muted-foreground">

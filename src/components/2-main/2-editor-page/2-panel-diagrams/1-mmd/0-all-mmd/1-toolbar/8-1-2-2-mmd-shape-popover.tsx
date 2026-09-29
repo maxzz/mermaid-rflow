@@ -4,9 +4,9 @@ import { ShapesIcon } from 'lucide-react';
 import { classNames } from '@/utils';
 import { Button } from '@/ui/shadcn/button';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { FLOW_SHAPE_ITEMS, type NodeShape } from '../3-catalog/1-flowchart-source';
-import { insertMmdPaletteNode } from '../3-catalog/4-apply-patch';
-import { mmdPaletteShapeAtom } from '../8-store/3-mmd-ui-atoms';
+import { FLOW_SHAPE_ITEMS, type NodeShape } from '../../3-catalog/1-flowchart-source';
+import { insertMmdPaletteNode } from '../../3-catalog/4-apply-patch';
+import { mmdPaletteShapeAtom } from '../../8-store/3-mmd-ui-atoms';
 
 export function ShapePopover({ enabled, selected, applyTitle }: { enabled: boolean; selected: string | null; applyTitle: string; }) {
     const setShape = useSetAtom(mmdPaletteShapeAtom);
@@ -20,7 +20,7 @@ export function ShapePopover({ enabled, selected, applyTitle }: { enabled: boole
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent side="right" align="center" className="p-2 w-56">
+            <PopoverContent side="bottom" align="start" className="p-2 w-56">
                 <PopoverHeader>
                     <PopoverTitle>{selected ? 'Change shape' : 'Shapes'}</PopoverTitle>
                     <PopoverDescription className="text-[0.65rem] text-muted-foreground">
