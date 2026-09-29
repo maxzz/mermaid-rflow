@@ -3,6 +3,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { useSnapshot } from 'valtio';
 import { classNames } from '@/utils';
 import { appSettings } from '@/store/1-ui-settings';
+import { RflowSourcePick } from '@/components/2-main/2-editor-page/2-panel-diagrams/4-source-pick';
 
 import ReactFlow, {
     type Connection,
@@ -45,12 +46,6 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
     const setSelectedEdges = useSetAtom(rf_SelectedEdgesAtom);
     const setEdgeLabelEditor = useSetAtom(rf_EdgeLabelEditorAtom);
     const setNodeEditorDraft = useSetAtom(rf_NodeEditorDraftAtom);
-
-    const nodesWithLink = useMemo(
-        () => (nodes as Node[]).map(
-            (n) => ({ ...n, className: classNames(n.className, sourceLink.classForNode(n)) })
-        ),
-        [nodes, sourceLink.classForNode, sourceLink.keys, sourceLink.intensity]);
 
     const edgesWithSelection = useMemo(
         () => (edges as Edge[]).map(
@@ -170,7 +165,7 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
             minZoom={ZOOM_MIN}
             maxZoom={ZOOM_MAX}
 
-            nodes={nodesWithLink}
+            nodes={nodes as Node[]}
             edges={edgesWithSelection}
             nodesDraggable={!panMode}
             nodesConnectable={!panMode}
@@ -209,6 +204,7 @@ export function RflowCanvas({ sourceLink, anchorRef }: { sourceLink: ReturnType<
             {rflow.showBgGrid && <Background variant={BackgroundVariant.Dots} />}
             {rflow.showMinimap && <MiniMap />}
             <SelectionFrame />
+            <RflowSourcePick />
         </ReactFlow>
     );
 }
