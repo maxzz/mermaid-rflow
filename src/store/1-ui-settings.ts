@@ -9,6 +9,7 @@ const STORAGE_ID = `${STORE_KEY}__${STORE_VER}`;
 export interface RflowCanvasSettings {
     showBgGrid: boolean;         // dotted background on the Rflow canvas
     showMinimap: boolean;        // React Rflow minimap
+    focusSelection: boolean;     // zoom and pan to the node or edge selected in the editor
 }
 
 export interface AppSettings {
@@ -21,6 +22,7 @@ export interface AppSettings {
 const DEFAULT_RFLOW: RflowCanvasSettings = {
     showBgGrid: false,
     showMinimap: false,
+    focusSelection: true,
 };
 
 const DEFAULT_SETTINGS: AppSettings = {

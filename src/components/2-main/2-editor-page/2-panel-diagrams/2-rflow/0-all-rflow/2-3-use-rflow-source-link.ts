@@ -1,14 +1,17 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, type MouseEvent } from 'react';
 import { useSnapshot } from 'valtio';
 import { type Edge, type Node, type ReactFlowInstance } from 'reactflow';
+import { appSettings } from '@/store/1-ui-settings';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
 import { type LinkIntensity, buildSourceIndex, clearSelection, clearSourceLink, selectFromDiagram, setSourceIndex, sourceLink } from '@/components/2-main/2-editor-page/2-panel-diagrams/3-bm/6-source-render-links';
 import { catalogFlowGraph, catalogKeyForEdge, catalogKeyForNode, rfIdsForLinkKeys } from '../1-canvas/8-catalog-rflow';
 
 export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: ReactFlowInstance, enabled = true) {
     const { source } = useSnapshot(mermaidSettings);
+    const { rflow } = useSnapshot(appSettings);
     const link = useSnapshot(sourceLink);
     const lastFitSig = useRef('');
+    const focusSelection = rflow.focusSelection;
 
     const topologyKey = useMemo(
         () =>
@@ -41,7 +44,7 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
 
     useLayoutEffect(
         () => {
-            if (!enabled || link.origin !== 'editor' || intensity !== 'click' || !keys.length) {
+            if (!enabled || !focusSelection || link.origin !== 'editor' || intensity !== 'click' || !keys.length) {
                 lastFitSig.current = '';
                 return;
             }
@@ -56,7 +59,7 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
             }
             reactFlow.fitView({ nodes: ids.map((id) => ({ id })), duration: 400, padding: 0.3 });
         },
-        [enabled, intensity, keys, link.origin, nodes, reactFlow]);
+        [enabled, focusSelection, intensity, keys, link.origin, nodes, reactFlow]);
 
     const classForEdge = useCallback(
         (edge: Edge) => classForKey(catalogKeyForEdge(edge), keys, intensity, caretEdgeClasses, clickEdgeClasses),

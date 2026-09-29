@@ -6,13 +6,16 @@ import { TabDropdownMenu } from "@/ui/local-ui/8-tab-dropdown-menu";
 import { appSettings } from "@/store/1-ui-settings";
 import { copyFlowJson, exportFlowJson, saveCurrentFlow } from "../../3-bm/8-save-export-rflow";
 import { rf_LoadDialogOpenAtom, rf_CanvasMethodsAtom } from "../8-store/a-1-rflow-ui-atoms";
+import { RflowOptionsPopover } from "./8-1-2-1-rflow-options-popover";
 
 export function PreviewToolbar_Rflow() {
     const setLoadOpen = useSetAtom(rf_LoadDialogOpenAtom);
     const methods = useAtomValue(rf_CanvasMethodsAtom);
     const { rflow } = useSnapshot(appSettings);
 
-    return (
+    return (<>
+        <RflowOptionsPopover />
+
         <TabDropdownMenu>
             <DropdownMenuItem onSelect={() => setLoadOpen(true)}>
                 <FolderOpenIcon />
@@ -63,5 +66,5 @@ export function PreviewToolbar_Rflow() {
                 Show minimap
             </DropdownMenuCheckboxItem>
         </TabDropdownMenu>
-    );
+    </>);
 }
