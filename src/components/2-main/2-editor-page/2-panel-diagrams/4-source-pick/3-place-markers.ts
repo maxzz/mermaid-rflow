@@ -4,8 +4,6 @@ import { markerShape } from './2-marker-shape';
 /** Screen pixels from the source handle to the caption, then between stacked captions. */
 const EDGE_ALONG_PX = 6;
 const EDGE_LANE_PX = 32;
-/** Ignore a bend smaller than this (flow px) and keep the caption on the default side. */
-const BEND_PX = 8;
 
 export function placeNodeMarker(node: NodePick, view: ViewTransform): NodeMarker {
     const name = node.name.trim() || node.key;
@@ -27,8 +25,8 @@ export function placeNodeMarker(node: NodePick, view: ViewTransform): NodeMarker
 }
 
 /**
- * Anchor at the start of the stroke. The caption hangs off that point on the open
- * side, so its box sits beside the line instead of across it.
+ * Anchor at the start of the stroke. The caption hangs to the left of that point
+ * (above, when the line leaves sideways) so it sits beside the line.
  */
 export function placeEdgeMarker(edge: EdgePick, view: ViewTransform, lane = 0): EdgeMarker {
     const x = view.tx + edge.x * view.zoom;
@@ -49,22 +47,11 @@ export function placeEdgeMarker(edge: EdgePick, view: ViewTransform, lane = 0): 
     };
 }
 
-export function edgeLabelPlace(edge: Pick<EdgePick, 'x' | 'y' | 'dx' | 'dy' | 'towardX' | 'towardY'>): EdgeLabelPlace {
+/** One connection is marked at a time, so the caption always takes the left side of the stroke. */
+export function edgeLabelPlace(edge: Pick<EdgePick, 'dx' | 'dy'>): EdgeLabelPlace {
     const vertical = Math.abs(edge.dy) >= Math.abs(edge.dx);
-    const bendX = (edge.towardX ?? edge.x + edge.dx) - edge.x;
-    const bendY = (edge.towardY ?? edge.y + edge.dy) - edge.y;
     if (vertical) {
-        const down = edge.dy >= 0;
-        const right = bendX < -BEND_PX;
-        if (down) {
-            return right ? 'down-right' : 'down-left';
-        }
-        return right ? 'up-right' : 'up-left';
+        return edge.dy >= 0 ? 'down-left' : 'up-left';
     }
-    const forward = edge.dx >= 0;
-    const below = bendY < -BEND_PX;
-    if (forward) {
-        return below ? 'right-below' : 'right-above';
-    }
-    return below ? 'left-below' : 'left-above';
+    return edge.dx >= 0 ? 'right-above' : 'left-above';
 }

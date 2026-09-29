@@ -58,11 +58,11 @@ describe('placeEdgeMarker', () => {
 });
 
 describe('edgeLabelPlace', () => {
-    it('puts the caption on the side opposite the bend', () => {
-        expect(edgeLabelPlace({ x: 40, y: 80, dx: 0, dy: 1, towardX: 10, towardY: 160 })).toBe('down-right');
-        expect(edgeLabelPlace({ x: 40, y: 80, dx: 0, dy: 1, towardX: 90, towardY: 160 })).toBe('down-left');
-        expect(edgeLabelPlace({ x: 40, y: 80, dx: 1, dy: 0, towardX: 120, towardY: 140 })).toBe('right-above');
-        expect(edgeLabelPlace({ x: 40, y: 80, dx: 1, dy: 0, towardX: 120, towardY: 20 })).toBe('right-below');
+    it('keeps the caption on the left of a vertical line and above a horizontal one', () => {
+        expect(edgeLabelPlace({ dx: 0, dy: 1 })).toBe('down-left');
+        expect(edgeLabelPlace({ dx: 0, dy: -1 })).toBe('up-left');
+        expect(edgeLabelPlace({ dx: 1, dy: 0 })).toBe('right-above');
+        expect(edgeLabelPlace({ dx: -1, dy: 0 })).toBe('left-above');
     });
 });
 

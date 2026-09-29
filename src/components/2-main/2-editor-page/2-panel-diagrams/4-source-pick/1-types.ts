@@ -28,9 +28,6 @@ export type EdgePick = {
     y: number;
     dx: number;
     dy: number;
-    /** Flow-space point the line runs toward, so the caption can sit on the open side. */
-    towardX?: number;
-    towardY?: number;
 };
 
 /**

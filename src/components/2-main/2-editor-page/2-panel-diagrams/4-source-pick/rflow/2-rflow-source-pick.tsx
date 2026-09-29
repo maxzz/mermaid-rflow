@@ -26,12 +26,9 @@ export function RflowSourcePick() {
     const editor = focused && link.origin === 'editor' && keys.length > 0;
     const selectionKey = editor ? `${link.focusLine ?? ''}:${keys.join('|')}` : '';
     const [tx, ty, zoom] = transform;
-    const index = sourceLink.index;
     const markers = editor
         ? flowSourceMarkers({
             keys,
-            line: link.focusLine,
-            hitsFor: (key) => index?.keyToHits.get(key),
             nodes: measuredNodes(nodeInternals),
             edges: measuredEdges(edges),
             view: { tx, ty, zoom },
@@ -78,7 +75,6 @@ function measuredEdges(edges: Edge[]): MeasuredEdge[] {
             edgeText(edge),
         ),
         sourceId: edge.source,
-        targetId: edge.target,
         sourceHandle: edge.sourceHandle,
     }));
 }

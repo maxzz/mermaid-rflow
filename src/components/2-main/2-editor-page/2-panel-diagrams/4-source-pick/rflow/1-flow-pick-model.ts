@@ -26,45 +26,13 @@ export type MeasuredEdge = {
     key: string;
     text: string;
     sourceId: string;
-    targetId: string;
     sourceHandle?: string | null;
 };
 
-type LineHit = {
-    line: number;
-    isDefinition: boolean;
-};
-
-export function definedBlockKeys(
-    keys: readonly string[],
-    line: number | null,
-    hitsFor: (key: string) => readonly LineHit[] | undefined,
-): Set<string> {
-    const defined = new Set<string>();
-    if (line == null) {
-        return defined;
-    }
-    for (const key of keys) {
-        const hits = hitsFor(key);
-        if (hits?.some((hit) => hit.line === line && hit.isDefinition)) {
-            defined.add(key);
-        }
-    }
-    return defined;
-}
-
-/** Blocks that are declared on the line, plus every connection. Endpoint mentions stay unmarked. */
-export function keysToMark(keys: readonly string[], defined: ReadonlySet<string>): { blocks: string[]; edges: string[]; } {
+/** Every block named on the line, plus every connection. A connection also badges its endpoints. */
+export function keysToMark(keys: readonly string[]): { blocks: string[]; edges: string[]; } {
     const edges = unique(keys.filter((key) => key.startsWith('edge:')));
-    const blocks = unique(keys.filter((key) => {
-        if (!key.startsWith('node:') && !key.startsWith('subgraph:')) {
-            return false;
-        }
-        if (defined.has(key)) {
-            return true;
-        }
-        return edges.length === 0;
-    }));
+    const blocks = unique(keys.filter((key) => key.startsWith('node:') || key.startsWith('subgraph:')));
     return { blocks, edges };
 }
 
@@ -89,14 +57,11 @@ export function edgeAnchor(node: Pick<MeasuredNode, 'x' | 'y' | 'w' | 'h' | 'sou
 
 export function flowSourceMarkers(args: {
     keys: readonly string[];
-    line: number | null;
-    hitsFor: (key: string) => readonly LineHit[] | undefined;
     nodes: readonly MeasuredNode[];
     edges: readonly MeasuredEdge[];
     view: ViewTransform;
 }): PlacedMarker[] {
-    const defined = definedBlockKeys(args.keys, args.line, args.hitsFor);
-    const { blocks, edges } = keysToMark(args.keys, defined);
+    const { blocks, edges } = keysToMark(args.keys);
     const nodeByKey = new Map(args.nodes.map((node) => [node.key, node]));
     const nodeById = new Map(args.nodes.map((node) => [node.id, node]));
     const markers: PlacedMarker[] = [];
@@ -120,14 +85,7 @@ export function flowSourceMarkers(args: {
         if (!anchor) {
             continue;
         }
-        const target = nodeById.get(edge.targetId);
-        const pick: EdgePick = {
-            key: edge.key,
-            text: edge.text,
-            ...anchor,
-            towardX: target ? target.x + target.w / 2 : anchor.x + anchor.dx,
-            towardY: target ? target.y + target.h / 2 : anchor.y + anchor.dy,
-        };
+        const pick: EdgePick = { key: edge.key, text: edge.text, ...anchor };
         markers.push(placeEdgeMarker(pick, args.view, lane));
         lane += 1;
     }
