@@ -58,15 +58,6 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
         },
         [enabled, intensity, keys, link.origin, nodes, reactFlow]);
 
-    const classForNode = useCallback(
-        (node: Node) => {
-            if (link.origin === 'diagram') {
-                return undefined;
-            }
-            return classForKey(catalogKeyForNode(node), keys, intensity, caretNodeClasses, clickNodeClasses);
-        },
-        [intensity, keys, link.origin]);
-
     const classForEdge = useCallback(
         (edge: Edge) => classForKey(catalogKeyForEdge(edge), keys, intensity, caretEdgeClasses, clickEdgeClasses),
         [intensity, keys]);
@@ -90,7 +81,6 @@ export function useFlowSourceLink(nodes: Node[], edges: Edge[], reactFlow: React
         []);
 
     return {
-        classForNode,
         classForEdge,
         onNodeClick,
         onEdgeClick,
@@ -107,7 +97,5 @@ function classForKey(key: string, keys: string[], intensity: LinkIntensity, care
     return intensity === 'click' ? clickClass : caretClass;
 }
 
-const caretNodeClasses = 'outline-2 outline-solid outline-primary outline-offset-2';
-const clickNodeClasses = 'outline-[3px] outline-solid outline-primary outline-offset-2 shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_40%,transparent)]!';
 const caretEdgeClasses = '[&_path]:stroke-primary!';
 const clickEdgeClasses = '[&_path]:stroke-primary! [&_path]:stroke-[3px]! [&_path]:drop-shadow-[0_0_4px_color-mix(in_oklab,var(--primary)_45%,transparent)]';
