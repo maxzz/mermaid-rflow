@@ -1,4 +1,4 @@
-import { useSnapshot } from 'valtio';
+import { atom, useSetAtom } from 'jotai';
 import { toast } from 'sonner';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { copyText, downloadText } from '@/components/4-dialogs/2-export/8-export-utils';
@@ -8,18 +8,19 @@ import { mmdDiagram } from '../8-store/1-mmd-diagram';
 import { MmdOptionsPopover } from './8-1-1-mmd-render-options-popover';
 
 export function Right_Toolbar_Mmd() {
-    const { svg, error } = useSnapshot(mmdDiagram);
+    const copyOfficialSvg = useSetAtom(doCopyOfficialSvgAtom);
+    const downloadOfficialSvg = useSetAtom(doDownloadOfficialSvgAtom);
 
     return (
         <div className="flex items-center">
             <MmdOptionsPopover />
 
             <TabDropdownMenu>
-                <DropdownMenuItem onSelect={() => void copyOfficialSvg(svg, error)}>
+                <DropdownMenuItem onSelect={() => void copyOfficialSvg()}>
                     <CopyIcon />
                     Copy SVG
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => downloadOfficialSvg(svg, error)}>
+                <DropdownMenuItem onSelect={() => downloadOfficialSvg()}>
                     <DownloadIcon />
                     Download SVG
                 </DropdownMenuItem>
@@ -28,30 +29,38 @@ export function Right_Toolbar_Mmd() {
     );
 }
 
-async function copyOfficialSvg(svg: string, error: string | null) {
-    if (error) {
-        toast.error(`Cannot copy: ${error}`);
-        return;
-    }
-    if (!svg) {
-        toast.message('Nothing to copy: the diagram is empty.');
-        return;
-    }
+export const doCopyOfficialSvgAtom = atom(
+    null,
+    async () => {
+        const { svg, error } = mmdDiagram;
+        if (error) {
+            toast.error(`Cannot copy: ${error}`);
+            return;
+        }
+        if (!svg) {
+            toast.message('Nothing to copy: the diagram is empty.');
+            return;
+        }
 
-    await copyText(svg);
-    toast.success('SVG copied to clipboard');
-}
-
-function downloadOfficialSvg(svg: string, error: string | null) {
-    if (error) {
-        toast.error(`Cannot download: ${error}`);
-        return;
+        await copyText(svg);
+        toast.success('SVG copied to clipboard');
     }
-    if (!svg) {
-        toast.message('Nothing to download: the diagram is empty.');
-        return;
-    }
+);
 
-    downloadText(svg, 'diagram.svg', 'image/svg+xml');
-    toast.success('Downloaded SVG');
-}
+export const doDownloadOfficialSvgAtom = atom(
+    null,
+    () => {
+        const { svg, error } = mmdDiagram;
+        if (error) {
+            toast.error(`Cannot download: ${error}`);
+            return;
+        }
+        if (!svg) {
+            toast.message('Nothing to download: the diagram is empty.');
+            return;
+        }
+
+        downloadText(svg, 'diagram.svg', 'image/svg+xml');
+        toast.success('Downloaded SVG');
+    }
+);
