@@ -5,13 +5,12 @@ import { Settings2Icon } from "lucide-react";
 import { Button } from "@/ui/shadcn/button";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/ui/shadcn/popover";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
-import { Switch } from "@/ui/shadcn/switch";
 import { TooltipProvider } from "@/ui/shadcn/tooltip";
 
 import { DIAGRAM_FONTS, type DiagramTheme, mermaidSettings } from "@/store/2-mermaid-settings";
 import { BarsLoaderIcon, PreviewSelectItem, useSelectPreview } from "@/ui/local-ui";
 import { loadBeautifulMermaid } from "@/components/0-all/8-lazy-modules";
-import { Row, SliderRow, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
+import { Row, SliderRow, SwitchRow, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 export function RenderOptionsPopover() {
     return (
@@ -149,9 +148,12 @@ function Section_TextOutput() {
     return (<>
         <Section title="Text output" />
 
-        <Row label="Pure ASCII" hint="When on, the text diagram uses only ASCII characters. Off uses Unicode box-drawing characters.">
-            <Switch className="-mr-1 scale-65" checked={ascii.useAscii} onCheckedChange={(v) => { mermaidSettings.ascii.useAscii = v; }} />
-        </Row>
+        <SwitchRow
+            label="Pure ASCII"
+            hint="When on, the text diagram uses only ASCII characters. Off uses Unicode box-drawing characters."
+            checked={ascii.useAscii}
+            onCheckedChange={(v) => { mermaidSettings.ascii.useAscii = v; }}
+        />
 
         <SliderRow
             label="Horizontal spacing"

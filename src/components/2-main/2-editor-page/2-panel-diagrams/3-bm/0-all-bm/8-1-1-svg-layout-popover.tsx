@@ -5,9 +5,8 @@ import { WorkflowIcon } from "lucide-react";
 import { Button } from "@/ui/shadcn/button";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/ui/shadcn/popover";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
-import { Switch } from "@/ui/shadcn/switch";
 import { TooltipProvider } from "@/ui/shadcn/tooltip";
-import { Row, SliderRow, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
+import { Row, SliderRow, SwitchRow, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 import {
     type ConsiderModelOrder,
@@ -93,12 +92,18 @@ function SvgElkOptions() {
             values={CONSIDER_MODEL_ORDERS}
             labels={MODEL_ORDER_LABELS}
         />
-        <Row label="Force model order" hint="Keep the source node order even when a different order would reduce crossings.">
-            <Switch className="-mr-1 scale-65" checked={elk.forceNodeModelOrder} onCheckedChange={(v) => { mermaidSettings.svg.elk.forceNodeModelOrder = v; }} />
-        </Row>
-        <Row label="Merge edges" hint="Share a path when several edges go to or from the same node. Easier on the eye, sometimes harder to follow.">
-            <Switch className="-mr-1 scale-65" checked={elk.mergeEdges} onCheckedChange={(v) => { mermaidSettings.svg.elk.mergeEdges = v; }} />
-        </Row>
+        <SwitchRow
+            label="Force model order"
+            hint="Keep the source node order even when a different order would reduce crossings."
+            checked={elk.forceNodeModelOrder}
+            onCheckedChange={(v) => { mermaidSettings.svg.elk.forceNodeModelOrder = v; }}
+        />
+        <SwitchRow
+            label="Merge edges"
+            hint="Share a path when several edges go to or from the same node. Easier on the eye, sometimes harder to follow."
+            checked={elk.mergeEdges}
+            onCheckedChange={(v) => { mermaidSettings.svg.elk.mergeEdges = v; }}
+        />
         <SliderRow
             label="Thoroughness"
             hint="Crossing-minimization trials. Higher can improve the layout but takes longer."

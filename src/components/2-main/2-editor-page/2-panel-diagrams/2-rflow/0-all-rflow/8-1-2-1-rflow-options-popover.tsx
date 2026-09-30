@@ -3,10 +3,9 @@ import { classNames } from "@/utils";
 import { Settings2Icon } from "lucide-react";
 import { Button } from "@/ui/shadcn/button";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/ui/shadcn/popover";
-import { Switch } from "@/ui/shadcn/switch";
 import { TooltipProvider } from "@/ui/shadcn/tooltip";
 import { appSettings } from "@/store/1-ui-settings";
-import { Row, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
+import { SwitchRow, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 export function RflowOptionsPopover() {
     const { rflow: { focusSelection, lineAnimation } } = useSnapshot(appSettings);
@@ -32,21 +31,18 @@ export function RflowOptionsPopover() {
                 <TooltipProvider delayDuration={500}>
 
                     <div className={classNames(popoverMainGridClasses, "gap-x-2 gap-y-2")}>
-                        <Row label="Focus selection" hint="Zoom and pan to the node or edge selected in the editor. Off keeps the current scale and position.">
-                            <Switch
-                                className="-mr-1 scale-65"
-                                checked={focusSelection}
-                                onCheckedChange={(v) => { appSettings.rflow.focusSelection = v; }}
-                            />
-                        </Row>
-                        
-                        <Row label="Line animation" hint="Marching dashes along connector lines. Off keeps solid and styled lines still.">
-                            <Switch
-                                className="-mr-1 scale-65"
-                                checked={lineAnimation}
-                                onCheckedChange={(v) => { appSettings.rflow.lineAnimation = v; }}
-                            />
-                        </Row>
+                        <SwitchRow
+                            label="Focus selection"
+                            hint="Zoom and pan to the node or edge selected in the editor. Off keeps the current scale and position."
+                            checked={focusSelection}
+                            onCheckedChange={(v) => { appSettings.rflow.focusSelection = v; }}
+                        />
+                        <SwitchRow
+                            label="Line animation"
+                            hint="Marching dashes along connector lines. Off keeps solid and styled lines still."
+                            checked={lineAnimation}
+                            onCheckedChange={(v) => { appSettings.rflow.lineAnimation = v; }}
+                        />
                     </div>
 
                 </TooltipProvider>

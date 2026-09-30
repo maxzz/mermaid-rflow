@@ -3,11 +3,10 @@ import { classNames } from '@/utils';
 import { Settings2Icon } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/ui/shadcn/popover';
-import { Switch } from '@/ui/shadcn/switch';
 import { TooltipProvider } from '@/ui/shadcn/tooltip';
 import { PreviewSelectItem, useSelectPreview } from '@/ui/local-ui';
 import { mermaidSettings } from '@/store/2-mermaid-settings';
-import { PreviewSelect, Row, popoverMainGridClasses } from '../../../8-common-ui/popovers-ui/popovers-shared-ui';
+import { PreviewSelect, Row, SwitchRow, popoverMainGridClasses } from '../../../8-common-ui/popovers-ui/popovers-shared-ui';
 
 import { classifyMermaidSource, readDirection, type FlowDirection } from '../../3-catalog/1-flowchart-source';
 import { setDirection } from '../../3-catalog/2-source-patch';
@@ -75,9 +74,7 @@ function Body() {
             </PreviewSelect>
         </Row>
 
-        <Row label="Adaptive to app theme" hint="Follow the app light or dark theme when choosing a paired Mermaid palette.">
-            <Switch className="-mr-1 scale-65" checked={adaptive} onCheckedChange={(v) => { mmdSettings.adaptive = v; }} />
-        </Row>
+        <SwitchRow label="Adaptive to app theme" hint="Follow the app light or dark theme when choosing a paired Mermaid palette." checked={adaptive} onCheckedChange={(v) => { mmdSettings.adaptive = v; }} />
 
         <Row label="Look" hint="Classic, hand-drawn, or neo rendering style.">
             <PreviewSelect select={lookSelect} liveLabel={MMD_LOOKS.find((item) => item.value === look)?.label ?? look}>
@@ -113,9 +110,7 @@ function Body() {
             </PreviewSelect>
         </Row>
 
-        <Row label="Autofit" hint="Scale the diagram to the pane. Zooming or panning turns this off.">
-            <Switch className="-mr-1 scale-65" checked={autofit} onCheckedChange={(v) => { mmdSettings.autofit = v; }} />
-        </Row>
+        <SwitchRow label="Autofit" hint="Scale the diagram to the pane. Zooming or panning turns this off." checked={autofit} onCheckedChange={(v) => { mmdSettings.autofit = v; }} />
     </>);
 }
 
