@@ -21,6 +21,7 @@ import { NodeEditorDialog } from '../4-dialogs/1-dlg-node-editor';
 import { NodeSearchDialog } from '../4-dialogs/4-dlg-node-search';
 
 import { useFlowSourceLink } from './2-3-use-rflow-source-link';
+import { useDismissPopupsOnChart } from './2-4-use-dismiss-popups-on-chart';
 import { RflowMarquee } from '../5-multi-select';
 import { isThemeDark } from '@/utils/theme-utils';
 import { doSelectSubgraphContentsAtom } from '../8-store/a-2-rflow-toolbars-atoms';
@@ -47,6 +48,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const reactFlowInstance = useReactFlow();
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
     const canvasRef = useRef<HTMLDivElement | null>(null);
+    useDismissPopupsOnChart(canvasRef);
     const [hasBox, setHasBox] = useState(false);
 
     useLayoutEffect(
