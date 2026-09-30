@@ -36,6 +36,7 @@ export function WelcomePage() {
                 </p>
 
             </div>
+
             <DontShowAgainCheckbox />
 
             <Section3_Footer className="welcome-footer border-t-0" />
@@ -62,19 +63,30 @@ function DontShowAgainCheckbox() {
     const id = useId();
 
     return (
-        <div className="mx-4 flex items-center gap-2">
+        <div className="mx-auto flex items-center gap-1">
             <Checkbox
-                className="data-[state=checked]:bg-green-800 data-[state=checked]:hover:bg-green-900 dark:data-[state=checked]:bg-lime-700 dark:data-[state=checked]:hover:bg-lime-600"
+                className={checkboxClasses}
                 id={id}
                 checked={!showWelcome}
                 onCheckedChange={(checked) => { mermaidSettings.showWelcome = checked !== true; }}
             />
-            <Label htmlFor={id} className="text-xs font-normal text-green-800 dark:text-lime-800 cursor-pointer">
+            <Label htmlFor={id} className="text-[.65rem] font-normal text-green-800 dark:text-lime-800 cursor-pointer">
                 Do not show the welcome page at startup
             </Label>
         </div>
     );
 }
+
+const checkboxClasses = "\
+p-2 \
+border-lime-600 \
+data-[state=checked]:bg-lime-600 \
+data-[state=checked]:hover:bg-green-900 \
+dark:data-[state=checked]:bg-lime-700 \
+dark:data-[state=checked]:hover:bg-lime-600 \
+rounded-md \
+scale-75 \
+";
 
 /** The app name; clicking it calls the octopus out of the swamp (or sends it in if it is on shore). */
 export function SwampTitle() {
