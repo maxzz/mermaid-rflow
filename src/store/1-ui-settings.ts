@@ -10,6 +10,7 @@ export interface RflowCanvasSettings {
     showBgGrid: boolean;         // dotted background on the Rflow canvas
     showMinimap: boolean;        // React Rflow minimap
     focusSelection: boolean;     // zoom and pan to the node or edge selected in the editor
+    lineAnimation: boolean;      // marching dashes along connector lines
 }
 
 export interface AppSettings {
@@ -23,6 +24,7 @@ const DEFAULT_RFLOW: RflowCanvasSettings = {
     showBgGrid: false,
     showMinimap: false,
     focusSelection: true,
+    lineAnimation: true,
 };
 
 const DEFAULT_SETTINGS: AppSettings = {

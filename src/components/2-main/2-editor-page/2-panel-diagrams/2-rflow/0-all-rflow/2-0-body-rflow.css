@@ -1,0 +1,5 @@
+/* Tailwind turns underscores in arbitrary variants into spaces, so it cannot target .react-flow__edge. */
+.rflow-edges-still .react-flow__edge.animated path {
+    animation: none;
+    stroke-dasharray: none;
+}

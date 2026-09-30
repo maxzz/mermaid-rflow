@@ -9,7 +9,7 @@ import { appSettings } from "@/store/1-ui-settings";
 import { Row, popoverMainGridClasses } from "../../8-common-ui/popovers-ui/popovers-shared-ui";
 
 export function RflowOptionsPopover() {
-    const { rflow: { focusSelection } } = useSnapshot(appSettings);
+    const { rflow: { focusSelection, lineAnimation } } = useSnapshot(appSettings);
 
     return (
         <Popover>
@@ -29,7 +29,7 @@ export function RflowOptionsPopover() {
                         Flow options
                     </PopoverTitle>
                     <PopoverDescription className="text-[0.65rem] text-muted-foreground sr-only">
-                        How the canvas follows a selection in the editor.
+                        How the canvas follows a selection in the editor, and whether connector lines animate.
                     </PopoverDescription>
                 </PopoverHeader>
 
@@ -40,6 +40,13 @@ export function RflowOptionsPopover() {
                                 className="-mr-1 scale-65"
                                 checked={focusSelection}
                                 onCheckedChange={(v) => { appSettings.rflow.focusSelection = v; }}
+                            />
+                        </Row>
+                        <Row label="Line animation" hint="Marching dashes along connector lines. Off keeps solid and styled lines still.">
+                            <Switch
+                                className="-mr-1 scale-65"
+                                checked={lineAnimation}
+                                onCheckedChange={(v) => { appSettings.rflow.lineAnimation = v; }}
                             />
                         </Row>
                     </div>

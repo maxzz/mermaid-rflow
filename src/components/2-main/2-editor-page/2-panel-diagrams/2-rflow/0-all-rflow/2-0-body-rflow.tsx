@@ -8,6 +8,7 @@ import { BarsLoaderIcon } from '@/ui/local-ui';
 
 import { type Edge, type Node, ReactFlowProvider, useReactFlow } from 'reactflow';
 import 'reactflow/dist/style.css';
+import './2-0-body-rflow.css';
 
 import { rf_Diagram } from '../8-store/a-0-flow-diagram';
 import { rf_CanvasMethodsAtom, rf_DraggingAtom, rf_ExportingAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom } from '../8-store/a-1-rflow-ui-atoms';
@@ -41,7 +42,7 @@ export function Body_Rflow({ active = true }: { active?: boolean; }) {
 
 function RflowDiagramView({ active = true }: { active?: boolean; }) {
     const { nodes, edges } = useSnapshot(rf_Diagram);
-    const { theme } = useSnapshot(appSettings);
+    const { theme, rflow: { lineAnimation } } = useSnapshot(appSettings);
     const isDark = isThemeDark(theme);
     const reactFlowInstance = useReactFlow();
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
@@ -133,7 +134,7 @@ function RflowDiagramView({ active = true }: { active?: boolean; }) {
 
         <NodeSearchDialog />
 
-        <div ref={reactFlowWrapper} className={classNames(containerClasses, isDragging && containerDraggingClasses, isDark && 'dark',)}>
+        <div ref={reactFlowWrapper} className={classNames(containerClasses, (isDragging || !lineAnimation) && 'rflow-edges-still', isDragging && containerDraggingClasses, isDark && 'dark',)}>
             <RflowToolbars />
 
             <div ref={canvasRef} className="relative flex-1 min-h-0 w-full">
@@ -182,7 +183,5 @@ relative w-full h-full flex flex-col \
 ";
 
 const containerDraggingClasses = " \
-[&_.react-flow__edge.animated_path]:animate-none \
-[&_.react-flow__edge.animated_path]:[stroke-dasharray:none] \
 [&_.react-flow__node-resizer]:invisible \
 [&_.react-flow__handle]:invisible";
