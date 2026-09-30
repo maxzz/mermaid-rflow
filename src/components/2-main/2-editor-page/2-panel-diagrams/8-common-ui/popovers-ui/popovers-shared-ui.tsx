@@ -1,6 +1,7 @@
 import { type ReactNode, useId } from "react";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/ui/shadcn/select";
 import { Label } from "@/ui/shadcn/label";
+import { Checkbox } from "@/ui/shadcn/checkbox";
 import { Slider } from "@/ui/shadcn/slider";
 import { Switch } from "@/ui/shadcn/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/shadcn/tooltip";
@@ -81,13 +82,29 @@ type SwitchRowProps = {
     hint: string;
     checked: boolean;
     onCheckedChange: (value: boolean) => void;
+    asSwitch?: boolean;
 };
 
-export function SwitchRow({ label, hint, checked, onCheckedChange }: SwitchRowProps) {
+export function SwitchRow({ label, hint, checked, onCheckedChange, asSwitch }: SwitchRowProps) {
+    const id = useId();
+
+    if (asSwitch) {
+        return (
+            <Row label={label} hint={hint}>
+                <Switch className="-mr-1 scale-65" checked={checked} onCheckedChange={onCheckedChange} />
+            </Row>
+        );
+    }
+
     return (
-        <Row label={label} hint={hint}>
-            <Switch className="-mr-1 scale-65" checked={checked} onCheckedChange={onCheckedChange} />
-        </Row>
+        <div className={popoverRowSubGridClasses}>
+            <div className="col-span-full flex items-center gap-2">
+                <Checkbox id={id} checked={checked} onCheckedChange={(v) => onCheckedChange(v === true)} />
+                <HintLabel htmlFor={id} hint={hint}>
+                    {label}
+                </HintLabel>
+            </div>
+        </div>
     );
 }
 
