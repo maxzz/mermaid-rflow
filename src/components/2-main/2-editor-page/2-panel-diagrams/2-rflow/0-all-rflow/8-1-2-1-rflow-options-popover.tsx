@@ -19,11 +19,7 @@ export function RflowOptionsPopover() {
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent
-                align="end"
-                className="p-3 pt-0 w-80 max-h-[min(70vh,32rem)] overflow-y-auto rounded-sm"
-                onOpenAutoFocus={(e) => e.preventDefault()}
-            >
+            <PopoverContent className="p-3 pt-0 w-80 max-h-[min(70vh,32rem)] overflow-y-auto rounded-sm" onOpenAutoFocus={(e) => e.preventDefault()} align="end">
                 <PopoverHeader>
                     <PopoverTitle className="-mx-3 px-3 pt-3 pb-2 text-xs font-medium bg-muted border-b border-border shadow-xs">
                         Flow options
@@ -34,6 +30,7 @@ export function RflowOptionsPopover() {
                 </PopoverHeader>
 
                 <TooltipProvider delayDuration={500}>
+
                     <div className={classNames(popoverMainGridClasses, "gap-x-2 gap-y-2")}>
                         <Row label="Focus selection" hint="Zoom and pan to the node or edge selected in the editor. Off keeps the current scale and position.">
                             <Switch
@@ -42,6 +39,7 @@ export function RflowOptionsPopover() {
                                 onCheckedChange={(v) => { appSettings.rflow.focusSelection = v; }}
                             />
                         </Row>
+                        
                         <Row label="Line animation" hint="Marching dashes along connector lines. Off keeps solid and styled lines still.">
                             <Switch
                                 className="-mr-1 scale-65"
@@ -50,6 +48,7 @@ export function RflowOptionsPopover() {
                             />
                         </Row>
                     </div>
+
                 </TooltipProvider>
             </PopoverContent>
         </Popover>

@@ -8,7 +8,7 @@ import { BarsLoaderIcon } from '@/ui/local-ui';
 
 import { type Edge, type Node, ReactFlowProvider, useReactFlow } from 'reactflow';
 import 'reactflow/dist/style.css';
-import './2-0-body-rflow.css';
+import './s-2-0-body-rflow.css';
 
 import { rf_Diagram } from '../8-store/a-0-flow-diagram';
 import { rf_CanvasMethodsAtom, rf_DraggingAtom, rf_ExportingAtom, rf_PanModeAtom, rf_SearchDialogOpenAtom } from '../8-store/a-1-rflow-ui-atoms';

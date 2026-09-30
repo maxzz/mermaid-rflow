@@ -65,11 +65,13 @@ function Body() {
     return (<>
         <Row label="Theme" hint="Color palette for the official Mermaid renderer. Adaptive pairs follow the app light or dark theme.">
             <PreviewSelect select={themeSelect} liveLabel={MMD_THEME_LABELS[theme]}>
-                {MMD_THEMES.map((name) => (
-                    <PreviewSelectItem key={name} value={name} onPreview={themeSelect.preview}>
-                        {MMD_THEME_LABELS[name]}
-                    </PreviewSelectItem>
-                ))}
+                {MMD_THEMES.map(
+                    (name) => (
+                        <PreviewSelectItem key={name} value={name} onPreview={themeSelect.preview}>
+                            {MMD_THEME_LABELS[name]}
+                        </PreviewSelectItem>
+                    )
+                )}
             </PreviewSelect>
         </Row>
 
