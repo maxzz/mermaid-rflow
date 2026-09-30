@@ -39,7 +39,7 @@
         "cmdk": "^1.1.1",
         "dagre": "0.8.5",
         "html-to-image": "1.11.13",
-        "jotai": "^3.0.0",
+        "jotai": "^3.0.1",
         "jotai-valtio": "^0.6.0",
         "json5": "^2.2.3",
         "lucide-react": "^1.47.0",
